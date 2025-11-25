@@ -1,0 +1,93 @@
+
+
+msgid "Actions"
+msgstr "Действия"
+
+msgid "Active"
+msgstr "Активен"
+
+msgid "Are you sure you want to delete?"
+msgstr "Сигурни ли сте, че искате да изтриете?"
+
+msgid "Edit"
+msgstr "Редактирай"
+
+msgctxt "noun"
+msgid "Edit"
+msgstr "Редактиране"
+
+msgid "Email"
+msgstr "Имейл"
+
+msgid "Dashboard"
+msgstr "Табло"
+
+msgid "Cancel"
+msgstr "Откажи"
+
+msgid "Create"
+msgstr "Създай"
+
+msgctxt "noun"
+msgid "Create"
+msgstr "Създаване"
+
+msgid "Created on"
+msgstr "Създаден на"
+
+msgid "Delete"
+msgstr "Изтрий"
+
+msgid "Edit Profile"
+msgstr "Редактиране на профил"
+
+msgid "Email"
+msgstr "Имейл"
+
+msgid "Inactive"
+msgstr "Неактивен"
+
+msgid "Leave blank to keep current password"
+msgstr "Оставете празно, за да запазите текущата парола"
+
+msgid "Profile"
+msgstr "Профил"
+
+msgid "Invalid email or password"
+msgstr "Невалиден имайл или парола"
+
+msgid "Log out"
+msgstr "Изход"
+
+msgid "Modified on"
+msgstr "Променен на"
+
+msgid "Name"
+msgstr "Име"
+
+msgid "Password"
+msgstr "Парола"
+
+msgid "Remember me"
+msgstr "Запомни ме"
+
+msgid "Save"
+msgstr "Запиши"
+
+msgid "Sign in"
+msgstr "Влез"
+
+msgid "Unable to update your profile. Please try again."
+msgstr "Профилът не може да бъде актуализиран. Моля, опитайте отново."
+
+msgid "User"
+msgstr "Потребител"
+
+msgid "User Profile"
+msgstr "Потребителски профил"
+
+msgid "Users"
+msgstr "Потребители"
+
+msgid "Your profile has been updated."
+msgstr "Профилът е актуализиран."

@@ -1,0 +1,6 @@
+# PHPUnit
+.phpunit.cache/
+coverage/
+
+# Test artifacts
+tests/tmp/
