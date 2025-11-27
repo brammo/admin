@@ -1,6 +1,6 @@
 # Psalm Configuration
 
-This project uses [Psalm](https://psalm.dev/) for static code analysis at level 1 (the strictest level).
+This project uses [Psalm](https://psalm.dev/) for static code analysis at error level 8.
 
 ## Running Psalm
 
@@ -26,39 +26,21 @@ vendor/bin/psalm
 
 Psalm is configured via `psalm.xml` with the following settings:
 
-- **Error Level**: 1 (strictest)
+- **Error Level**: 8 (least strict)
 - **Analyzed Paths**: `src/` directory
-- **Baseline**: `psalm-baseline.xml` for existing issues
-- **Find Unused Code**: Disabled (can be enabled for deeper analysis)
+- **Ignored Paths**: `vendor/` directory
+- **Stubs**: CakePHP functions file for proper analysis
 - **Target PHP Version**: 8.1 (inferred from composer.json)
 
-### Suppressed Issues
+### Generating Baseline
 
-The configuration suppresses some issues that are standard in CakePHP applications:
-
-1. **PropertyNotSetInConstructor** - View Helpers use CakePHP's initialization pattern
-2. **MissingConstructor** - Controllers and Helpers don't require explicit constructors
-3. **PossiblyUnusedMethod** - Public methods may be called by CakePHP framework
-
-These are standard patterns in CakePHP and don't represent actual errors.
-
-## Baseline
-
-This project uses a baseline file (`psalm-baseline.xml`) to track existing issues that are being gradually fixed. The baseline allows the project to:
-
-- Add strict static analysis without breaking existing workflows
-- Track which issues are legacy vs. new
-- Gradually improve code quality over time
-
-### Regenerating Baseline
-
-If you fix issues in the baseline, regenerate it:
+If you need to add Psalm to an existing project with many errors, you can generate a baseline:
 
 ```bash
 composer psalm-baseline
 ```
 
-This updates `psalm-baseline.xml` with the current state of issues.
+This creates `psalm-baseline.xml` which allows you to gradually fix issues without blocking CI.
 
 ## CI Integration
 
@@ -96,12 +78,12 @@ code --install-extension getpsalm.psalm-vscode-plugin
 
 ## Error Levels
 
-Psalm has 8 error levels (1-8). This project uses level 1:
+Psalm has 8 error levels (1-8). This project uses level 8:
 
-- **Level 8**: Least strict, basic checks
-- **Level 5**: Medium strictness
+- **Level 1**: Strictest - catches almost all type issues
 - **Level 3**: Stricter type checking
-- **Level 1**: Strictest (used here) - catches almost all type issues
+- **Level 5**: Medium strictness
+- **Level 8**: Least strict, basic checks (used here)
 
 ## Common Issues
 

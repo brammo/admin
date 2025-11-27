@@ -5,6 +5,8 @@ namespace Brammo\Admin\Test\TestCase\Controller;
 
 use Brammo\Admin\Controller\AppController;
 use Cake\Core\Configure;
+use Cake\Event\Event;
+use Cake\Http\ServerRequest;
 use Cake\I18n\I18n;
 use Cake\TestSuite\IntegrationTestTrait;
 use Cake\TestSuite\TestCase;
@@ -31,7 +33,7 @@ class AppControllerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $request = new \Cake\Http\ServerRequest();
+        $request = new ServerRequest();
         $this->AppController = new AppController($request);
     }
 
@@ -81,7 +83,7 @@ class AppControllerTest extends TestCase
 
         $this->AppController->initialize();
         $this->AppController->beforeFilter(
-            new \Cake\Event\Event('Controller.beforeFilter', $this->AppController)
+            new Event('Controller.beforeFilter', $this->AppController),
         );
 
         $this->assertEquals('bg', I18n::getLocale());
@@ -99,7 +101,7 @@ class AppControllerTest extends TestCase
 
         $this->AppController->initialize();
         $this->AppController->beforeFilter(
-            new \Cake\Event\Event('Controller.beforeFilter', $this->AppController)
+            new Event('Controller.beforeFilter', $this->AppController),
         );
 
         // Locale should remain unchanged

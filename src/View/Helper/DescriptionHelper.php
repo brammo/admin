@@ -23,24 +23,24 @@ class DescriptionHelper extends Helper
             'list' => '<dl{{attrs}}>{{content}}</dl>',
             'term' => '<dt{{attrs}}>{{content}}</dt>',
             'definition' => '<dd{{attrs}}>{{content}}</dd>',
-        ]
+        ],
     ];
 
     /**
      * The list
-     * 
+     *
      * @var array<int, array{0: string, 1: string}>
      */
     protected array $rows = [];
 
     /**
      * Add a row
-     * 
+     *
      * @param string $term The term/label
      * @param string $definition The definition/value
      * @return $this
      */
-    public function add(string $term, string $definition): static
+    public function add(string $term, string $definition)
     {
         $this->rows[] = [$term, $definition];
 
@@ -61,9 +61,11 @@ class DescriptionHelper extends Helper
             $content .= $templater->format('definition', ['content' => $definition]);
         }
 
+        /** @var array<string, mixed> $listAttrs */
+        $listAttrs = isset($options['list']) && is_array($options['list']) ? $options['list'] : [];
         $content = $templater->format('list', [
-            'attrs' => $templater->formatAttributes($options['list'] ?? []),
-            'content' => $content
+            'attrs' => $templater->formatAttributes($listAttrs),
+            'content' => $content,
         ]);
 
         $this->rows = [];

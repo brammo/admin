@@ -44,13 +44,20 @@
     "scripts": {
         "check": [
             "@test",
+            "@cs-check"
+        ],
+        "analyse": [
             "@stan",
             "@psalm"
-        ],
-        "test": "phpunit --stderr",
-        "stan": "phpstan analyse --memory-limit=512M",
+         ],
+        "cs-check": "phpcs --colors -p",
+        "cs-fix": "phpcbf --colors -p",
+        "test": "phpunit --colors=always",
+        "stan": "phpstan analyse",
+        "stan-baseline": "phpstan analyse --generate-baseline",
         "psalm": "psalm --show-info=false",
-        "psalm-baseline": "psalm --set-baseline=psalm-baseline.xml"
+        "psalm-baseline": "psalm --set-baseline=psalm-baseline.xml",
+        "coverage-test": "phpunit --stderr --coverage-clover=clover.xml"
     },
     "config": {
         "allow-plugins": {

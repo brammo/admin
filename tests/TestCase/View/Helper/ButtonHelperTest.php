@@ -50,7 +50,7 @@ class ButtonHelperTest extends TestCase
     public function testRenderDefault(): void
     {
         $result = $this->Button->render('Test Button', '/test/url');
-        
+
         $this->assertStringContainsString('btn', $result);
         $this->assertStringContainsString('btn-secondary', $result);
         $this->assertStringContainsString('Test Button', $result);
@@ -65,9 +65,9 @@ class ButtonHelperTest extends TestCase
     public function testRenderWithVariant(): void
     {
         $result = $this->Button->render('Primary Button', '/test', [
-            'variant' => 'primary'
+            'variant' => 'primary',
         ]);
-        
+
         $this->assertStringContainsString('btn-primary', $result);
     }
 
@@ -79,9 +79,9 @@ class ButtonHelperTest extends TestCase
     public function testRenderWithIcon(): void
     {
         $result = $this->Button->render('Icon Button', '/test', [
-            'icon' => 'plus-circle'
+            'icon' => 'plus-circle',
         ]);
-        
+
         $this->assertStringContainsString('plus-circle', $result);
     }
 
@@ -93,9 +93,9 @@ class ButtonHelperTest extends TestCase
     public function testRenderCompactStyle(): void
     {
         $result = $this->Button->render('Compact', '/test', [
-            'style' => 'compact'
+            'style' => 'compact',
         ]);
-        
+
         $this->assertStringContainsString('title="Compact"', $result);
     }
 
@@ -107,9 +107,9 @@ class ButtonHelperTest extends TestCase
     public function testRenderWithSize(): void
     {
         $result = $this->Button->render('Small Button', '/test', [
-            'size' => 'sm'
+            'size' => 'sm',
         ]);
-        
+
         $this->assertStringContainsString('btn-sm', $result);
     }
 
@@ -121,9 +121,9 @@ class ButtonHelperTest extends TestCase
     public function testRenderPost(): void
     {
         $result = $this->Button->render('Post Button', '/test', [
-            'method' => 'post'
+            'method' => 'post',
         ]);
-        
+
         $this->assertStringContainsString('form', $result);
         $this->assertStringContainsString('method="post"', $result);
     }
@@ -137,9 +137,9 @@ class ButtonHelperTest extends TestCase
     {
         $result = $this->Button->render('Delete', '/test', [
             'method' => 'post',
-            'confirm' => 'Are you sure?'
+            'confirm' => 'Are you sure?',
         ]);
-        
+
         $this->assertStringContainsString('Are you sure?', $result);
     }
 
@@ -151,7 +151,7 @@ class ButtonHelperTest extends TestCase
     public function testLink(): void
     {
         $result = $this->Button->link('Link Button', '/test');
-        
+
         $this->assertStringContainsString('btn', $result);
         $this->assertStringContainsString('/test', $result);
         $this->assertStringNotContainsString('form', $result);
@@ -165,7 +165,7 @@ class ButtonHelperTest extends TestCase
     public function testPostLink(): void
     {
         $result = $this->Button->postLink('Post Link', '/test');
-        
+
         $this->assertStringContainsString('form', $result);
         $this->assertStringContainsString('method="post"', $result);
     }
@@ -178,7 +178,7 @@ class ButtonHelperTest extends TestCase
     public function testCreate(): void
     {
         $result = $this->Button->create('/test/add');
-        
+
         $this->assertStringContainsString('btn-success', $result);
         $this->assertStringContainsString('plus-circle', $result);
         // Text is translated, so just verify button structure is correct
@@ -193,7 +193,7 @@ class ButtonHelperTest extends TestCase
     public function testEdit(): void
     {
         $result = $this->Button->edit('/test/edit/1');
-        
+
         $this->assertStringContainsString('btn-primary', $result);
         $this->assertStringContainsString('pencil', $result);
         // Text is translated, so just verify button structure is correct
@@ -208,7 +208,7 @@ class ButtonHelperTest extends TestCase
     public function testDelete(): void
     {
         $result = $this->Button->delete('/test/delete/1');
-        
+
         $this->assertStringContainsString('btn-danger', $result);
         $this->assertStringContainsString('trash', $result);
         // Text is translated, so just verify button structure is correct
@@ -224,9 +224,9 @@ class ButtonHelperTest extends TestCase
     public function testDeleteWithCustomOptions(): void
     {
         $result = $this->Button->delete('/test/delete/1', [
-            'confirm' => 'Custom confirmation message'
+            'confirm' => 'Custom confirmation message',
         ]);
-        
+
         $this->assertStringContainsString('Custom confirmation message', $result);
     }
 }

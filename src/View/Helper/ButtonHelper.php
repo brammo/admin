@@ -4,13 +4,12 @@ declare(strict_types=1);
 namespace Brammo\Admin\View\Helper;
 
 use Cake\View\Helper;
-
 use function Cake\Core\h;
 use function Cake\I18n\__d;
 
 /**
  * Button Helper
- * 
+ *
  * @package Brammo\Admin\View\Helper
  * @property \BootstrapUI\View\Helper\HtmlHelper $Html
  * @property \BootstrapUI\View\Helper\FormHelper $Form
@@ -20,16 +19,16 @@ class ButtonHelper extends Helper
     /**
      * List of helpers used by this helper
      *
-     * @var array<string, array<string, string>>
+     * @var array<array-key, mixed>
      */
     protected array $helpers = [
         'Html' => ['className' => 'BootstrapUI.Html'],
-        'Form' => ['className' => 'BootstrapUI.Form']
+        'Form' => ['className' => 'BootstrapUI.Form'],
     ];
 
     /**
      * Renders a button
-     * 
+     *
      * ### Options
      * - `method`: Link method 'get' or 'post' (default: 'get')
      * - `variant`: Button variant (default: 'secondary')
@@ -37,7 +36,7 @@ class ButtonHelper extends Helper
      * - `size`: Button size (default: '')
      * - `style`: 'compact' or 'noraml' (default: 'noraml')
      * - `confirm`: confirmation message for post links
-     * 
+     *
      * @param string $title Title
      * @param array<string, mixed>|string $url URL
      * @param array<string, mixed> $options Options
@@ -51,7 +50,7 @@ class ButtonHelper extends Helper
             'icon' => '',
             'size' => '',
             'style' => 'normal',
-            'confirm' => ''
+            'confirm' => '',
         ];
         $options += $defaults;
 
@@ -65,7 +64,7 @@ class ButtonHelper extends Helper
         // TODO: check options
 
         $htmlOptions = [
-            'class' => 'btn btn-' . $variant
+            'class' => 'btn btn-' . $variant,
         ];
 
         if ($style == 'compact') {
@@ -95,7 +94,7 @@ class ButtonHelper extends Helper
 
     /**
      * Renders a button link
-     * 
+     *
      * @param string $title Title
      * @param array<string, mixed>|string $url URL
      * @param array<string, mixed> $options Options
@@ -108,7 +107,7 @@ class ButtonHelper extends Helper
 
     /**
      * Renders a button post link
-     * 
+     *
      * @param string $title Title
      * @param array<string, mixed>|string $url URL
      * @param array<string, mixed> $options Options
@@ -121,7 +120,7 @@ class ButtonHelper extends Helper
 
     /**
      * Renders a create button
-     * 
+     *
      * @param array<string, mixed>|string $url URL
      * @param array<string, mixed> $options Options
      * @return string HTML code
@@ -130,13 +129,13 @@ class ButtonHelper extends Helper
     {
         return $this->render(__d('brammo/admin', 'Create'), $url, $options + [
             'variant' => 'success',
-            'icon' => 'plus-circle'
+            'icon' => 'plus-circle',
         ]);
     }
 
     /**
      * Renders an edit button
-     * 
+     *
      * @param array<string, mixed>|string $url URL
      * @param array<string, mixed> $options Options
      * @return string HTML code
@@ -145,13 +144,13 @@ class ButtonHelper extends Helper
     {
         return $this->render(__d('brammo/admin', 'Edit'), $url, $options + [
             'variant' => 'primary',
-            'icon' => 'pencil'
+            'icon' => 'pencil',
         ]);
     }
 
     /**
      * Renders a delete button
-     * 
+     *
      * @param array<string, mixed>|string $url URL
      * @param array<string, mixed> $options Options
      * @return string HTML code
@@ -162,7 +161,7 @@ class ButtonHelper extends Helper
             'method' => 'post',
             'variant' => 'danger',
             'icon' => 'trash',
-            'confirm' => __d('brammo/admin', 'Are you sure you want to delete?')
+            'confirm' => __d('brammo/admin', 'Are you sure you want to delete?'),
         ]);
     }
 }

@@ -51,7 +51,7 @@ class CardHelperTest extends TestCase
     {
         $body = 'This is card body content';
         $result = $this->Card->render($body);
-        
+
         $this->assertStringContainsString($body, $result);
     }
 
@@ -64,9 +64,9 @@ class CardHelperTest extends TestCase
     {
         $body = 'Card content';
         $result = $this->Card->render($body, [
-            'title' => 'Card Title'
+            'title' => 'Card Title',
         ]);
-        
+
         // Note: The current implementation passes title in options but card element doesn't use it
         // This test verifies the current behavior
         $this->assertStringContainsString($body, $result);
@@ -81,9 +81,9 @@ class CardHelperTest extends TestCase
     {
         $body = 'Card content';
         $result = $this->Card->render($body, [
-            'header' => 'Custom Header'
+            'header' => 'Custom Header',
         ]);
-        
+
         // The card element renders header OR body based on what's set last in element logic
         // Since body is passed as first param, it should be rendered
         $this->assertStringContainsString($body, $result);
@@ -98,9 +98,9 @@ class CardHelperTest extends TestCase
     {
         $body = 'Card content';
         $result = $this->Card->render($body, [
-            'footer' => 'Card Footer'
+            'footer' => 'Card Footer',
         ]);
-        
+
         // The card element only renders the last set section (footer), not body
         $this->assertStringContainsString('Card Footer', $result);
     }
@@ -114,9 +114,9 @@ class CardHelperTest extends TestCase
     {
         $body = 'Card content';
         $result = $this->Card->render($body, [
-            'class' => ['custom-card-class']
+            'class' => ['custom-card-class'],
         ]);
-        
+
         $this->assertStringContainsString($body, $result);
     }
 
@@ -128,7 +128,7 @@ class CardHelperTest extends TestCase
     public function testDefaultConfiguration(): void
     {
         $config = $this->Card->getConfig();
-        
+
         $this->assertArrayHasKey('class', $config);
         $this->assertContains('card', $config['class']);
         $this->assertArrayHasKey('headerClass', $config);

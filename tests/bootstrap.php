@@ -5,11 +5,11 @@ declare(strict_types=1);
  * Test suite bootstrap for Brammo\Admin.
  */
 
+use Brammo\Admin\Plugin as AdminPlugin;
+use Cake\Cache\Cache;
 use Cake\Core\Configure;
 use Cake\Core\Plugin;
 use Cake\Datasource\ConnectionManager;
-use Cake\TestSuite\Fixture\SchemaLoader;
-use Cake\Cache\Cache;
 
 // Load the autoloader
 require dirname(__DIR__) . '/vendor/autoload.php';
@@ -89,5 +89,5 @@ ConnectionManager::setConfig('test', [
 
 // Load more plugins here if needed
 if (!Plugin::isLoaded('Brammo/Admin')) {
-    Plugin::getCollection()->add(new \Brammo\Admin\Plugin());
+    Plugin::getCollection()->add(new AdminPlugin());
 }

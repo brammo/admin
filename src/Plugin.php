@@ -28,7 +28,7 @@ class Plugin extends BasePlugin
     public function bootstrap(PluginApplicationInterface $app): void
     {
         parent::bootstrap($app);
-        
+
         // Load dependent plugin
         $app->addPlugin('Brammo/Auth');
     }
@@ -44,8 +44,8 @@ class Plugin extends BasePlugin
         // Add Authentication middleware
         $middlewareQueue->add(
             new AuthenticationMiddleware(
-                new AuthenticationServiceProvider()
-            )
+                new AuthenticationServiceProvider(),
+            ),
         );
 
         return $middlewareQueue;

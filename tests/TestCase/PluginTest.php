@@ -6,7 +6,6 @@ namespace Brammo\Admin\Test\TestCase;
 use Authentication\Middleware\AuthenticationMiddleware;
 use Brammo\Admin\Plugin;
 use Cake\Console\CommandCollection;
-use Cake\Core\Configure;
 use Cake\Core\Container;
 use Cake\Core\PluginApplicationInterface;
 use Cake\Http\MiddlewareQueue;
@@ -56,7 +55,7 @@ class PluginTest extends TestCase
     {
         /** @var PluginApplicationInterface&MockObject $app */
         $app = $this->createMock(PluginApplicationInterface::class);
-        
+
         $app->expects($this->once())
             ->method('addPlugin')
             ->with('Brammo/Auth');
@@ -69,7 +68,7 @@ class PluginTest extends TestCase
                 $app->addPlugin('Brammo/Auth');
             }
         };
-        
+
         $plugin->bootstrap($app);
     }
 
@@ -81,12 +80,12 @@ class PluginTest extends TestCase
     public function testMiddleware(): void
     {
         $middlewareQueue = new MiddlewareQueue();
-        
+
         $result = $this->plugin->middleware($middlewareQueue);
-        
+
         $this->assertInstanceOf(MiddlewareQueue::class, $result);
         $this->assertCount(1, $result);
-        
+
         // Check that AuthenticationMiddleware was added
         $middleware = iterator_to_array($result);
         $this->assertInstanceOf(AuthenticationMiddleware::class, $middleware[0]);
@@ -100,9 +99,9 @@ class PluginTest extends TestCase
     public function testConsole(): void
     {
         $commands = new CommandCollection();
-        
+
         $result = $this->plugin->console($commands);
-        
+
         $this->assertInstanceOf(CommandCollection::class, $result);
     }
 
@@ -114,10 +113,10 @@ class PluginTest extends TestCase
     public function testServices(): void
     {
         $container = new Container();
-        
+
         // Should not throw any exceptions
         $this->plugin->services($container);
-        
+
         $this->assertInstanceOf(Container::class, $container);
     }
 }

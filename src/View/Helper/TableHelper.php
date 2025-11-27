@@ -27,7 +27,7 @@ class TableHelper extends Helper
             'row' => '<tr{{attrs}}>{{content}}</tr>',
             'headerCell' => '<th{{attrs}}>{{content}}</th>',
             'bodyCell' => '<td{{attrs}}>{{content}}</td>',
-        ]
+        ],
     ];
 
     /**
@@ -37,11 +37,11 @@ class TableHelper extends Helper
      */
     protected array $_defaultAttributes = [
         'wrapper' => [
-            'class' => 'table-responsive'
+            'class' => 'table-responsive',
         ],
         'table' => [
-            'class' => 'table'
-        ]
+            'class' => 'table',
+        ],
     ];
 
     /**
@@ -53,7 +53,7 @@ class TableHelper extends Helper
 
     /**
      * The table header options
-     * 
+     *
      * @var array<string, mixed>
      */
     protected array $headerOptions = [];
@@ -65,10 +65,9 @@ class TableHelper extends Helper
      */
     protected array $body = [];
 
-
     /**
      * Sets up the table header
-     * 
+     *
      * @param array<int, mixed> $data Header data
      * @param array<string, mixed> $options HTML attributes.
      * @return void
@@ -81,7 +80,7 @@ class TableHelper extends Helper
 
     /**
      * Adds a table row
-     * 
+     *
      * @param array<int, mixed> $data Row data
      * @return void
      */
@@ -92,7 +91,7 @@ class TableHelper extends Helper
 
     /**
      * Renders the table
-     * 
+     *
      * @param array<string, mixed> $options Options
      * @return string
      */
@@ -113,8 +112,8 @@ class TableHelper extends Helper
 
     /**
      * Renders table header
-     * 
-     * @return string 
+     *
+     * @return string
      */
     private function renderHeader(): string
     {
@@ -145,14 +144,14 @@ class TableHelper extends Helper
         $this->header = [];
 
         return $templater->format('header', [
-            'content' => $templater->format('row', ['content' => implode(' ', $cells)])
+            'content' => $templater->format('row', ['content' => implode(' ', $cells)]),
         ]);
     }
 
     /**
      * Renders table body
-     * 
-     * @return string 
+     *
+     * @return string
      */
     private function renderBody(): string
     {
@@ -164,7 +163,6 @@ class TableHelper extends Helper
 
         $rows = [];
         foreach ($this->body as $row) {
-
             $cells = [];
             foreach ($row as $cell) {
                 $options = [];
@@ -176,7 +174,7 @@ class TableHelper extends Helper
 
                 $cells[] = $templater->format('bodyCell', [
                     'attrs' => $templater->formatAttributes($options),
-                    'content' => $cell
+                    'content' => $cell,
                 ]);
             }
 
@@ -186,7 +184,7 @@ class TableHelper extends Helper
         $this->body = [];
 
         return $templater->format('body', [
-            'content' => implode(' ', $rows)
+            'content' => implode(' ', $rows),
         ]);
     }
 }

@@ -5,9 +5,10 @@ namespace Brammo\Admin\Controller;
 
 use Brammo\Admin\View\AppView;
 use Cake\Controller\Controller;
-use Cake\Event\EventInterface;
 use Cake\Core\Configure;
+use Cake\Event\EventInterface;
 use Cake\I18n\I18n;
+
 /**
  * Admin Application Controller
  */
@@ -35,17 +36,17 @@ class AppController extends Controller
 
     /**
      * Called before the controller action
-     * 
+     *
      * @param \Cake\Event\EventInterface<\Cake\Controller\Controller> $event An Event instance
-     * @return \Cake\Http\Response|null|void
+     * @return void
      */
-    public function beforeFilter(EventInterface $event)
+    public function beforeFilter(EventInterface $event): void
     {
         parent::beforeFilter($event);
 
         // Set default language
-        $defaultLang = Configure::read('Admin.I18n.default');
-        if ($defaultLang) {
+        $defaultLang = (string)Configure::read('Admin.I18n.default');
+        if (!empty($defaultLang)) {
             I18n::setLocale($defaultLang);
         }
     }

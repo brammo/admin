@@ -23,7 +23,7 @@ class CardHelper extends Helper
         'headerClass' => ['card-header'],
         'bodyClass' => ['card-body'],
         'footerClass' => ['card-footer'],
-        'element' => 'Brammo/Admin.card'
+        'element' => 'Brammo/Admin.card',
     ];
 
     /**

@@ -50,7 +50,7 @@ class TableHelperTest extends TestCase
     public function testRenderEmptyTable(): void
     {
         $result = $this->Table->render();
-        
+
         $this->assertStringContainsString('<table', $result);
         $this->assertStringContainsString('class="table"', $result);
         $this->assertStringContainsString('table-responsive', $result);
@@ -65,7 +65,7 @@ class TableHelperTest extends TestCase
     {
         $this->Table->header(['ID', 'Name', 'Email']);
         $result = $this->Table->render();
-        
+
         $this->assertStringContainsString('<thead', $result);
         $this->assertStringContainsString('<th', $result);
         $this->assertStringContainsString('ID', $result);
@@ -85,7 +85,7 @@ class TableHelperTest extends TestCase
             ['Name', ['class' => 'name-column']],
         ]);
         $result = $this->Table->render();
-        
+
         $this->assertStringContainsString('class="id-column"', $result);
         $this->assertStringContainsString('class="name-column"', $result);
     }
@@ -99,7 +99,7 @@ class TableHelperTest extends TestCase
     {
         $this->Table->row([1, 'John Doe', 'john@example.com']);
         $result = $this->Table->render();
-        
+
         $this->assertStringContainsString('<tbody', $result);
         $this->assertStringContainsString('<tr', $result);
         $this->assertStringContainsString('<td', $result);
@@ -120,7 +120,7 @@ class TableHelperTest extends TestCase
             ['John Doe', ['class' => 'name-cell']],
         ]);
         $result = $this->Table->render();
-        
+
         $this->assertStringContainsString('class="id-cell"', $result);
         $this->assertStringContainsString('class="name-cell"', $result);
     }
@@ -135,7 +135,7 @@ class TableHelperTest extends TestCase
         $this->Table->row([1, 'John Doe', 'john@example.com']);
         $this->Table->row([2, 'Jane Smith', 'jane@example.com']);
         $result = $this->Table->render();
-        
+
         $this->assertStringContainsString('John Doe', $result);
         $this->assertStringContainsString('Jane Smith', $result);
         $this->assertStringContainsString('john@example.com', $result);
@@ -153,7 +153,7 @@ class TableHelperTest extends TestCase
         $this->Table->row([1, 'John Doe', 'john@example.com']);
         $this->Table->row([2, 'Jane Smith', 'jane@example.com']);
         $result = $this->Table->render();
-        
+
         $this->assertStringContainsString('<thead', $result);
         $this->assertStringContainsString('<tbody', $result);
         $this->assertStringContainsString('ID', $result);
@@ -171,9 +171,9 @@ class TableHelperTest extends TestCase
     {
         $this->Table->row([1, 'Test']);
         $result = $this->Table->render([
-            'table' => ['class' => 'table table-striped custom-class']
+            'table' => ['class' => 'table table-striped custom-class'],
         ]);
-        
+
         $this->assertStringContainsString('table-striped', $result);
         $this->assertStringContainsString('custom-class', $result);
     }
@@ -187,11 +187,11 @@ class TableHelperTest extends TestCase
     {
         $this->Table->header(['ID', 'Name']);
         $this->Table->row([1, 'John']);
-        
+
         $result1 = $this->Table->render();
         $this->assertStringContainsString('ID', $result1);
         $this->assertStringContainsString('John', $result1);
-        
+
         // After render, state should be reset
         $result2 = $this->Table->render();
         $this->assertStringNotContainsString('ID', $result2);

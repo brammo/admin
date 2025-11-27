@@ -7,7 +7,7 @@ use Cake\View\View;
 
 /**
  * Application View
- * 
+ *
  * @property \Authentication\View\Helper\IdentityHelper $Identity
  * @property \BootstrapUI\View\Helper\BreadcrumbsHelper $Breadcrumbs
  * @property \BootstrapUI\View\Helper\HtmlHelper $Html
@@ -32,7 +32,7 @@ class AppView extends View
         $this->addHelper('Flash', ['className' => 'BootstrapUI.Flash']);
         $this->addHelper('Paginator', ['className' => 'BootstrapUI.Paginator']);
         $this->addHelper('Breadcrumbs', ['className' => 'BootstrapUI.Breadcrumbs']);
-        
+
         // Load Authentication Identity helper
         $this->addHelper('Authentication.Identity');
 

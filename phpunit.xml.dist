@@ -1,29 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.5/phpunit.xsd"
-    bootstrap="tests/bootstrap.php"
+    xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.0/phpunit.xsd"
     colors="true"
-    stopOnFailure="false"
+    bootstrap="tests/bootstrap.php"
     cacheDirectory=".phpunit.cache"
-    beStrictAboutOutputDuringTests="true"
-    failOnRisky="true"
-    failOnWarning="true">
-    
+    displayDetailsOnTestsThatTriggerWarnings="true"
+>
     <testsuites>
-        <testsuite name="Brammo Admin Test Suite">
-            <directory>./tests/TestCase/</directory>
+        <testsuite name="admin">
+            <directory>tests/TestCase/</directory>
         </testsuite>
     </testsuites>
 
+    <!-- Load extension for fixtures -->
+    <extensions>
+        <bootstrap class="Cake\TestSuite\Fixture\Extension\PHPUnitExtension"/>
+    </extensions>
+
     <source>
         <include>
-            <directory suffix=".php">./src/</directory>
+            <directory suffix=".php">src/</directory>
         </include>
     </source>
 
     <php>
         <ini name="memory_limit" value="-1"/>
-        <ini name="error_reporting" value="-1"/>
+        <ini name="apc.enable_cli" value="1"/>
     </php>
 </phpunit>

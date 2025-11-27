@@ -13,7 +13,7 @@ composer stan
 Or use PHPStan directly:
 
 ```bash
-vendor/bin/phpstan analyse --memory-limit=512M
+vendor/bin/phpstan analyse
 ```
 
 ## Configuration
@@ -22,8 +22,8 @@ PHPStan is configured via `phpstan.neon` with the following settings:
 
 - **Analysis Level**: 8 (strictest)
 - **Analyzed Paths**: `src/` directory
-- **Bootstrap Files**: CakePHP core and I18n functions for proper analysis
-- **Memory Limit**: 512M for complex analysis
+- **Excluded Paths**: `tests/` directory
+- **Bootstrap Files**: CakePHP Core and I18n functions for proper analysis
 
 ### Ignored Errors
 

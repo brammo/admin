@@ -50,7 +50,7 @@ class DescriptionHelperTest extends TestCase
     public function testAdd(): void
     {
         $result = $this->Description->add('Term', 'Definition');
-        
+
         // add() should return $this for method chaining
         $this->assertInstanceOf(DescriptionHelper::class, $result);
     }
@@ -64,7 +64,7 @@ class DescriptionHelperTest extends TestCase
     {
         $this->Description->add('Name', 'John Doe');
         $result = $this->Description->render();
-        
+
         $this->assertStringContainsString('<dl', $result);
         $this->assertStringContainsString('<dt', $result);
         $this->assertStringContainsString('<dd', $result);
@@ -83,9 +83,9 @@ class DescriptionHelperTest extends TestCase
         $this->Description->add('Name', 'John Doe');
         $this->Description->add('Email', 'john@example.com');
         $this->Description->add('Phone', '+1234567890');
-        
+
         $result = $this->Description->render();
-        
+
         $this->assertStringContainsString('Name', $result);
         $this->assertStringContainsString('John Doe', $result);
         $this->assertStringContainsString('Email', $result);
@@ -106,7 +106,7 @@ class DescriptionHelperTest extends TestCase
             ->add('Second', 'Value 2')
             ->add('Third', 'Value 3')
             ->render();
-        
+
         $this->assertStringContainsString('First', $result);
         $this->assertStringContainsString('Value 1', $result);
         $this->assertStringContainsString('Second', $result);
@@ -124,9 +124,9 @@ class DescriptionHelperTest extends TestCase
     {
         $this->Description->add('Term', 'Definition');
         $result = $this->Description->render([
-            'list' => ['class' => 'custom-dl-class']
+            'list' => ['class' => 'custom-dl-class'],
         ]);
-        
+
         $this->assertStringContainsString('class="custom-dl-class"', $result);
         $this->assertStringContainsString('Term', $result);
         $this->assertStringContainsString('Definition', $result);
@@ -140,10 +140,10 @@ class DescriptionHelperTest extends TestCase
     public function testStateResetAfterRender(): void
     {
         $this->Description->add('Name', 'John Doe');
-        
+
         $result1 = $this->Description->render();
         $this->assertStringContainsString('John Doe', $result1);
-        
+
         // After render, state should be reset
         $result2 = $this->Description->render();
         $this->assertStringNotContainsString('John Doe', $result2);
@@ -157,7 +157,7 @@ class DescriptionHelperTest extends TestCase
     public function testRenderEmptyList(): void
     {
         $result = $this->Description->render();
-        
+
         $this->assertStringContainsString('<dl', $result);
         $this->assertStringContainsString('</dl>', $result);
         $this->assertStringNotContainsString('<dt', $result);
@@ -173,7 +173,7 @@ class DescriptionHelperTest extends TestCase
     {
         $this->Description->add('<script>alert("XSS")</script>', '<b>Bold Text</b>');
         $result = $this->Description->render();
-        
+
         // HTML content is rendered as-is (view layer is responsible for escaping)
         $this->assertStringContainsString('<script>', $result);
         $this->assertStringContainsString('<b>', $result);
