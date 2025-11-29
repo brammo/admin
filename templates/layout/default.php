@@ -35,7 +35,10 @@ $lang = I18n::getLocale();
         <?= $this->element('Brammo/Admin.Sidebar/menu') ?>
     </aside>
     <main class="main-content">
-        <?= $this->fetch('content') ?>
+        <?= $this->element('Brammo/Admin.pageHeader') ?>
+        <div class="page-content">
+            <?= $this->fetch('content') ?>
+        </div>
     </main>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/js/all.min.js" integrity="sha256-Z6/mj/QZDUfTjL6nkq7pwkHNZpkVY8Xk8Appn4bTLXs=" crossorigin="anonymous"></script>    <?= $this->Html->script('Brammo/Admin.main') ?>
