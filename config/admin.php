@@ -1,6 +1,8 @@
 <?php
 /**
  * Admin configuration
+ * 
+ * @see docs/CONFIGURATION.md for detailed configuration options
  */
 
 return [
@@ -14,6 +16,67 @@ return [
          */
         'I18n' => [
             'default' => 'en_US',
+        ],
+
+        /**
+         * Layout configuration
+         * 
+         * Configure CSS, JavaScript and font assets for the admin panel.
+         * 
+         * @see docs/CONFIGURATION.md for detailed options
+         */
+        'Layout' => [
+
+            /**
+             * Default CSS assets (Bootstrap and Icons)
+             */
+            'cssDefaults' => [
+                [
+                    'url' => 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css',
+                    'integrity' => 'sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH',
+                    'crossorigin' => 'anonymous',
+                ],
+                [
+                    'url' => 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css',
+                    'integrity' => 'sha384-tViUnnbYAV00FLIhhi3v/dWt3Jxw4gZQcNoSCxCIFNJVCx7/D55/wXsrNIRANwdD',
+                    'crossorigin' => 'anonymous',
+                ],
+            ],
+
+            /**
+             * Additional CSS assets to append
+             */
+            'css' => [],
+
+            /**
+             * Default JavaScript assets (Bootstrap)
+             */
+            'scriptDefaults' => [
+                [
+                    'url' => 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js',
+                    'integrity' => 'sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz',
+                    'crossorigin' => 'anonymous',
+                ],
+            ],
+
+            /**
+             * Additional JavaScript assets to append
+             */
+            'script' => [],
+
+            /**
+             * Google Fonts configuration
+             */
+            'fonts' => [
+                'enabled' => true,
+                'preconnect' => [
+                    'https://fonts.googleapis.com',
+                    'https://fonts.gstatic.com',
+                ],
+                'files' => [
+                    'https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap',
+                ],
+            ],
         ],
 
         /**
@@ -38,7 +101,7 @@ return [
         'Home' => [
             'title' => __d('brammo/admin', 'Home'),
             'url' => '/admin',
-            'icon' => 'house-door'
+            'icon' => 'speedometer2',
         ],
 
         /**
