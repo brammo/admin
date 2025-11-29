@@ -7,13 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Comprehensive helpers documentation (`docs/HELPERS.md`)
+- Layout configuration for CSS, JavaScript, and font assets
+- Configurable asset loading with `cssDefaults`, `css`, `scriptDefaults`, `script` options
+- Google Fonts configuration with preconnect support
+- Layout elements for rendering assets (`Layout/css.php`, `Layout/script.php`)
+- Comprehensive configuration documentation (`docs/CONFIGURATION.md`)
+
 ### Changed
 - Refactor CardHelper to use StringTemplateTrait templater instead of element rendering
 - Improve pagination element
 - Refactor page header and content layout and styles for improved responsiveness
-
-### Added
-- Add comprehensive View Helpers documentation (`docs/HELPERS.md`)
+- Move configuration documentation from README to `docs/CONFIGURATION.md`
+- Default layout now reads CSS and JS assets from configuration
 
 ## [1.0.0] - 2025-11-25
 

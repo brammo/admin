@@ -56,131 +56,13 @@ The plugin integrates with CakePHP Authentication and Brammo Auth plugin for use
 
 ## Configuration
 
-### Internationalization
+All configuration options are documented in [docs/CONFIGURATION.md](docs/CONFIGURATION.md), including:
 
-Set the default language in your configuration:
-
-```php
-// config/app.php
-'Admin' => [
-    'I18n' => [
-        'default' => 'bg' // or any other locale
-    ]
-]
-```
-
-### Sidebar Menu
-
-The sidebar menu can be customized in your application configuration. Add menu items with icons, links, and optional submenus.
-
-#### Configuration
-
-Configure the sidebar menu in your `config/app.php`:
-
-```php
-// config/app.php
-'Admin' => [
-    'Sidebar' => [
-        'iconDefaults' => [
-            'tag' => 'i',
-            'namespace' => 'bi',  // Bootstrap Icons
-            'prefix' => 'bi',
-            'size' => null,
-        ],
-        
-        'menu' => [
-            'Dashboard' => [
-                'title' => __('Dashboard'),
-                'icon' => 'speedometer2',
-                'url' => [
-                    'plugin' => 'Admin',
-                    'controller' => 'Dashboard',
-                    'action' => 'index'
-                ],
-            ],
-            'Users' => [
-                'title' => __('Users'),
-                'icon' => 'people',
-                'url' => [
-                    'plugin' => 'Admin',
-                    'controller' => 'Users',
-                    'action' => 'index'
-                ],
-            ],
-            'Settings' => [
-                'title' => __('Settings'),
-                'icon' => 'gear',
-                'submenu' => [
-                    'General' => [
-                        'title' => __('General'),
-                        'url' => [
-                            'plugin' => 'Admin',
-                            'controller' => 'Settings',
-                            'action' => 'general'
-                        ],
-                    ],
-                    'Security' => [
-                        'title' => __('Security'),
-                        'url' => [
-                            'plugin' => 'Admin',
-                            'controller' => 'Settings',
-                            'action' => 'security'
-                        ],
-                    ],
-                ],
-            ],
-        ],
-    ],
-]
-```
-
-#### Menu Item Structure
-
-Each menu item can have the following properties:
-
-- **title**: Display text (required) - use translation function  `__('Title')` or `__d('admin', 'Title')` for plugin
-- **icon**: Bootstrap Icons name (optional) - see [Bootstrap Icons](https://icons.getbootstrap.com/)
-- **url**: CakePHP URL array (optional) - defaults to `['plugin' => 'Admin', 'controller' => name, 'action' => 'index']`
-- **submenu**: Array of submenu items with the same structure (optional)
-
-#### Icon Configuration
-
-Icons use Bootstrap Icons by default. You can customize the icon defaults:
-
-- **tag**: HTML tag for icons (default: `i`)
-- **namespace**: CSS namespace (default: `bi`)
-- **prefix**: CSS class prefix (default: `bi`)
-- **size**: Icon size class like `sm` or `lg` (optional)
-
-if you want to use FontAwesome icon, change iconDefaults to:
-
-```php
-[
-    'iconDefaults' => [
-        'prefix' => 'fa',
-        'namespace' => 'fa-solid'
-    ]
-]
-```
-
-or set `prefix` and `namespace` for any icon
-
-```php
-[
-    'Dashboard' => [
-        'title' => __('Dashboard')
-        'icon' => [
-            'name' => 'gauge',
-            'prefix' => 'fa',
-            'namespace' => 'fa-solid'
-        ]
-    ],
-]
-```
-
-### Layouts
-
-The plugin uses the default layout `Brammo/Admin.default`. You can customize it by creating your own layout in `templates/layout/` directory.
+- Internationalization
+- Brand customization
+- Home link
+- Sidebar menu
+- Layout assets (CSS, JavaScript, fonts)
 
 ## Development
 
