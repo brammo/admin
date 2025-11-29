@@ -10,7 +10,6 @@ use function Cake\I18n\__d;
 /**
  * Button Helper
  *
- * @package Brammo\Admin\View\Helper
  * @property \BootstrapUI\View\Helper\HtmlHelper $Html
  * @property \BootstrapUI\View\Helper\FormHelper $Form
  */
@@ -29,7 +28,7 @@ class ButtonHelper extends Helper
     /**
      * Renders a button
      *
-     * ### Options
+     * Options
      * - `method`: Link method 'get' or 'post' (default: 'get')
      * - `variant`: Button variant (default: 'secondary')
      * - `icon`: Icon name

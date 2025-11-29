@@ -7,8 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Refactor CardHelper to use StringTemplateTrait templater instead of element rendering
 - Improve pagination element
 - Refactor page header and content layout and styles for improved responsiveness
+
+### Added
+- Add comprehensive View Helpers documentation (`docs/HELPERS.md`)
 
 ## [1.0.0] - 2025-11-25
 

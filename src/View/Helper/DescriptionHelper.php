@@ -48,6 +48,11 @@ class DescriptionHelper extends Helper
     }
 
     /**
+     * Render the description list
+     * 
+     * Options:
+     * - `list`: HTML attributes for the list element
+     * 
      * @param array<string, mixed> $options
      * @return string
      */

@@ -67,6 +67,10 @@ class TableHelper extends Helper
 
     /**
      * Sets up the table header
+     * 
+     * Options:
+     * - `header`: Header data
+     * - `headerOptions`: HTML attributes for the header element
      *
      * @param array<int, mixed> $data Header data
      * @param array<string, mixed> $options HTML attributes.
@@ -91,6 +95,10 @@ class TableHelper extends Helper
 
     /**
      * Renders the table
+     * 
+     * Options:
+     * - `wrapper`: HTML attributes for the wrapper div
+     * - `table`: HTML attributes for the table element
      *
      * @param array<string, mixed> $options Options
      * @return string

@@ -35,59 +35,12 @@ public function bootstrap(): void
 
 The plugin provides several view helpers to simplify UI development:
 
-#### ButtonHelper
+- **ButtonHelper** - Generate Bootstrap-styled buttons with icons
+- **CardHelper** - Create Bootstrap card components
+- **TableHelper** - Build responsive HTML tables
+- **DescriptionHelper** - Generate description lists
 
-Generate Bootstrap-styled buttons with ease:
-
-```php
-// Basic buttons
-echo $this->Button->link('View', ['action' => 'view', $id]);
-echo $this->Button->create(['action' => 'add']);
-echo $this->Button->edit(['action' => 'edit', $id]);
-echo $this->Button->delete(['action' => 'delete', $id]);
-
-// Custom buttons
-echo $this->Button->render('Custom', '/url', [
-    'variant' => 'primary',
-    'icon' => 'plus-circle',
-    'size' => 'sm'
-]);
-```
-
-#### CardHelper
-
-Create Bootstrap card components:
-
-```php
-echo $this->Card->render($content, [
-    'header' => 'Card Header',
-    'footer' => 'Card Footer',
-    'class' => ['custom-class']
-]);
-```
-
-#### TableHelper
-
-Build HTML tables with headers and rows:
-
-```php
-$this->Table->header(['ID', 'Name', 'Email']);
-$this->Table->row([1, 'John Doe', 'john@example.com']);
-$this->Table->row([2, 'Jane Smith', 'jane@example.com']);
-echo $this->Table->render();
-```
-
-#### DescriptionHelper
-
-Generate description lists:
-
-```php
-echo $this->Description
-    ->add('Name', 'John Doe')
-    ->add('Email', 'john@example.com')
-    ->add('Phone', '+1234567890')
-    ->render();
-```
+See [docs/HELPERS.md](docs/HELPERS.md) for detailed documentation and examples.
 
 ### Controllers
 
