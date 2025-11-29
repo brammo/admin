@@ -65,6 +65,9 @@ msgstr "Променен на"
 msgid "Name"
 msgstr "Име"
 
+msgid "Page {{page}} of {{pages}}, showing {{current}} record(s) out of {{count}} total"
+msgstr "Страница {{page}} от {{pages}}, показва {{current}} запис(а) от общо {{count}}"
+
 msgid "Password"
 msgstr "Парола"
 
