@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **NavHelper**: Render Bootstrap 5 nav tabs/pills with JavaScript tab switching
+  - Builder pattern with `add()` for tabs and `addLink()` for navigational links
+  - Support for tabs and pills styles via `type` option
+  - Icon support via BootstrapUI HtmlHelper
+  - Fade animations, fill, justified, and vertical layout options
+  - Full ARIA accessibility attributes
+  - Bootstrap 5 data attributes for automatic JS behavior
+  - Comprehensive test coverage (27 tests, 96 assertions)
 - Comprehensive helpers documentation (`docs/HELPERS.md`)
 - Layout configuration for CSS, JavaScript, and font assets
 - Configurable asset loading with `cssDefaults`, `css`, `scriptDefaults`, `script` options

@@ -14,6 +14,7 @@ use Cake\View\View;
  * @property \BootstrapUI\View\Helper\FormHelper $Form
  * @property \BootstrapUI\View\Helper\FlashHelper $Flash
  * @property \BootstrapUI\View\Helper\PaginatorHelper $Paginator
+ * @property \Brammo\Admin\View\Helper\NavHelper $Nav
  */
 class AppView extends View
 {
@@ -41,5 +42,6 @@ class AppView extends View
         $this->addHelper('Table', ['className' => 'Brammo/Admin.Table']);
         $this->addHelper('Description', ['className' => 'Brammo/Admin.Description']);
         $this->addHelper('Card', ['className' => 'Brammo/Admin.Card']);
+        $this->addHelper('Nav', ['className' => 'Brammo/Admin.Nav']);
     }
 }
