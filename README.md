@@ -36,10 +36,6 @@ public function bootstrap(): void
 The plugin provides several view helpers to simplify UI development:
 
 - **ButtonHelper** - Generate Bootstrap-styled buttons with icons
-- **CardHelper** - Create Bootstrap card components
-- **TableHelper** - Build responsive HTML tables
-- **DescriptionHelper** - Generate description lists
-- **NavHelper** - Render Bootstrap nav tabs/pills with JavaScript tab switching
 
 See [docs/HELPERS.md](docs/HELPERS.md) for detailed documentation and examples.
 

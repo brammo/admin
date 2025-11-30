@@ -21,6 +21,7 @@
     "require": {
         "php": ">=8.1",
         "brammo/auth": "^1.0",
+        "brammo/bootstrap-ui": "^1.0",
         "cakephp/authentication": "^3.0",
         "cakephp/cakephp": "^5.0",
         "friendsofcake/bootstrap-ui": "^5.0"

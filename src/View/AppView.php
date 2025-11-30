@@ -34,14 +34,16 @@ class AppView extends View
         $this->addHelper('Paginator', ['className' => 'BootstrapUI.Paginator']);
         $this->addHelper('Breadcrumbs', ['className' => 'BootstrapUI.Breadcrumbs']);
 
-        // Load Authentication Identity helper
-        $this->addHelper('Authentication.Identity');
-
+        // Load BootstrapUI additional helpers
+        $this->addHelper('Table', ['className' => 'Brammo/BootstrapUI.Table']);
+        $this->addHelper('Description', ['className' => 'Brammo/BootstrapUI.Description']);
+        $this->addHelper('Card', ['className' => 'Brammo/BootstrapUI.Card']);
+        $this->addHelper('Nav', ['className' => 'Brammo/BootstrapUI.Nav']);
+        
         // Load custom Admin helpers
         $this->addHelper('Button', ['className' => 'Brammo/Admin.Button']);
-        $this->addHelper('Table', ['className' => 'Brammo/Admin.Table']);
-        $this->addHelper('Description', ['className' => 'Brammo/Admin.Description']);
-        $this->addHelper('Card', ['className' => 'Brammo/Admin.Card']);
-        $this->addHelper('Nav', ['className' => 'Brammo/Admin.Nav']);
+
+        // Load Authentication Identity helper
+        $this->addHelper('Authentication.Identity');
     }
 }

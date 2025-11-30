@@ -32,9 +32,6 @@ vendor/bin/phpunit --coverage-html coverage/
     - `UserControllerTest.php` - User controller tests
   - `View/Helper/` - View helper tests
     - `ButtonHelperTest.php` - Button helper tests
-    - `CardHelperTest.php` - Card helper tests
-    - `TableHelperTest.php` - Table helper tests
-    - `DescriptionHelperTest.php` - Description helper tests
 - `tests/Fixture/` - Test fixtures for database testing
 
 ## Test Coverage

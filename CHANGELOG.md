@@ -8,14 +8,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- **NavHelper**: Render Bootstrap 5 nav tabs/pills with JavaScript tab switching
-  - Builder pattern with `add()` for tabs and `addLink()` for navigational links
-  - Support for tabs and pills styles via `type` option
-  - Icon support via BootstrapUI HtmlHelper
-  - Fade animations, fill, justified, and vertical layout options
-  - Full ARIA accessibility attributes
-  - Bootstrap 5 data attributes for automatic JS behavior
-  - Comprehensive test coverage (27 tests, 96 assertions)
 - Comprehensive helpers documentation (`docs/HELPERS.md`)
 - Layout configuration for CSS, JavaScript, and font assets
 - Configurable asset loading with `cssDefaults`, `css`, `scriptDefaults`, `script` options
@@ -24,11 +16,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Comprehensive configuration documentation (`docs/CONFIGURATION.md`)
 
 ### Changed
-- Refactor CardHelper to use StringTemplateTrait templater instead of element rendering
 - Improve pagination element
 - Refactor page header and content layout and styles for improved responsiveness
 - Move configuration documentation from README to `docs/CONFIGURATION.md`
 - Default layout now reads CSS and JS assets from configuration
+
+### Removed
+- **CardHelper**: Moved to [brammo/bootstrap-ui](https://github.com/brammo/bootstrap-ui)
+- **TableHelper**: Moved to [brammo/bootstrap-ui](https://github.com/brammo/bootstrap-ui)
+- **DescriptionHelper**: Moved to [brammo/bootstrap-ui](https://github.com/brammo/bootstrap-ui)
+- **NavHelper**: Moved to [brammo/bootstrap-ui](https://github.com/brammo/bootstrap-ui)
 
 ## [1.0.0] - 2025-11-25
 
