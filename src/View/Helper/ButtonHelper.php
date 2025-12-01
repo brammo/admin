@@ -51,6 +51,12 @@ class ButtonHelper extends Helper
             'style' => 'normal',
             'confirm' => '',
         ];
+
+        if (isset($options['title'])) {
+            $title = $options['title'];
+            unset($options['title']);
+        }
+
         $options += $defaults;
 
         $method = $options['method'];
@@ -133,6 +139,21 @@ class ButtonHelper extends Helper
     }
 
     /**
+     * Renders a view button
+     *
+     * @param array<string, mixed>|string $url URL
+     * @param array<string, mixed> $options Options
+     * @return string HTML code
+     */
+    public function view(array|string $url, array $options = []): string
+    {
+        return $this->render(__d('brammo/admin', 'View'), $url, $options + [
+            'variant' => 'info',
+            'icon' => 'eye',
+        ]);
+    }
+
+    /**
      * Renders an edit button
      *
      * @param array<string, mixed>|string $url URL
@@ -144,6 +165,21 @@ class ButtonHelper extends Helper
         return $this->render(__d('brammo/admin', 'Edit'), $url, $options + [
             'variant' => 'primary',
             'icon' => 'pencil',
+        ]);
+    }
+
+    /**
+     * Renders a compact edit button
+     *
+     * @param array<string, mixed>|string $url URL
+     * @param array<string, mixed> $options Options
+     * @return string HTML code
+     */
+    public function editCompact(array|string $url, array $options = []): string
+    {
+        return $this->edit($url, $options + [
+            'size' => 'sm',
+            'style' => 'compact',
         ]);
     }
 
@@ -161,6 +197,37 @@ class ButtonHelper extends Helper
             'variant' => 'danger',
             'icon' => 'trash',
             'confirm' => __d('brammo/admin', 'Are you sure you want to delete?'),
+        ]);
+    }
+
+    /**
+     * Renders a compact delete button
+     *
+     * @param array<string, mixed>|string $url URL
+     * @param array<string, mixed> $options Options
+     * @return string HTML code
+     */
+    public function deleteCompact(array|string $url, array $options = []): string
+    {
+        return $this->delete($url, $options + [
+            'size' => 'sm',
+            'style' => 'compact',
+        ]);
+    }
+
+    /**
+     * Renders a preview button
+     *
+     * @param array<string, mixed>|string $url URL
+     * @param array<string, mixed> $options Options
+     * @return string HTML code
+     */
+    public function preview(array|string $url, array $options = []): string
+    {
+        return $this->render(__d('brammo/admin', 'Preview'), $url, $options + [
+            'variant' => 'info',
+            'icon' => 'box-arrow-up-right',
+            'style' => 'compact',
         ]);
     }
 }
