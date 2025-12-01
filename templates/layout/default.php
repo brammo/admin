@@ -33,6 +33,7 @@ $lang = I18n::getLocale();
     <main class="main-content">
         <?= $this->element('Brammo/Admin.pageHeader') ?>
         <div class="page-content">
+            <?= $this->Flash->render() ?>
             <?= $this->fetch('content') ?>
         </div>
     </main>
