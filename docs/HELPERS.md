@@ -30,11 +30,23 @@ The helper provides convenient preset buttons for common actions:
 // Create button (green with plus icon)
 echo $this->Button->create(['action' => 'add']);
 
+// View button (info/cyan with eye icon)
+echo $this->Button->view(['action' => 'view', $id]);
+
 // Edit button (blue with pencil icon)
 echo $this->Button->edit(['action' => 'edit', $id]);
 
+// Compact edit button (small, icon-only)
+echo $this->Button->editCompact(['action' => 'edit', $id]);
+
 // Delete button (red with trash icon, includes confirmation)
 echo $this->Button->delete(['action' => 'delete', $id]);
+
+// Compact delete button (small, icon-only)
+echo $this->Button->deleteCompact(['action' => 'delete', $id]);
+
+// Preview button (info with external link icon, compact style)
+echo $this->Button->preview(['action' => 'preview', $id]);
 ```
 
 ### Custom Buttons

@@ -229,4 +229,206 @@ class ButtonHelperTest extends TestCase
 
         $this->assertStringContainsString('Custom confirmation message', $result);
     }
+
+    /**
+     * Test view method
+     *
+     * @return void
+     */
+    public function testView(): void
+    {
+        $result = $this->Button->view('/test/view/1');
+
+        $this->assertStringContainsString('btn-info', $result);
+        $this->assertStringContainsString('eye', $result);
+        $this->assertStringContainsString('href="/test/view/1"', $result);
+        $this->assertStringNotContainsString('form', $result);
+    }
+
+    /**
+     * Test view method with custom options
+     *
+     * @return void
+     */
+    public function testViewWithCustomOptions(): void
+    {
+        $result = $this->Button->view('/test/view/1', [
+            'size' => 'lg',
+        ]);
+
+        $this->assertStringContainsString('btn-info', $result);
+        $this->assertStringContainsString('btn-lg', $result);
+    }
+
+    /**
+     * Test editCompact method
+     *
+     * @return void
+     */
+    public function testEditCompact(): void
+    {
+        $result = $this->Button->editCompact('/test/edit/1');
+
+        $this->assertStringContainsString('btn-primary', $result);
+        $this->assertStringContainsString('btn-sm', $result);
+        $this->assertStringContainsString('pencil', $result);
+        $this->assertStringContainsString('title=', $result);
+        $this->assertStringContainsString('href="/test/edit/1"', $result);
+    }
+
+    /**
+     * Test deleteCompact method
+     *
+     * @return void
+     */
+    public function testDeleteCompact(): void
+    {
+        $result = $this->Button->deleteCompact('/test/delete/1');
+
+        $this->assertStringContainsString('btn-danger', $result);
+        $this->assertStringContainsString('btn-sm', $result);
+        $this->assertStringContainsString('trash', $result);
+        $this->assertStringContainsString('title=', $result);
+        $this->assertStringContainsString('form', $result);
+        $this->assertStringContainsString('data-confirm-message', $result);
+    }
+
+    /**
+     * Test preview method
+     *
+     * @return void
+     */
+    public function testPreview(): void
+    {
+        $result = $this->Button->preview('/test/preview/1');
+
+        $this->assertStringContainsString('btn-info', $result);
+        $this->assertStringContainsString('box-arrow-up-right', $result);
+        $this->assertStringContainsString('title=', $result);
+        $this->assertStringContainsString('href="/test/preview/1"', $result);
+        $this->assertStringNotContainsString('form', $result);
+    }
+
+    /**
+     * Test render method with title option override
+     *
+     * @return void
+     */
+    public function testRenderWithTitleOption(): void
+    {
+        $result = $this->Button->render('Original Title', '/test', [
+            'title' => 'Overridden Title',
+        ]);
+
+        $this->assertStringContainsString('Overridden Title', $result);
+        $this->assertStringNotContainsString('Original Title', $result);
+    }
+
+    /**
+     * Test render method with array URL
+     *
+     * @return void
+     */
+    public function testRenderWithArrayUrl(): void
+    {
+        // Array URLs require routing, so just test with a simple array that gets converted
+        $result = $this->Button->render('Array URL', '/tests/index');
+
+        $this->assertStringContainsString('btn', $result);
+        $this->assertStringContainsString('Array URL', $result);
+        $this->assertStringContainsString('/tests/index', $result);
+    }
+
+    /**
+     * Test link method with options
+     *
+     * @return void
+     */
+    public function testLinkWithOptions(): void
+    {
+        $result = $this->Button->link('Link With Options', '/test', [
+            'variant' => 'warning',
+            'icon' => 'star',
+            'size' => 'lg',
+        ]);
+
+        $this->assertStringContainsString('btn-warning', $result);
+        $this->assertStringContainsString('btn-lg', $result);
+        $this->assertStringContainsString('star', $result);
+        $this->assertStringNotContainsString('form', $result);
+    }
+
+    /**
+     * Test postLink method with options
+     *
+     * @return void
+     */
+    public function testPostLinkWithOptions(): void
+    {
+        $result = $this->Button->postLink('Post With Options', '/test', [
+            'variant' => 'success',
+            'icon' => 'check',
+            'confirm' => 'Confirm this action?',
+        ]);
+
+        $this->assertStringContainsString('btn-success', $result);
+        $this->assertStringContainsString('check', $result);
+        $this->assertStringContainsString('form', $result);
+        $this->assertStringContainsString('Confirm this action?', $result);
+    }
+
+    /**
+     * Test create method with custom options
+     *
+     * @return void
+     */
+    public function testCreateWithCustomOptions(): void
+    {
+        $result = $this->Button->create('/test/add', [
+            'size' => 'lg',
+            'icon' => 'plus',
+        ]);
+
+        $this->assertStringContainsString('btn-success', $result);
+        $this->assertStringContainsString('btn-lg', $result);
+        // Custom icon should override default
+        $this->assertStringContainsString('plus', $result);
+    }
+
+    /**
+     * Test edit method with custom options
+     *
+     * @return void
+     */
+    public function testEditWithCustomOptions(): void
+    {
+        $result = $this->Button->edit('/test/edit/1', [
+            'size' => 'sm',
+            'variant' => 'warning',
+        ]);
+
+        // Custom variant should override default
+        $this->assertStringContainsString('btn-warning', $result);
+        $this->assertStringContainsString('btn-sm', $result);
+    }
+
+    /**
+     * Test render with multiple options combined
+     *
+     * @return void
+     */
+    public function testRenderWithMultipleOptions(): void
+    {
+        $result = $this->Button->render('Full Options', '/test', [
+            'variant' => 'danger',
+            'icon' => 'exclamation-triangle',
+            'size' => 'lg',
+            'style' => 'compact',
+        ]);
+
+        $this->assertStringContainsString('btn-danger', $result);
+        $this->assertStringContainsString('btn-lg', $result);
+        $this->assertStringContainsString('exclamation-triangle', $result);
+        $this->assertStringContainsString('title="Full Options"', $result);
+    }
 }

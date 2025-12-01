@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2025-12-01
+
+### Added
+- **ButtonHelper**: Added `view()` method for view buttons with info variant and eye icon
+- **ButtonHelper**: Added `editCompact()` method for compact edit buttons (small, icon-only)
+- **ButtonHelper**: Added `deleteCompact()` method for compact delete buttons (small, icon-only)
+- **ButtonHelper**: Added `preview()` method for preview buttons with external link icon
+- Additional tests for ButtonHelper covering all methods and options
+
 ## [1.1.0] - 2025-11-30
 
 ### Added
@@ -26,6 +35,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **TableHelper**: Moved to [brammo/bootstrap-ui](https://github.com/brammo/bootstrap-ui)
 - **DescriptionHelper**: Moved to [brammo/bootstrap-ui](https://github.com/brammo/bootstrap-ui)
 - **NavHelper**: Moved to [brammo/bootstrap-ui](https://github.com/brammo/bootstrap-ui)
+
+### Changed
+- Updated ButtonHelper documentation in `docs/HELPERS.md` to include all preset button methods
 
 ## [1.0.0] - 2025-11-25
 
