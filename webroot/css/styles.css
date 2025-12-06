@@ -2,13 +2,21 @@
  * Stylesheet for Brammo Admin theme
  */ 
 
+:root {
+  --ba-light-color: #f8f9fa;
+  --ba-dark-color: #121426;
+
+  --ba-sidebar-width: 18rem;
+  --ba-sidebar-mini-width: 4rem;
+
+  --bs-font-sans-serif: Inter, sans-serif;
+  --bs-body-font-weight: 400;
+}
+
 /* Light Theme Variables */
 
 :root, 
 [data-bs-theme="light"] {
-
-  --ba-sidebar-width: 18rem;
-  --ba-sidebar-mini-width: 4rem;
 
   --ba-header-bg: #fff;
   --ba-sidebar-bg: #fff;
@@ -19,33 +27,26 @@
   --ba-primary-color-light-rgb: 84, 101, 242;
   --ba-primary-color-disabled: #b3bbf9;
 
-  --ba-secondary-color: #012970;
-  --ba-secondary-color-rgb: 1, 41, 112;
-  --ba-secondary-color-light: #013797;
-  --ba-secondary-color-disabled: #629afe;
+  --ba-secondary-color: #506583;
+  --ba-secondary-color-rgb: 80, 101, 131;
 
-  --ba-text-color: #5a6a85;
-  --ba-secondary-text-color: rgba(17, 28, 45, .6);
+  --ba-text-color: #2a3547;
 
-  --bs-body-bg: #f6f9ff;
-  --bs-body-color: #5a6a85;
-  --bs-emphasis-color: #2a3547;
-  --bs-heading-color: var(--bs-emphasis-color);
+  --bs-body-bg: var(--ba-light-color);
+  --bs-body-color: var(--ba-text-color);
+  --bs-emphasis-color: var(--ba-emphasis-color);
   --bs-primary-rgb: var(--ba-primary-color-rgb);
   --bs-link-color-rgb: var(--ba-primary-color-rgb);
   --bs-link-hover-color-rgb: var(--ba-primary-color-light-rgb);
   --bs-navbar-brand-color: var(--ba-primary-color);
   --bs-primary-rgb: var(--ba-primary-color-rgb);
+  --bs-secondary-color: var(--ba-secondary-color);
   --bs-secondary-rgb: var(--ba-secondary-color-rgb);
-  --bs-font-sans-serif: Inter, sans-serif;
-  --bs-body-font-weight: 300;
 }
 
 /* Dark Theme Variables */
 
 [data-bs-theme="dark"] {
-
-  --ba-dark-color: #1a1d2e;
 
   --ba-header-bg: var(--ba-dark-color);
   --ba-sidebar-bg: var(--ba-dark-color);
@@ -58,16 +59,12 @@
 
   --ba-secondary-color: #629afe;
   --ba-secondary-color-rgb: 98, 154, 254;
-  --ba-secondary-color-light: #7ba9fe;
-  --ba-secondary-color-disabled: #4a85e8;
 
   --ba-text-color: #b4b9d0;
-  --ba-secondary-text-color: rgba(180, 185, 208, .6);
+  --ba-emphasis-color: #e4e6f0;
 
   --bs-body-bg: #0f1117;
-  --bs-body-color: #b4b9d0;
-  --bs-emphasis-color: #e4e6ed;
-  --bs-heading-color: var(--bs-emphasis-color);
+  --bs-body-color: var(--ba-text-color);
   --bs-primary-rgb: var(--ba-primary-color-rgb);
   --bs-link-color-rgb: var(--ba-primary-color-rgb);
   --bs-navbar-brand-color: var(--ba-primary-color);
@@ -76,8 +73,11 @@
   --bs-secondary-rgb: var(--ba-secondary-color-rgb);
   --bs-font-sans-serif: Inter, sans-serif;
   --bs-body-font-weight: 300;
-  
   --bs-border-color: #2a2d3e;
+}
+
+.fw-bolder {
+  font-weight: 500 !important;
 }
 
 /* Buttons */
@@ -97,15 +97,12 @@
   --bs-btn-disabled-border-color: var(--ba-primary-color-disabled);
 }
 
-.btn-secondary {
-  --bs-btn-bg: var(--ba-secondary-color);
-  --bs-btn-border-color: var(--ba-secondary-color);
-  --bs-btn-hover-bg: var(--ba-secondary-color-light);
-  --bs-btn-hover-border-color: var(--ba-secondary-color-light);
-  --bs-btn-active-bg: var(--ba-secondary-color-light);
-  --bs-btn-active-border-color: var(--ba-secondary-color-light);
-  --bs-btn-disabled-bg: var(--ba-secondary-color-disabled);
-  --bs-btn-disabled-border-color: var(--ba-secondary-color-disabled);
+.btn-link {
+  text-decoration: none;
+}
+
+.btn-link:hover {
+  background-color: var(--ba-);
 }
 
 /* Navs */
@@ -150,6 +147,24 @@
   font-weight: 500;
 }
 
+.table th a {
+  color: inherit;
+}
+
+.table th a.asc::after {
+  content: ' ▲';
+  margin-left: .25rem;
+  font-size: .75rem;
+  opacity: .25;
+}
+
+.table th a.desc::after {
+  content: ' ▼';
+  margin-left: .25rem;
+  font-size: .75rem;
+  opacity: .25;
+}
+
 .table a {
   text-decoration: none;
 }
@@ -157,6 +172,7 @@
 .table .action,
 .table .actions {
   width: 1%;
+  text-align: right;
 }
 
 .table tbody tr:last-child td {
@@ -168,8 +184,9 @@
 .card {
   --bs-card-bg: #fff;  
   --bs-card-cap-bg: rgba(0, 0, 0, 0);
-  --bs-card-border-width: 0;
   --bs-card-cap-padding-y: 1rem;
+  --bs-card-border-width: 0;
+  --bs-body-color: var(--ba-text-color);
   box-shadow: var(--bs-box-shadow-sm);
 }
 
@@ -205,6 +222,18 @@
   content: var(--bs-breadcrumb-divider);
 }
 
+/* Tabs */
+
+.nav-tabs .nav-link {
+  --bs-nav-tabs-link-color: var(--bs-body-color);
+  --bs-nav-tabs-link-hover-border-color: transparent;
+  --bs-nav-tabs-link-active-bg: transparent;
+}
+
+.tab-pane {
+  padding-top: 1rem;
+}
+
 /* Definition list */
 
 dl {
@@ -213,14 +242,20 @@ dl {
 }
 
 dt {
-  color: var(--bs-emphasis-color);
-  font-weight: 400;
+  font-size: .75rem;
+  font-weight: 600;
+  margin-bottom: .25rem;
+  color: var(--bs-secondary-color);
+  text-transform: uppercase;
 }
 
 dd {
-  margin-bottom: .5rem;
+  margin-bottom: 1rem;
+  padding: .5rem;
+  border-radius: .375rem;
+  background-color: var(--bs-body-bg);
 }
-
+/*
 dd > *::last-child {
   margin-bottom: 0;
 }
@@ -244,6 +279,7 @@ dd > *::last-child {
     color: var(--ba-text-color);
   }
 }
+*/
 
 /* Pagination */
 
@@ -260,6 +296,11 @@ dd > *::last-child {
 
 .w-1 {
   width: 1%;
+}
+
+.drag-handle {
+  cursor: ns-resize;
+  color: var(--ba-secondary-color);
 }
 
 /* Header */
@@ -653,7 +694,6 @@ dd > *::last-child {
   margin: 0;
   font-size: 1.5rem;
   font-weight: 600;
-  color: var(--bs-emphasis-color);
 }
 
 .page-header .buttons {
@@ -664,6 +704,7 @@ dd > *::last-child {
 
 .page-header .buttons .btn {
   margin-right: .5rem;
+  white-space: nowrap;
 }
 
 @media (min-width: 992px) {

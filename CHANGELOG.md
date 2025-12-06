@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+- Refactor pagination element
+- Add breadcrumbs element and integrate it into the page header
+- Fix title translation fallback in sidebar menu
+- Enhance CSS variables for light and dark themes; improve button and table styles
+
 ## [1.1.1] - 2025-12-01
 
 ### Added
