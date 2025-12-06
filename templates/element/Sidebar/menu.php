@@ -16,7 +16,7 @@ $currentController = $this->request->getParam('controller');
 <ul class="sidebar-menu nav nav-pills">
     <?php foreach ($menu as $name => $item): ?>
         <?php
-        $title = $item['title'] ?? __d('admin', $name);
+        $title = __d('admin', $item['title'] ?? $name);
         
         $icon = null;
         if (isset($item['icon'])) {
