@@ -143,5 +143,116 @@ return [
             'menu' => [
             ],
         ],
+
+        /**
+         * File Manager configuration
+         */
+        'FileManager' => [
+
+            /**
+             * Base path
+             * 
+             * The base path where files are stored.
+             */
+            'basePath' => WWW_ROOT,
+
+            /**
+             * Top folders
+             * 
+             * An array of top-level folders available in the file manager.
+             */
+            'topFolders' => [
+                'images',
+                'files',
+            ],
+
+            /**
+             * File types configuration
+             * 
+             * Define allowed file types for different categories.
+             */
+            'fileTypes' => [
+                'files' => [
+                    'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 
+                    // 'txt', 'csv', 
+                    // 'zip', 'rar', '7z', 'mp3', 'mp4', 'avi', 
+                    // 'mov', 'wmv'
+                ],
+                'images' => [
+                    'jpg', 'jpeg', 'png', 'gif', 'webp', 
+                    // 'svg', 'bmp', 'tiff', 
+                ],
+            ],
+
+            /**
+             * File icons configuration
+             * 
+             * Map file extensions to Bootstrap Icons.
+             */
+            'fileIcons' => [
+                'pdf' => 'file-earmark-pdf',
+                'doc' => 'file-earmark-word',
+                'docx' => 'file-earmark-word',
+                'xls' => 'file-earmark-excel',
+                'xlsx' => 'file-earmark-excel',
+                'ppt' => 'file-earmark-powerpoint',
+                'pptx' => 'file-earmark-powerpoint',
+                'txt' => 'file-earmark-text',
+                'csv' => 'file-earmark-spreadsheet',
+                'zip' => 'file-earmark-zip',
+                'rar' => 'file-earmark-zip',
+                '7z' => 'file-earmark-zip',
+                'mp3' => 'file-earmark-music',
+                'mp4' => 'file-earmark-play',
+                'avi' => 'file-earmark-play',
+                'mov' => 'file-earmark-play',
+                'wmv' => 'file-earmark-play',
+                'jpg' => 'file-earmark-image',
+                'jpeg' => 'file-earmark-image',
+                'png' => 'file-earmark-image',
+                'gif' => 'file-earmark-image',
+                'webp' => 'file-earmark-image',
+                'svg' => 'file-earmark-image',
+                'bmp' => 'file-earmark-image',
+                'tiff' => 'file-earmark-image',
+                'default' => 'file-earmark',
+            ],
+
+            /**
+             * Image processing configuration
+             */
+            'Images' => [
+
+                /**
+                 * Maximum image width in pixels
+                 */
+                'maxWidth' => 2048,
+
+                /**
+                 * Maximum image height in pixels
+                 */
+                'maxHeight' => 2048,
+
+                /**
+                 * JPEG quality (1-100)
+                 */
+                'jpegQuality' => 90,
+
+                /**
+                 * PNG quality (0-9)
+                 */
+                'pngQuality' => 6,
+
+                /**
+                 * WebP quality (1-100)
+                 */
+                'webpQuality' => 90,
+
+                /**
+                 * Resize image on upload
+                 */
+                'resizeOnUpload' => true,
+            ],
+        ],
     ],
 ];

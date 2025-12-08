@@ -9,6 +9,30 @@ msgstr "Активен"
 msgid "Are you sure you want to delete?"
 msgstr "Сигурни ли сте, че искате да изтриете?"
 
+msgid "Back"
+msgstr "Назад"
+
+msgid "Cannot create folder"
+msgstr "Папката не може да бъде създадена"
+
+msgid "Cannot fix image size"
+msgstr "Размерът на изображението не може да бъде коригиран"
+
+msgid "Cannot save file"
+msgstr "Файлът не може да бъде записан"
+
+msgid "Close"
+msgstr "Затвори"
+
+msgid "Create Folder"
+msgstr "Създай папка"
+
+msgid "Date"
+msgstr "Дата"
+
+msgid "Delete"
+msgstr "Изтрий"
+
 msgid "Edit"
 msgstr "Редактирай"
 
@@ -19,8 +43,26 @@ msgstr "Редактиране"
 msgid "Email"
 msgstr "Имейл"
 
-msgid "Dashboard"
-msgstr "Табло"
+msgid "Exceeded file size limit"
+msgstr "Надвишен е лимитът за размер на файла"
+
+msgid "File Manager"
+msgstr "Файлов мениджър"
+
+msgid "File not uploaded"
+msgstr "Файлът не е качен"
+
+msgid "Filter"
+msgstr "Филтър"
+
+msgid "Filter by name"
+msgstr "Филтриране по име"
+
+msgid "Fix Image Size"
+msgstr "Коригирай размера на изображението"
+
+msgid "Folder Name"
+msgstr "Име на папката"
 
 msgid "Cancel"
 msgstr "Откажи"
@@ -35,29 +77,47 @@ msgstr "Създаване"
 msgid "Created on"
 msgstr "Създаден на"
 
-msgid "Delete"
-msgstr "Изтрий"
-
 msgid "Edit Profile"
 msgstr "Редактиране на профил"
 
-msgid "Email"
-msgstr "Имейл"
+msgid "Image"
+msgstr "Снимка"
+
+msgid "Image size fixed"
+msgstr "Размерът на снимката е коригиран"
+
+msgid "Images"
+msgstr "Изображения"
 
 msgid "Inactive"
 msgstr "Неактивен"
 
-msgid "Leave blank to keep current password"
-msgstr "Оставете празно, за да запазите текущата парола"
-
-msgid "Profile"
-msgstr "Профил"
-
 msgid "Invalid email or password"
 msgstr "Невалиден имайл или парола"
 
+msgid "Invalid file"
+msgstr "Невалиден файл"
+
+msgid "Invalid file type"
+msgstr "Невалиден тип файл"
+
+msgid "Invalid filename"
+msgstr "Невалидно име на файл"
+
+msgid "Invalid folder"
+msgstr "Невалидна папка"
+
+msgid "Invalid request"
+msgstr "Невалидна заявка"
+
+msgid "Leave blank to keep current password"
+msgstr "Оставете празно, за да запазите текущата парола"
+
 msgid "Log out"
 msgstr "Изход"
+
+msgid "Missing folder name"
+msgstr "Липсва име на папката"
 
 msgid "Modified on"
 msgstr "Променен на"
@@ -65,11 +125,17 @@ msgstr "Променен на"
 msgid "Name"
 msgstr "Име"
 
+msgid "No files uploaded"
+msgstr "Няма качени файлове"
+
 msgid "Page {{page}} of {{pages}}, showing {{current}} record(s) out of {{count}} total"
 msgstr "Страница {{page}} от {{pages}}, показва {{current}} запис(а) от общо {{count}}"
 
 msgid "Password"
 msgstr "Парола"
+
+msgid "Refresh"
+msgstr "Обнови"
 
 msgid "Remember me"
 msgstr "Запомни ме"
@@ -77,11 +143,51 @@ msgstr "Запомни ме"
 msgid "Save"
 msgstr "Запиши"
 
+msgid "Select"
+msgstr "Избери"
+
 msgid "Sign in"
 msgstr "Влез"
 
+msgid "Size"
+msgstr "Размер"
+
+msgid "Successfuly created folder"
+msgstr "Папката е създадена успешно"
+
+msgid "Successfuly deleted"
+msgstr "Успешно изтрито"
+
+msgid "The file could not be deleted"
+msgstr "Файлът не може да бъде изтрит"
+
+msgid "The folder could not be deleted"
+msgstr "Папката не може да бъде изтрита"
+
+msgid "The folder is not empty"
+msgstr "Папката не е празна"
+
+msgid "The specified file is not an image"
+msgstr "Посоченият файл не е изображение"
+
 msgid "Unable to update your profile. Please try again."
 msgstr "Профилът не може да бъде актуализиран. Моля, опитайте отново."
+
+msgid "Unknown error"
+msgstr "Неизвестна грешка"
+
+msgid "Up One Level"
+msgstr "Нагоре"
+
+msgid "Upload"
+msgstr "Качи"
+
+msgctxt "noun"
+msgid "Upload"
+msgstr "Качване"
+
+msgid "Upload failed"
+msgstr "Качването е неуспешно"
 
 msgid "User"
 msgstr "Потребител"
@@ -94,3 +200,9 @@ msgstr "Потребители"
 
 msgid "Your profile has been updated."
 msgstr "Профилът е актуализиран."
+
+msgid "file(s)"
+msgstr "файл(а)"
+
+msgid "file(s) uploaded"
+msgstr "файл(а) качен(и)"
