@@ -897,4 +897,549 @@ class FileManagerControllerTest extends TestCase
 
         $this->assertArrayHasKey('error', $data);
     }
+
+    /**
+     * Test AJAX upload single file from image element
+     *
+     * @return void
+     */
+    public function testAjaxUploadSingleFileFromImageElement(): void
+    {
+        // Create a mock uploaded file
+        $tmpFile = $this->testDir . DS . 'tmp_upload.jpg';
+        file_put_contents($tmpFile, 'fake image content');
+
+        $uploadedFile = new \Laminas\Diactoros\UploadedFile(
+            $tmpFile,
+            filesize($tmpFile),
+            UPLOAD_ERR_OK,
+            'test_image.jpg',
+            'image/jpeg'
+        );
+
+        $request = new ServerRequest([
+            'url' => '/admin/file-manager/upload',
+            'environment' => ['REQUEST_METHOD' => 'POST'],
+            'query' => ['folder' => 'images'],
+        ]);
+        $request = $request->withEnv('REQUEST_METHOD', 'POST');
+        $request = $request->withHeader('X-Requested-With', 'XMLHttpRequest');
+        $request = $request->withHeader('X-CSRF-Token', 'test-token');
+        $request = $request->withUploadedFiles(['file' => $uploadedFile]);
+
+        $controller = new FileManagerController($request);
+
+        $response = $controller->upload();
+
+        $this->assertInstanceOf(Response::class, $response);
+        $this->assertEquals('application/json', $response->getType());
+
+        $body = (string)$response->getBody();
+        $data = json_decode($body, true);
+
+        $this->assertFalse($data['error']);
+        $this->assertArrayHasKey('files', $data);
+        $this->assertCount(1, $data['files']);
+        $this->assertEquals('test_image.jpg', $data['files'][0]);
+        $this->assertArrayHasKey('message', $data);
+
+        // Verify file was uploaded
+        $this->assertFileExists($this->testDir . DS . 'images' . DS . 'test_image.jpg');
+    }
+
+    /**
+     * Test AJAX upload returns error for invalid file type
+     *
+     * @return void
+     */
+    public function testAjaxUploadRejectsInvalidFileType(): void
+    {
+        $tmpFile = $this->testDir . DS . 'tmp_upload.exe';
+        file_put_contents($tmpFile, 'fake executable content');
+
+        $uploadedFile = new \Laminas\Diactoros\UploadedFile(
+            $tmpFile,
+            filesize($tmpFile),
+            UPLOAD_ERR_OK,
+            'malware.exe',
+            'application/x-msdownload'
+        );
+
+        $request = new ServerRequest([
+            'url' => '/admin/file-manager/upload',
+            'environment' => ['REQUEST_METHOD' => 'POST'],
+            'query' => ['folder' => 'images'],
+        ]);
+        $request = $request->withEnv('REQUEST_METHOD', 'POST');
+        $request = $request->withHeader('X-Requested-With', 'XMLHttpRequest');
+        $request = $request->withUploadedFiles(['file' => $uploadedFile]);
+
+        $controller = new FileManagerController($request);
+
+        $response = $controller->upload();
+
+        $body = (string)$response->getBody();
+        $data = json_decode($body, true);
+
+        $this->assertArrayHasKey('error', $data);
+        $this->assertStringContainsString('Invalid file type', $data['error']);
+
+        // Verify file was not uploaded
+        $this->assertFileDoesNotExist($this->testDir . DS . 'images' . DS . 'malware.exe');
+    }
+
+    /**
+     * Test AJAX upload handles upload errors
+     *
+     * @return void
+     */
+    public function testAjaxUploadHandlesUploadError(): void
+    {
+        $uploadedFile = new \Laminas\Diactoros\UploadedFile(
+            '',
+            0,
+            UPLOAD_ERR_INI_SIZE,
+            'large_image.jpg',
+            'image/jpeg'
+        );
+
+        $request = new ServerRequest([
+            'url' => '/admin/file-manager/upload',
+            'environment' => ['REQUEST_METHOD' => 'POST'],
+            'query' => ['folder' => 'images'],
+        ]);
+        $request = $request->withEnv('REQUEST_METHOD', 'POST');
+        $request = $request->withHeader('X-Requested-With', 'XMLHttpRequest');
+        $request = $request->withUploadedFiles(['file' => $uploadedFile]);
+
+        $controller = new FileManagerController($request);
+
+        $response = $controller->upload();
+
+        $body = (string)$response->getBody();
+        $data = json_decode($body, true);
+
+        $this->assertArrayHasKey('error', $data);
+        $this->assertStringContainsString('Exceeded file size limit', $data['error']);
+    }
+
+    /**
+     * Test AJAX upload handles no file error
+     *
+     * @return void
+     */
+    public function testAjaxUploadHandlesNoFileError(): void
+    {
+        $uploadedFile = new \Laminas\Diactoros\UploadedFile(
+            '',
+            0,
+            UPLOAD_ERR_NO_FILE,
+            'empty.jpg',
+            'image/jpeg'
+        );
+
+        $request = new ServerRequest([
+            'url' => '/admin/file-manager/upload',
+            'environment' => ['REQUEST_METHOD' => 'POST'],
+            'query' => ['folder' => 'images'],
+        ]);
+        $request = $request->withEnv('REQUEST_METHOD', 'POST');
+        $request = $request->withHeader('X-Requested-With', 'XMLHttpRequest');
+        $request = $request->withUploadedFiles(['file' => $uploadedFile]);
+
+        $controller = new FileManagerController($request);
+
+        $response = $controller->upload();
+
+        $body = (string)$response->getBody();
+        $data = json_decode($body, true);
+
+        $this->assertArrayHasKey('error', $data);
+        $this->assertStringContainsString('File not uploaded', $data['error']);
+    }
+
+    /**
+     * Test AJAX upload returns error for missing folder parameter
+     *
+     * @return void
+     */
+    public function testAjaxUploadRequiresFolderParameter(): void
+    {
+        $tmpFile = $this->testDir . DS . 'tmp_upload.jpg';
+        file_put_contents($tmpFile, 'fake image content');
+
+        $uploadedFile = new \Laminas\Diactoros\UploadedFile(
+            $tmpFile,
+            filesize($tmpFile),
+            UPLOAD_ERR_OK,
+            'test_image.jpg',
+            'image/jpeg'
+        );
+
+        $request = new ServerRequest([
+            'url' => '/admin/file-manager/upload',
+            'environment' => ['REQUEST_METHOD' => 'POST'],
+            // No folder parameter
+        ]);
+        $request = $request->withEnv('REQUEST_METHOD', 'POST');
+        $request = $request->withHeader('X-Requested-With', 'XMLHttpRequest');
+        $request = $request->withUploadedFiles(['file' => $uploadedFile]);
+
+        $controller = new FileManagerController($request);
+
+        $response = $controller->upload();
+
+        $body = (string)$response->getBody();
+        $data = json_decode($body, true);
+
+        $this->assertArrayHasKey('error', $data);
+        $this->assertStringContainsString('Invalid folder', $data['error']);
+    }
+
+    /**
+     * Test AJAX upload returns error for invalid folder
+     *
+     * @return void
+     */
+    public function testAjaxUploadRejectsInvalidFolder(): void
+    {
+        $tmpFile = $this->testDir . DS . 'tmp_upload.jpg';
+        file_put_contents($tmpFile, 'fake image content');
+
+        $uploadedFile = new \Laminas\Diactoros\UploadedFile(
+            $tmpFile,
+            filesize($tmpFile),
+            UPLOAD_ERR_OK,
+            'test_image.jpg',
+            'image/jpeg'
+        );
+
+        $request = new ServerRequest([
+            'url' => '/admin/file-manager/upload',
+            'environment' => ['REQUEST_METHOD' => 'POST'],
+            'query' => ['folder' => '../etc'],
+        ]);
+        $request = $request->withEnv('REQUEST_METHOD', 'POST');
+        $request = $request->withHeader('X-Requested-With', 'XMLHttpRequest');
+        $request = $request->withUploadedFiles(['file' => $uploadedFile]);
+
+        $controller = new FileManagerController($request);
+
+        $response = $controller->upload();
+
+        $body = (string)$response->getBody();
+        $data = json_decode($body, true);
+
+        $this->assertArrayHasKey('error', $data);
+        $this->assertStringContainsString('Invalid folder', $data['error']);
+    }
+
+    /**
+     * Test AJAX upload returns error when no files are provided
+     *
+     * @return void
+     */
+    public function testAjaxUploadReturnsErrorForNoFiles(): void
+    {
+        $request = new ServerRequest([
+            'url' => '/admin/file-manager/upload',
+            'environment' => ['REQUEST_METHOD' => 'POST'],
+            'query' => ['folder' => 'images'],
+        ]);
+        $request = $request->withEnv('REQUEST_METHOD', 'POST');
+        $request = $request->withHeader('X-Requested-With', 'XMLHttpRequest');
+        // No uploaded files
+
+        $controller = new FileManagerController($request);
+
+        $response = $controller->upload();
+
+        $body = (string)$response->getBody();
+        $data = json_decode($body, true);
+
+        $this->assertArrayHasKey('error', $data);
+        $this->assertStringContainsString('No files uploaded', $data['error']);
+    }
+
+    /**
+     * Test AJAX upload generates unique filename for existing file
+     *
+     * @return void
+     */
+    public function testAjaxUploadGeneratesUniqueFilename(): void
+    {
+        // Create an existing file
+        file_put_contents($this->testDir . DS . 'images' . DS . 'existing.jpg', 'existing content');
+
+        $tmpFile = $this->testDir . DS . 'tmp_upload.jpg';
+        file_put_contents($tmpFile, 'new content');
+
+        $uploadedFile = new \Laminas\Diactoros\UploadedFile(
+            $tmpFile,
+            filesize($tmpFile),
+            UPLOAD_ERR_OK,
+            'existing.jpg',
+            'image/jpeg'
+        );
+
+        $request = new ServerRequest([
+            'url' => '/admin/file-manager/upload',
+            'environment' => ['REQUEST_METHOD' => 'POST'],
+            'query' => ['folder' => 'images'],
+        ]);
+        $request = $request->withEnv('REQUEST_METHOD', 'POST');
+        $request = $request->withHeader('X-Requested-With', 'XMLHttpRequest');
+        $request = $request->withUploadedFiles(['file' => $uploadedFile]);
+
+        $controller = new FileManagerController($request);
+
+        $response = $controller->upload();
+
+        $body = (string)$response->getBody();
+        $data = json_decode($body, true);
+
+        $this->assertFalse($data['error']);
+        $this->assertArrayHasKey('files', $data);
+        $this->assertCount(1, $data['files']);
+        // Should have incremented filename
+        $this->assertEquals('existing(1).jpg', $data['files'][0]);
+
+        // Both files should exist
+        $this->assertFileExists($this->testDir . DS . 'images' . DS . 'existing.jpg');
+        $this->assertFileExists($this->testDir . DS . 'images' . DS . 'existing(1).jpg');
+    }
+
+    /**
+     * Test AJAX upload replaces spaces in filename
+     *
+     * @return void
+     */
+    public function testAjaxUploadReplacesSpacesInFilename(): void
+    {
+        $tmpFile = $this->testDir . DS . 'tmp_upload.jpg';
+        file_put_contents($tmpFile, 'fake image content');
+
+        $uploadedFile = new \Laminas\Diactoros\UploadedFile(
+            $tmpFile,
+            filesize($tmpFile),
+            UPLOAD_ERR_OK,
+            'my new image.jpg',
+            'image/jpeg'
+        );
+
+        $request = new ServerRequest([
+            'url' => '/admin/file-manager/upload',
+            'environment' => ['REQUEST_METHOD' => 'POST'],
+            'query' => ['folder' => 'images'],
+        ]);
+        $request = $request->withEnv('REQUEST_METHOD', 'POST');
+        $request = $request->withHeader('X-Requested-With', 'XMLHttpRequest');
+        $request = $request->withUploadedFiles(['file' => $uploadedFile]);
+
+        $controller = new FileManagerController($request);
+
+        $response = $controller->upload();
+
+        $body = (string)$response->getBody();
+        $data = json_decode($body, true);
+
+        $this->assertFalse($data['error']);
+        $this->assertEquals('my_new_image.jpg', $data['files'][0]);
+        $this->assertFileExists($this->testDir . DS . 'images' . DS . 'my_new_image.jpg');
+    }
+
+    /**
+     * Test AJAX upload to subfolder
+     *
+     * @return void
+     */
+    public function testAjaxUploadToSubfolder(): void
+    {
+        $tmpFile = $this->testDir . DS . 'tmp_upload.txt';
+        file_put_contents($tmpFile, 'file content');
+
+        $uploadedFile = new \Laminas\Diactoros\UploadedFile(
+            $tmpFile,
+            filesize($tmpFile),
+            UPLOAD_ERR_OK,
+            'document.txt',
+            'text/plain'
+        );
+
+        $request = new ServerRequest([
+            'url' => '/admin/file-manager/upload',
+            'environment' => ['REQUEST_METHOD' => 'POST'],
+            'query' => ['folder' => 'uploads/subfolder'],
+        ]);
+        $request = $request->withEnv('REQUEST_METHOD', 'POST');
+        $request = $request->withHeader('X-Requested-With', 'XMLHttpRequest');
+        $request = $request->withUploadedFiles(['file' => $uploadedFile]);
+
+        $controller = new FileManagerController($request);
+
+        $response = $controller->upload();
+
+        $body = (string)$response->getBody();
+        $data = json_decode($body, true);
+
+        $this->assertFalse($data['error']);
+        $this->assertEquals('document.txt', $data['files'][0]);
+        $this->assertFileExists($this->testDir . DS . 'uploads' . DS . 'subfolder' . DS . 'document.txt');
+    }
+
+    /**
+     * Test AJAX upload creates target folder if it doesn't exist
+     *
+     * @return void
+     */
+    public function testAjaxUploadCreatesTargetFolder(): void
+    {
+        $tmpFile = $this->testDir . DS . 'tmp_upload.jpg';
+        file_put_contents($tmpFile, 'fake image content');
+
+        $uploadedFile = new \Laminas\Diactoros\UploadedFile(
+            $tmpFile,
+            filesize($tmpFile),
+            UPLOAD_ERR_OK,
+            'test_image.jpg',
+            'image/jpeg'
+        );
+
+        // New subfolder doesn't exist yet
+        $newFolder = 'images/gallery/2024';
+        $this->assertDirectoryDoesNotExist($this->testDir . DS . 'images' . DS . 'gallery');
+
+        $request = new ServerRequest([
+            'url' => '/admin/file-manager/upload',
+            'environment' => ['REQUEST_METHOD' => 'POST'],
+            'query' => ['folder' => $newFolder],
+        ]);
+        $request = $request->withEnv('REQUEST_METHOD', 'POST');
+        $request = $request->withHeader('X-Requested-With', 'XMLHttpRequest');
+        $request = $request->withUploadedFiles(['file' => $uploadedFile]);
+
+        $controller = new FileManagerController($request);
+
+        $response = $controller->upload();
+
+        $body = (string)$response->getBody();
+        $data = json_decode($body, true);
+
+        $this->assertFalse($data['error']);
+        $this->assertDirectoryExists($this->testDir . DS . 'images' . DS . 'gallery' . DS . '2024');
+        $this->assertFileExists($this->testDir . DS . 'images' . DS . 'gallery' . DS . '2024' . DS . 'test_image.jpg');
+    }
+
+    /**
+     * Test AJAX upload returns JSON response with correct content type
+     *
+     * @return void
+     */
+    public function testAjaxUploadReturnsJsonContentType(): void
+    {
+        $tmpFile = $this->testDir . DS . 'tmp_upload.png';
+        file_put_contents($tmpFile, 'fake png content');
+
+        $uploadedFile = new \Laminas\Diactoros\UploadedFile(
+            $tmpFile,
+            filesize($tmpFile),
+            UPLOAD_ERR_OK,
+            'icon.png',
+            'image/png'
+        );
+
+        $request = new ServerRequest([
+            'url' => '/admin/file-manager/upload',
+            'environment' => ['REQUEST_METHOD' => 'POST'],
+            'query' => ['folder' => 'images'],
+        ]);
+        $request = $request->withEnv('REQUEST_METHOD', 'POST');
+        $request = $request->withHeader('X-Requested-With', 'XMLHttpRequest');
+        $request = $request->withUploadedFiles(['file' => $uploadedFile]);
+
+        $controller = new FileManagerController($request);
+
+        $response = $controller->upload();
+
+        $this->assertEquals('application/json', $response->getType());
+
+        $body = (string)$response->getBody();
+        $data = json_decode($body, true);
+
+        $this->assertIsArray($data);
+        $this->assertFalse($data['error']);
+    }
+
+    /**
+     * Test AJAX upload handles unknown upload error
+     *
+     * @return void
+     */
+    public function testAjaxUploadHandlesUnknownError(): void
+    {
+        $uploadedFile = new \Laminas\Diactoros\UploadedFile(
+            '',
+            0,
+            UPLOAD_ERR_EXTENSION, // PHP extension stopped the upload
+            'image.jpg',
+            'image/jpeg'
+        );
+
+        $request = new ServerRequest([
+            'url' => '/admin/file-manager/upload',
+            'environment' => ['REQUEST_METHOD' => 'POST'],
+            'query' => ['folder' => 'images'],
+        ]);
+        $request = $request->withEnv('REQUEST_METHOD', 'POST');
+        $request = $request->withHeader('X-Requested-With', 'XMLHttpRequest');
+        $request = $request->withUploadedFiles(['file' => $uploadedFile]);
+
+        $controller = new FileManagerController($request);
+
+        $response = $controller->upload();
+
+        $body = (string)$response->getBody();
+        $data = json_decode($body, true);
+
+        $this->assertArrayHasKey('error', $data);
+        $this->assertStringContainsString('Unknown error', $data['error']);
+    }
+
+    /**
+     * Test AJAX upload with empty filename returns error
+     *
+     * @return void
+     */
+    public function testAjaxUploadWithEmptyFilenameReturnsError(): void
+    {
+        $tmpFile = $this->testDir . DS . 'tmp_upload.jpg';
+        file_put_contents($tmpFile, 'fake image content');
+
+        $uploadedFile = new \Laminas\Diactoros\UploadedFile(
+            $tmpFile,
+            filesize($tmpFile),
+            UPLOAD_ERR_OK,
+            '', // Empty filename
+            'image/jpeg'
+        );
+
+        $request = new ServerRequest([
+            'url' => '/admin/file-manager/upload',
+            'environment' => ['REQUEST_METHOD' => 'POST'],
+            'query' => ['folder' => 'images'],
+        ]);
+        $request = $request->withEnv('REQUEST_METHOD', 'POST');
+        $request = $request->withHeader('X-Requested-With', 'XMLHttpRequest');
+        $request = $request->withUploadedFiles(['file' => $uploadedFile]);
+
+        $controller = new FileManagerController($request);
+
+        $response = $controller->upload();
+
+        $body = (string)$response->getBody();
+        $data = json_decode($body, true);
+
+        $this->assertArrayHasKey('error', $data);
+        $this->assertStringContainsString('Invalid filename', $data['error']);
+    }
 }
