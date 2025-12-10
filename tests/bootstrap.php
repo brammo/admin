@@ -19,6 +19,11 @@ if (!function_exists('h')) {
     require dirname(__DIR__) . '/vendor/cakephp/cakephp/src/Core/functions.php';
 }
 
+// Load CakePHP global I18n functions if not already loaded
+if (!function_exists('__d')) {
+    require dirname(__DIR__) . '/vendor/cakephp/cakephp/src/I18n/functions_global.php';
+}
+
 // Path constants to a few helpful things.
 if (!defined('DS')) {
     define('DS', DIRECTORY_SEPARATOR);

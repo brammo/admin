@@ -11,7 +11,7 @@ use Cake\View\View;
  * @property \Authentication\View\Helper\IdentityHelper $Identity
  * @property \BootstrapUI\View\Helper\BreadcrumbsHelper $Breadcrumbs
  * @property \BootstrapUI\View\Helper\HtmlHelper $Html
- * @property \BootstrapUI\View\Helper\FormHelper $Form
+ * @property \Brammo\Admin\View\Helper\FormHelper $Form
  * @property \BootstrapUI\View\Helper\FlashHelper $Flash
  * @property \BootstrapUI\View\Helper\PaginatorHelper $Paginator
  * @property \Brammo\Admin\View\Helper\NavHelper $Nav
@@ -29,7 +29,7 @@ class AppView extends View
 
         // Load BootstrapUI helpers
         $this->addHelper('Html', ['className' => 'BootstrapUI.Html']);
-        $this->addHelper('Form', ['className' => 'BootstrapUI.Form']);
+        $this->addHelper('Form', ['className' => 'Brammo/Admin.Form']);
         $this->addHelper('Flash', ['className' => 'BootstrapUI.Flash']);
         $this->addHelper('Paginator', ['className' => 'BootstrapUI.Paginator']);
         $this->addHelper('Breadcrumbs', ['className' => 'BootstrapUI.Breadcrumbs']);
