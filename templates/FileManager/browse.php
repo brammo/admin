@@ -15,14 +15,19 @@ if ($folder) {
     $path .= $folder . '/';
 }
 
-$showModal = $this->request->getQuery('modal') == '1';
+$action = $this->request->getParam('action');
 
-if (!$this->request->is('ajax')) {
-    $this->Html->script('Brammo/Admin.filemanager', ['block' => true]);
-}
+$showModal = $this->request->getQuery('modal') == '1';
 ?>
 <?php $this->start('content'); ?>
-    <?= $this->element('FileManager/header', ['folder' => $folder, 'filter' => $filter, 'showUpload' => true]) ?>
+    <?= $this->element('FileBrowser/header', [
+            'folder' => $folder, 
+            'target' => $target,
+            'filter' => $filter, 
+            'action' => $action,
+            'showUpload' => true,
+        ]) 
+    ?>
     <div class="filemanager-images row mt-3 g-2">
         <?php foreach ($items as $item) : ?>
             <div class="col-sm-4 col-md-3">
@@ -37,7 +42,7 @@ if (!$this->request->is('ajax')) {
                             <?= $this->Html->link(
                                     $item['filename'],
                                     [
-                                        'action' => 'images',
+                                        'action' => $action,
                                         '?' => [
                                             'folder' => $folder ? 
                                                 $folder . DS . $item['filename'] : 
@@ -60,7 +65,8 @@ if (!$this->request->is('ajax')) {
                                 $item['filename'], 
                                 $path . $item['filename'], 
                                 [
-                                    'class' => 'select-file stretched-link', 
+                                    'class' => 'select stretched-link',
+                                    'data-type' => 'image', 
                                     'data-target' => $target
                                 ]
                             ) ?>
@@ -70,9 +76,14 @@ if (!$this->request->is('ajax')) {
             </div>
         <?php endforeach ?>
     </div>
-    <?= $this->element('FileManager/pagination') ?>
+    <?= $this->element('FileBrowser/pagination', [
+            'folder' => $folder,
+            'target' => $target,
+            'filter' => $filter,
+            'action' => $action
+        ]) 
+    ?>
 <?php $this->end(); ?>
-
 <?php if ($showModal): ?>
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -80,7 +91,7 @@ if (!$this->request->is('ajax')) {
             <h5 class="modal-title"><?= __d('brammo/admin', 'Images') ?></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="<?= __d('brammo/admin', 'Close') ?>"></button>
             </div>
-            <div class="modal-body" id="modal-filemanager-content">
+            <div class="modal-body" id="modal-image-browser-content">
                 <?= $this->fetch('content') ?>
             </div>
         </div>

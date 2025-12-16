@@ -6,6 +6,7 @@
  * @var string $folder
  * @var string $target
  * @var string $filter
+ * @var string $action
  * @var int $page
  * @var int $pages
  */
@@ -17,7 +18,7 @@ if ($pages < 2) {
 }
 
 $url = [
-    'action' => $this->request->getParam('action'), 
+    'action' => $action, 
     '?' => []
 ];
 

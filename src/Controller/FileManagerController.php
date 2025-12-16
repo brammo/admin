@@ -20,18 +20,11 @@ class FileManagerController extends AppController
     private const TYPE_FOLDER = '[folder]';
 
     /**
-     * Items per page
-     *
-     * @var int
-     */
-    private int $itemsPerPage = 10;
-
-    /**
      * Sort field
      * 
      * @var string
      */
-    private string $sort = 'filename';
+    private string $sortField = 'filename';
 
     /**
      * Sort direction
@@ -107,43 +100,41 @@ class FileManagerController extends AppController
      */    
     public function index(): void
     {
-        $this->browse();
+        $this->browse('all', 20);
     }
     
     /**
-     * Images method
+     * Browse images
      * 
      * @return void
      */
-    public function images(): void
+    public function browseImages(): void
     {
-        $this->itemsPerPage = 12;
-        $this->sort = 'date';
-        $this->sortDirection = 'desc';
-
         if ($this->request->is('ajax')) {
             $this->viewBuilder()->setLayout('ajax');
         }
         
-        $this->browse();
+        $this->sortField = 'date';
+        $this->sortDirection = 'desc';
+        $this->browse('images', 12);
+        $this->render('browse');
     }
     
     /**
-     * Files method
+     * Brose files
      * 
      * @return void
      */
-    public function files(): void
+    public function browseFiles(): void
     {
-        $this->itemsPerPage = 10;
-        $this->sort = 'date';
-        $this->sortDirection = 'desc';
-        
         if ($this->request->is('ajax')) {
             $this->viewBuilder()->setLayout('ajax');
         }
         
-        $this->browse();
+        $this->sortField = 'date';
+        $this->sortDirection = 'desc';
+        $this->browse('files', 10);
+        $this->render('browse');
     }
     
     /**
@@ -243,7 +234,6 @@ class FileManagerController extends AppController
         if ($filesCount > 0) {
             $res['message'] = $filesCount . ' ' . __d('brammo/admin', 'file(s) uploaded');
             $res['files'] = $files;
-            $res['file'] = implode("\r\n", $files);
         }
     
         if ($this->request->is('ajax')) {
@@ -514,9 +504,11 @@ class FileManagerController extends AppController
     /**
      * Browse method
      * 
+     * @param string $type File type (images, files, all)
+     * 
      * @return void
      */
-    private function browse(): void
+    private function browse(string $type, int $itemsPerPage): void
     {
         $folder = $this->request->getQuery('folder') ?: '';
         if (!empty($folder) && !$this->isValidFolder($folder)) {
@@ -531,16 +523,12 @@ class FileManagerController extends AppController
         
         uasort($items, [$this, 'sortFiles']);
         
-        if ($this->itemsPerPage) {
-            
-            $pages = (int)ceil(count($items) / $this->itemsPerPage);
-            $page = min(max((int)$this->request->getQuery('page'), 1), $pages);
-            $first = ($page - 1) * $this->itemsPerPage;
-
-            $this->set(compact('page', 'pages', 'first'));
-            
-            $items = array_slice($items, $first, $this->itemsPerPage);
-        }
+        $pages = (int)ceil(count($items) / $itemsPerPage);
+        $page = min(max((int)$this->request->getQuery('page'), 1), $pages);
+        $first = ($page - 1) * $itemsPerPage;
+        $this->set(compact('page', 'pages', 'first'));
+        
+        $items = array_slice($items, $first, $itemsPerPage);
         
         foreach ($items as $i => $item) {
             if ($item['type'] === self::TYPE_FOLDER) {
@@ -565,7 +553,7 @@ class FileManagerController extends AppController
         $target = $this->request->getQuery('target') ?: '';
 
         $this->set(compact('folder', 'filter', 'target', 'items'));
-        $this->set('sort', $this->sort);
+        $this->set('sort', $this->sortField);
         $this->set('sortDirection', $this->sortDirection);
     }
     
@@ -670,9 +658,9 @@ class FileManagerController extends AppController
             return 1;
         }
         
-        if ($file1[$this->sort] < $file2[$this->sort]) {
+        if ($file1[$this->sortField] < $file2[$this->sortField]) {
             $res = -1;
-        } elseif ($file1[$this->sort] > $file2[$this->sort]) {
+        } elseif ($file1[$this->sortField] > $file2[$this->sortField]) {
             $res = 1;
         } else {
             $res = 0;

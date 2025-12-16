@@ -6,8 +6,9 @@
  * @var string $folder
  * @var string $target
  * @var string $filter
+ * @var bool $showUpload
+ * @var string $action
  */
-
 ?>
 <div class="d-lg-flex">
     <div class="d-flex mb-3 mb-lg-0">
@@ -16,7 +17,7 @@
                 <?= $this->Html->link(
                         $this->Html->icon('chevron-left'),
                         [
-                            'action' => $this->request->getParam('action'), 
+                            'action' => $action, 
                             '?' => [
                                 'folder' => substr($folder, 0, strrpos($folder, '/')),
                                 'target' => $target
@@ -36,15 +37,13 @@
             <div>
                 <?= $this->Form->create(null, [
                         'url' => ['action' => 'createFolder', '?' => ['folder' => $folder]],
-                        'id' => 'form-create-folder', 
-                        'class' => 'd-inline-block ms-2', 
+                        'class' => 'create-folder-form d-inline-block', 
                         'style' => 'max-width:10rem;'
                     ]) 
                 ?>
                     <?= $this->Form->button($this->Html->icon('folder-plus'),
                             [
-                                'class' => 'btn btn-success btn-sm', 
-                                'id' => 'btn-create-folder', 
+                                'class' => 'create-folder btn btn-success btn-sm', 
                                 'title' => __d('brammo/admin', 'Create Folder'),
                                 'escapeTitle' => false, 
                             ]
@@ -77,8 +76,7 @@
                 ],
                 [
                     'escape' => false, 
-                    'class' => 'btn btn-info btn-sm', 
-                    'id' => 'button-refresh',
+                    'class' => 'refresh btn btn-info btn-sm', 
                     'title' => __d('brammo/admin', 'Refresh')
                 ]
             );
@@ -89,8 +87,7 @@
             <?= $this->Form->create(null, [
                     'url' => ['action' => 'upload', '?' => compact('folder', 'target')],
                     'type' => 'file', 
-                    'id' => 'form-upload', 
-                    'class' => 'd-inline-block'
+                    'class' => 'upload-form d-inline-block'
                 ]) 
             ?>
                 <?= $this->Form->file('files.', ['style' => 'display:none', 'multiple']) ?>
@@ -98,8 +95,7 @@
                     $this->Html->icon('upload'), 
                     [
                         'type' => 'submit', 
-                        'class' => 'btn btn-primary btn-sm', 
-                        'id' => 'button-upload',
+                        'class' => 'upload btn btn-primary btn-sm', 
                         'title' => __d('brammo/admin', 'Upload'),
                         'escapeTitle' => false
                     ]
@@ -115,7 +111,7 @@
                     '?' => compact('folder', 'target')
                 ], 
                 'type' => 'get', 
-                'id' => 'form-filter', 
+                'class' => 'filter-form', 
                 'style' => 'max-width:10rem;'
             ]) 
         ?>
@@ -128,8 +124,7 @@
                 ?>
                 <?= $this->Form->button($this->Html->icon('filter'), [
                         'type' => 'submit', 
-                        'class' => 'btn btn-secondary btn-sm', 
-                        'id' => 'button-search', 
+                        'class' => 'filterbtn btn-secondary btn-sm', 
                         'title' => __d('brammo/admin', 'Filter'),
                         'escapeTitle' => false
                     ]) 
