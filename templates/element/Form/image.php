@@ -100,7 +100,8 @@ $this->Html->script('Brammo/Admin.form-image', ['block' => true]);
             const formImage<?= $id ?> = new FormImage(
                 'form-image-<?= $id ?>', 
                 '<?= $browseUrl ?>', 
-                '<?= $uploadUrl ?>'
+                '<?= $uploadUrl ?>',
+                '<?= __d('brammo/admin', 'Select Image') ?>'
             );
         });
     </script>

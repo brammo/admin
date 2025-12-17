@@ -5,20 +5,20 @@
  */
 const FormImage = (function() {
 
-    const MODAL_ID = 'modal-file-browser';
-
     /**
      * Constructor
      * 
      * @param {string} elementId - The ID of the form image element
      * @param {string} browseUrl - The URL to open the file manager
      * @param {string} uploadUrl - The URL to upload images
+     * @param {string} modalTitle - The title for the file browser modal
      */
-    function FormImage(elementId, browseUrl, uploadUrl) {
+    function FormImage(elementId, browseUrl, uploadUrl, modalTitle = 'File Browser') {
 
         this.element = document.getElementById(elementId);
         this.browseUrl = browseUrl;
         this.uploadUrl = uploadUrl;
+        this.modalTitle = modalTitle;
         this.csrfToken = null;
 
         // Get CSRF token from parent form if available
@@ -29,6 +29,8 @@ const FormImage = (function() {
                 this.csrfToken = tokenInput.value;
             }
         }
+        
+        this.fileBrowser = new FileBrowser('#file-browser-modal', this.modalTitle);
 
         this.init();
     }
@@ -63,34 +65,8 @@ const FormImage = (function() {
         const url = this.browseUrl + '?folder=' + encodeURIComponent(folder) + 
             '&target=' + encodeURIComponent(target);
 
-        this.fileBrowser = new FileBrowser('#' + MODAL_ID);
-        this.fileBrowser.init();
         this.fileBrowser.loadContent(url);
         this.fileBrowser.showModal();
-
-/*         const existingModal = document.getElementById(MODAL_ID);
-        if (existingModal) {
-            existingModal.remove();
-        }
-
-        fetch(url, {
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-Token': this.csrfToken || ''
-            }
-        })
-        .then(response => response.text())
-        .then(html => {
-            const modalDiv = document.createElement('div');
-            modalDiv.id = MODAL_ID;
-            modalDiv.className = 'modal fade';
-            modalDiv.innerHTML = html;
-            document.body.appendChild(modalDiv);
-
-            const modal = new bootstrap.Modal(modalDiv);
-            modal.show();
-        });
- */
     };
 
     /**
