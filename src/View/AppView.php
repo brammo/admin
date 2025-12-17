@@ -29,7 +29,6 @@ class AppView extends View
 
         // Load BootstrapUI helpers
         $this->addHelper('Html', ['className' => 'BootstrapUI.Html']);
-        $this->addHelper('Form', ['className' => 'Brammo/Admin.Form']);
         $this->addHelper('Flash', ['className' => 'BootstrapUI.Flash']);
         $this->addHelper('Paginator', ['className' => 'BootstrapUI.Paginator']);
         $this->addHelper('Breadcrumbs', ['className' => 'BootstrapUI.Breadcrumbs']);
@@ -41,6 +40,7 @@ class AppView extends View
         $this->addHelper('Nav', ['className' => 'Brammo/BootstrapUI.Nav']);
         
         // Load custom Admin helpers
+        $this->addHelper('Form', ['className' => 'Brammo/Admin.Form']);
         $this->addHelper('Button', ['className' => 'Brammo/Admin.Button']);
 
         // Load Authentication Identity helper
