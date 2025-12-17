@@ -21,7 +21,7 @@ class FormHelper extends BootstrapFormHelper
      * - `image`: Renders an image picker/uploader using the Form/image element
      *
      * @param string $fieldName The field name.
-     * @param array<string, mixed> $options The options.
+     * @param array<array-key, mixed> $options The options.
      * @return string Generated HTML.
      */
     public function control(string $fieldName, array $options = []): string
