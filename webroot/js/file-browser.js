@@ -12,18 +12,19 @@
 const FileBrowser = (function() {
     'use strict';
 
-/*     FileBrowser.prototype = {};
-    FileBrowser.prototype.modalId = null;
-    FileBrowser.prototype.boundHandleClick = null;
-    FileBrowser.prototype.boundHandleSubmit = null;
- */
     /**
      * Constructor
      * 
      * @param {string} modalId - The ID of the modal element (e.g. '#myModal')
+     * @param {string} title - The title text for the modal
      */
-    function FileBrowser(modalId) {
+    function FileBrowser(modalId, title = 'File Browser') {
+
         this.modalId = modalId;
+        this.title = title;
+
+        this.init();
+        this.createModal();
     }
 
     FileBrowser.prototype.constructor = FileBrowser;
@@ -32,8 +33,6 @@ const FileBrowser = (function() {
      * Initialize the FileBrowser by creating the modal and setting up event listeners
      */
     FileBrowser.prototype.init = function() {
-
-        this.createModal();
 
         this.boundHandleClick = this.handleClick.bind(this);
         this.boundHandleSubmit = this.handleSubmit.bind(this);
@@ -58,7 +57,7 @@ const FileBrowser = (function() {
                 <div class="modal-dialog modal-lg modal-dialog-centered">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title">File Browser</h5>
+                            <h5 class="modal-title">${this.title}</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
@@ -236,7 +235,10 @@ const FileBrowser = (function() {
             fetch(form.getAttribute('action'), {
                 method: 'POST',
                 body: formData,
-                headers: csrfToken ? { 'X-CSRF-Token': csrfToken.value } : {}
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-Token': csrfToken ? csrfToken.value : ''
+                }
             })
             .then(response => response.json())
             .then(json => {
@@ -321,7 +323,10 @@ const FileBrowser = (function() {
         fetch(form.getAttribute('action'), {
             method: 'POST',
             body: formData,
-            headers: csrfToken ? { 'X-CSRF-Token': csrfToken.value } : {}
+            headers: { 
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-Token': csrfToken ? csrfToken.value : '' 
+            }
         })
         .then(response => response.json())
         .then(json => {

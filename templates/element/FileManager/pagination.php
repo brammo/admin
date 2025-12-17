@@ -17,24 +17,12 @@ if ($pages < 2) {
     return;
 }
 
+$page = max(1, min($page, $pages));
+
 $url = [
     'action' => $action, 
-    '?' => []
+    '?' => compact('folder', 'target', 'filter', 'page')
 ];
-
-if (!empty($folder)) {
-    $url['?']['folder'] = $folder;
-}
-
-if (!empty($target)) {
-    $url['?']['target'] = $target;
-}
-
-if (!empty($filter)) {
-    $url['?']['filter'] = $filter;
-}
-
-$url['?']['page'] = 1;
 ?>
 <div class="mt-3">
     <ul class="pagination">

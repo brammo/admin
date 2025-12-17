@@ -711,7 +711,7 @@ class FileManagerController extends AppController
             return ['error' => __d('brammo/admin', 'Cannot save file') . ' ' . $filename];
         }
 
-        if ($isImageType && Configure::read('Admin.FileManager.Images.fixOnUpload')) {
+        if ($isImageType && Configure::read('Admin.FileManager.Images.resizeOnUpload')) {
             $this->fixImageSize($fullPath . DS . $filename);
         }
         

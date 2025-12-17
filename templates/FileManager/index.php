@@ -11,8 +11,8 @@ use Cake\Core\Configure;
 
 $fileIcons = Configure::read('Admin.FileManager.fileIcons') ?: [];
 $imageTypes = Configure::read('Admin.FileManager.fileTypes.images') ?: [];
-$imageMaxWidth = Configure::read('Admin.FileManager.imageMaxWidth');
-$imageMaxHeight = Configure::read('Admin.FileManager.imageMaxHeight');
+$imageMaxWidth = Configure::read('Admin.FileManager.Images.maxWidth');
+$imageMaxHeight = Configure::read('Admin.FileManager.Images.maxHeight');
 
 $this->assign('title', __d('brammo/admin', 'File Manager'));
 
@@ -27,16 +27,7 @@ if ($folder) {
     $this->Breadcrumbs->add(__d('brammo/admin', 'File Manager'), [
         'action' => 'index'
     ]);
-    $currentFolder = array_pop($parts);
-    foreach ($parts as $i => $part) {
-        $this->Breadcrumbs->add($part, [
-            'action' => 'index', 
-            '?' => [
-                'folder' => implode('/', array_slice($parts, 0, $i + 1))
-            ]
-        ]);
-    }
-    $this->assign('title', $currentFolder);
+    $this->assign('title', '/' . $folder);
 
     // Up one level button
     $this->append('buttons', 
@@ -47,8 +38,8 @@ if ($folder) {
                 '?' => ['folder' => $upFolder]
             ],
             [
-                'variant' => 'secondary',
-                'icon' => 'chevron-left',
+                'variant' => 'outline-secondary',
+                'icon' => 'chevron-up',
                 'style' => 'compact',
             ]
         )
@@ -112,15 +103,28 @@ $this->append('buttons');
         'url' => ['action' => 'index'], 
         'type' => 'get', 
         'id' => 'form-filter', 
-        'class' => 'd-inline-block ms-2',
-        'style' => 'max-width:10rem'
+        'class' => 'd-inline-block',
+        'style' => 'max-width:12rem'
     ]);
     echo $this->Form->hidden('folder', ['value' => $folder]);
-    echo $this->Form->text('filter', [
-        'placeholder' => __d('brammo/admin', 'Filter by name'),
-        'value' => $filter,
-        'class' => 'form-control',
-    ]);
+    echo $this->Html->tag(
+        'div', 
+        $this->Form->text('filter', [
+            'placeholder' => __d('brammo/admin', 'Filter'),
+            'value' => $filter,
+            'class' => 'form-control bg-white'
+        ]) .
+        $this->Form->button(
+            $this->Html->icon('search'), 
+            [
+                'type' => 'submit', 
+                'class' => 'btn btn-secondary',
+                'title' => __d('brammo/admin', 'Filter'),
+                'escapeTitle' => false
+            ]
+        ),
+        ['class' => 'input-group']
+    );
     echo $this->Form->end();
 $this->end();
 

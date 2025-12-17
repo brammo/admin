@@ -731,3 +731,38 @@ dd > *::last-child {
   }
 }
 
+/**
+ * File Browser
+ */
+
+.file-browser-images .card {
+  height: 100%;
+}
+
+.file-browser-images .card-folder .card-img-top {
+  font-size: 5rem;
+}
+
+.file-browser-images .card-image .card-img-top {
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.file-browser-images .card-body {
+  padding: .5rem;
+  font-size: small;
+  text-align: center;
+}
+
+.file-browser-images a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.file-browser-images a:hover {
+  text-decoration: none;
+  background-color: rgba(65, 84, 241, 0.1);
+}
+
+/* Quill Editor */
