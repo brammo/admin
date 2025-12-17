@@ -128,7 +128,7 @@ class FormHelperTest extends TestCase
 
         // Should contain the image control structure
         $this->assertStringContainsString('form-image', $result);
-        $this->assertStringContainsString('input-image', $result);
+        $this->assertStringContainsString('input type="hidden" name="image"', $result);
     }
 
     /**
@@ -145,8 +145,9 @@ class FormHelperTest extends TestCase
         $result = $this->Form->imageControl('image');
 
         $this->assertStringContainsString('form-image', $result);
-        $this->assertStringContainsString('id="form-image-image"', $result);
-        $this->assertStringContainsString('id="input-image"', $result);
+        // ID is dynamically generated with uniqid()
+        $this->assertMatchesRegularExpression('/id="form-image-[a-z0-9]+"/', $result);
+        $this->assertStringContainsString('input type="hidden" name="image"', $result);
     }
 
     /**
@@ -165,7 +166,8 @@ class FormHelperTest extends TestCase
         ]);
 
         $this->assertStringContainsString('form-image', $result);
-        $this->assertStringContainsString('id="form-image-thumbnail"', $result);
+        // ID is dynamically generated with uniqid()
+        $this->assertMatchesRegularExpression('/id="form-image-[a-z0-9]+"/', $result);
     }
 
     /**
