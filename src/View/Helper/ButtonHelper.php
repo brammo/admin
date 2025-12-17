@@ -22,7 +22,7 @@ class ButtonHelper extends Helper
      */
     protected array $helpers = [
         'Html' => ['className' => 'BootstrapUI.Html'],
-        'Form' => ['className' => 'BootstrapUI.Form'],
+        'Form' => ['className' => 'Brammo/Admin.Form'],
     ];
 
     /**
