@@ -14,7 +14,7 @@ use Cake\Http\MiddlewareQueue;
 /**
  * Admin Plugin
  */
-class Plugin extends BasePlugin
+class AdminPlugin extends BasePlugin
 {
     /**
      * Load all the plugin configuration and bootstrap logic.

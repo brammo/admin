@@ -5,7 +5,7 @@ declare(strict_types=1);
  * Test suite bootstrap for Brammo\Admin.
  */
 
-use Brammo\Admin\Plugin as AdminPlugin;
+use Brammo\Admin\AdminPlugin;
 use Cake\Cache\Cache;
 use Cake\Core\Configure;
 use Cake\Core\Plugin;
