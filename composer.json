@@ -62,19 +62,5 @@
         "allow-plugins": {
             "dealerdirect/phpcodesniffer-composer-installer": true
         }
-    },
-    "repositories": [
-        {
-            "type": "path",
-            "url": "../../Brammo/auth"
-        },
-        {
-            "type": "path",
-            "url": "../../Brammo/bootstrap-ui"
-        },
-        {
-            "type": "path",
-            "url": "../../Brammo/content"
-        }        
-    ]
+    }
 }
