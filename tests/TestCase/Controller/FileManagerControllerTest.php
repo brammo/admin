@@ -65,7 +65,7 @@ class FileManagerControllerTest extends TestCase
             'Images' => [
                 'maxWidth' => 1024,
                 'maxHeight' => 1024,
-                'fixOnUpload' => false,
+                'resizeOnUpload' => false,
             ],
         ]);
 
@@ -1449,5 +1449,224 @@ class FileManagerControllerTest extends TestCase
         $this->assertArrayHasKey('error', $data);
         // Error message is localized - just check that error is not empty
         $this->assertNotEmpty($data['error']);
+    }
+
+    /**
+     * Test AJAX upload multiple files using files[] format
+     *
+     * @return void
+     */
+    public function testAjaxUploadMultipleFiles(): void
+    {
+        // Create mock uploaded files
+        $tmpFile1 = $this->testDir . DS . 'tmp_upload1.jpg';
+        $tmpFile2 = $this->testDir . DS . 'tmp_upload2.png';
+        file_put_contents($tmpFile1, 'fake image content 1');
+        file_put_contents($tmpFile2, 'fake image content 2');
+
+        $uploadedFile1 = new \Laminas\Diactoros\UploadedFile(
+            $tmpFile1,
+            filesize($tmpFile1),
+            UPLOAD_ERR_OK,
+            'image1.jpg',
+            'image/jpeg'
+        );
+
+        $uploadedFile2 = new \Laminas\Diactoros\UploadedFile(
+            $tmpFile2,
+            filesize($tmpFile2),
+            UPLOAD_ERR_OK,
+            'image2.png',
+            'image/png'
+        );
+
+        $request = new ServerRequest([
+            'url' => '/admin/file-manager/upload',
+            'environment' => ['REQUEST_METHOD' => 'POST'],
+            'query' => ['folder' => 'images'],
+        ]);
+        $request = $request->withEnv('REQUEST_METHOD', 'POST');
+        $request = $request->withHeader('X-Requested-With', 'XMLHttpRequest');
+        $request = $request->withUploadedFiles(['files' => [$uploadedFile1, $uploadedFile2]]);
+
+        $controller = new FileManagerController($request);
+
+        $response = $controller->upload();
+
+        $this->assertInstanceOf(Response::class, $response);
+        $body = (string)$response->getBody();
+        $data = json_decode($body, true);
+
+        $this->assertFalse($data['error']);
+        $this->assertArrayHasKey('files', $data);
+        $this->assertCount(2, $data['files']);
+        $this->assertContains('image1.jpg', $data['files']);
+        $this->assertContains('image2.png', $data['files']);
+
+        // Verify files were uploaded
+        $this->assertFileExists($this->testDir . DS . 'images' . DS . 'image1.jpg');
+        $this->assertFileExists($this->testDir . DS . 'images' . DS . 'image2.png');
+    }
+
+    /**
+     * Test AJAX upload multiple files with partial failure
+     *
+     * @return void
+     */
+    public function testAjaxUploadMultipleFilesPartialFailure(): void
+    {
+        // Create one valid and one invalid file
+        $tmpFile1 = $this->testDir . DS . 'tmp_upload_valid.jpg';
+        $tmpFile2 = $this->testDir . DS . 'tmp_upload_invalid.exe';
+        file_put_contents($tmpFile1, 'fake image content');
+        file_put_contents($tmpFile2, 'fake executable content');
+
+        $uploadedFile1 = new \Laminas\Diactoros\UploadedFile(
+            $tmpFile1,
+            filesize($tmpFile1),
+            UPLOAD_ERR_OK,
+            'valid_image.jpg',
+            'image/jpeg'
+        );
+
+        $uploadedFile2 = new \Laminas\Diactoros\UploadedFile(
+            $tmpFile2,
+            filesize($tmpFile2),
+            UPLOAD_ERR_OK,
+            'invalid.exe',
+            'application/x-msdownload'
+        );
+
+        $request = new ServerRequest([
+            'url' => '/admin/file-manager/upload',
+            'environment' => ['REQUEST_METHOD' => 'POST'],
+            'query' => ['folder' => 'images'],
+        ]);
+        $request = $request->withEnv('REQUEST_METHOD', 'POST');
+        $request = $request->withHeader('X-Requested-With', 'XMLHttpRequest');
+        $request = $request->withUploadedFiles(['files' => [$uploadedFile1, $uploadedFile2]]);
+
+        $controller = new FileManagerController($request);
+
+        $response = $controller->upload();
+
+        $body = (string)$response->getBody();
+        $data = json_decode($body, true);
+
+        // Should have both files and errors
+        $this->assertArrayHasKey('files', $data);
+        $this->assertCount(1, $data['files']);
+        $this->assertEquals('valid_image.jpg', $data['files'][0]);
+        $this->assertArrayHasKey('errors', $data);
+        $this->assertStringContainsString('exe', $data['error']);
+
+        // Only valid file should be uploaded
+        $this->assertFileExists($this->testDir . DS . 'images' . DS . 'valid_image.jpg');
+        $this->assertFileDoesNotExist($this->testDir . DS . 'images' . DS . 'invalid.exe');
+    }
+
+    /**
+     * Test sortFiles method - sorts by date descending
+     *
+     * @return void
+     */
+    public function testSortFilesByDateDescending(): void
+    {
+        $request = new ServerRequest(['url' => '/admin/file-manager']);
+        $controller = new FileManagerController($request);
+
+        $reflection = new \ReflectionClass($controller);
+
+        // Set sort field and direction (like browseImages does)
+        $sortFieldProp = $reflection->getProperty('sortField');
+        $sortFieldProp->setAccessible(true);
+        $sortFieldProp->setValue($controller, 'date');
+
+        $sortDirectionProp = $reflection->getProperty('sortDirection');
+        $sortDirectionProp->setAccessible(true);
+        $sortDirectionProp->setValue($controller, 'desc');
+
+        $method = $reflection->getMethod('sortFiles');
+        $method->setAccessible(true);
+
+        $file1 = ['filename' => 'old.txt', 'type' => 'txt', 'date' => '2024-01-01 10:00:00'];
+        $file2 = ['filename' => 'new.txt', 'type' => 'txt', 'date' => '2024-12-31 10:00:00'];
+
+        // Descending sort: newer date should come first (return 1 means $file1 > $file2)
+        $result = $method->invoke($controller, $file1, $file2);
+        $this->assertEquals(1, $result);
+
+        $result = $method->invoke($controller, $file2, $file1);
+        $this->assertEquals(-1, $result);
+
+        $result = $method->invoke($controller, $file1, $file1);
+        $this->assertEquals(0, $result);
+    }
+
+    /**
+     * Test sortFiles method - sorts by date ascending
+     *
+     * @return void
+     */
+    public function testSortFilesByDateAscending(): void
+    {
+        $request = new ServerRequest(['url' => '/admin/file-manager']);
+        $controller = new FileManagerController($request);
+
+        $reflection = new \ReflectionClass($controller);
+
+        // Set sort field and direction
+        $sortFieldProp = $reflection->getProperty('sortField');
+        $sortFieldProp->setAccessible(true);
+        $sortFieldProp->setValue($controller, 'date');
+
+        $sortDirectionProp = $reflection->getProperty('sortDirection');
+        $sortDirectionProp->setAccessible(true);
+        $sortDirectionProp->setValue($controller, 'asc');
+
+        $method = $reflection->getMethod('sortFiles');
+        $method->setAccessible(true);
+
+        $file1 = ['filename' => 'old.txt', 'type' => 'txt', 'date' => '2024-01-01 10:00:00'];
+        $file2 = ['filename' => 'new.txt', 'type' => 'txt', 'date' => '2024-12-31 10:00:00'];
+
+        // Ascending sort: older date should come first
+        $result = $method->invoke($controller, $file1, $file2);
+        $this->assertEquals(-1, $result);
+
+        $result = $method->invoke($controller, $file2, $file1);
+        $this->assertEquals(1, $result);
+    }
+
+    /**
+     * Test sortFiles - folders always come first regardless of sort settings
+     *
+     * @return void
+     */
+    public function testSortFilesFoldersFirstWithDateSort(): void
+    {
+        $request = new ServerRequest(['url' => '/admin/file-manager']);
+        $controller = new FileManagerController($request);
+
+        $reflection = new \ReflectionClass($controller);
+
+        // Set sort by date descending
+        $sortFieldProp = $reflection->getProperty('sortField');
+        $sortFieldProp->setAccessible(true);
+        $sortFieldProp->setValue($controller, 'date');
+
+        $sortDirectionProp = $reflection->getProperty('sortDirection');
+        $sortDirectionProp->setAccessible(true);
+        $sortDirectionProp->setValue($controller, 'desc');
+
+        $method = $reflection->getMethod('sortFiles');
+        $method->setAccessible(true);
+
+        $folder = ['filename' => 'folder', 'type' => '[folder]', 'date' => '2020-01-01'];
+        $file = ['filename' => 'recent.txt', 'type' => 'txt', 'date' => '2024-12-31'];
+
+        // Folder should always come first, even with date sorting
+        $this->assertEquals(-1, $method->invoke($controller, $folder, $file));
+        $this->assertEquals(1, $method->invoke($controller, $file, $folder));
     }
 }
