@@ -24,6 +24,11 @@ return [
         'Layout' => [
 
             /**
+             * The title of the admin panel
+             */
+            'title' => 'Brammo Admin',
+
+            /**
              * Default CSS assets (Bootstrap and Icons)
              */
             'cssDefaults' => [

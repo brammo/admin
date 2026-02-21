@@ -6,16 +6,14 @@
  */
 
 use Cake\I18n\I18n;
-
-$lang = I18n::getLocale();
 ?>
 <!DOCTYPE html>
-<html lang="<?= $lang ?>">
+<html lang="<?= I18n::getLocale() ?>">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-    <title><?= $this->fetch('title') ?></title>
+    <?= $this->element('Brammo/Admin.Layout/title') ?>
     <?= $this->fetch('meta') ?>
     <?= $this->element('Brammo/Admin.Layout/css') ?>
     <?= $this->Html->css('Brammo/Admin.styles') ?>

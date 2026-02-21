@@ -39,6 +39,18 @@ Configure the home link used in the brand and breadcrumbs:
 ]
 ```
 
+## Title
+
+Configure the page title displayed in the browser tab and header:
+
+```php
+'Admin' => [
+    'Title' => 'My Admin Panel'
+]
+```
+
+The title value can be a string or a closure function that returns a string dynamically.
+
 ## Sidebar Menu
 
 The sidebar menu can be customized with icons, links, and optional submenus.
