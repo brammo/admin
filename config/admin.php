@@ -11,12 +11,8 @@ return [
 
         /* 
          * Default locale for the admin panel
-         * 
-         * Uses the I18n package format
          */
-        'I18n' => [
-            'default' => 'en_US',
-        ],
+        'defaultLocale' => 'bg',
 
         /**
          * Layout configuration

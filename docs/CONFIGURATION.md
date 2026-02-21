@@ -8,9 +8,7 @@ Set the default language for the admin panel:
 
 ```php
 'Admin' => [
-    'I18n' => [
-        'default' => 'bg' // or any other locale
-    ]
+    'defaultLocale' => 'bg' // or any other locale
 ]
 ```
 
