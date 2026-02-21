@@ -8,13 +8,22 @@ use Cake\View\View;
 /**
  * Application View
  *
- * @property \Authentication\View\Helper\IdentityHelper $Identity
- * @property \BootstrapUI\View\Helper\BreadcrumbsHelper $Breadcrumbs
  * @property \BootstrapUI\View\Helper\HtmlHelper $Html
  * @property \BootstrapUI\View\Helper\FormHelper $Form
  * @property \BootstrapUI\View\Helper\FlashHelper $Flash
  * @property \BootstrapUI\View\Helper\PaginatorHelper $Paginator
- * @property \Brammo\Admin\View\Helper\NavHelper $Nav
+ * @property \BootstrapUI\View\Helper\BreadcrumbsHelper $Breadcrumbs
+ * @property \Brammo\BootstrapUI\View\Helper\TableHelper $Table
+ * @property \Brammo\BootstrapUI\View\Helper\DescriptionHelper $Description
+ * @property \Brammo\BootstrapUI\View\Helper\CardHelper $Card
+ * @property \Brammo\BootstrapUI\View\Helper\NavHelper $Nav
+ * @property \Brammo\Content\View\Helper\DateHelper $Date
+ * @property \Brammo\Content\View\Helper\ImageHelper $Image
+ * @property \Brammo\Content\View\Helper\FlagHelper $Flag
+ * @property \Brammo\Admin\View\Helper\ButtonHelper $Button
+ * @property \Authentication\View\Helper\IdentityHelper $Identity
+ * @extends \Cake\View\View<\Brammo\Admin\View\AppView>
+ * @psalm-suppress PropertyNotSetInConstructor
  */
 class AppView extends View
 {
@@ -39,7 +48,12 @@ class AppView extends View
         $this->addHelper('Description', ['className' => 'Brammo/BootstrapUI.Description']);
         $this->addHelper('Card', ['className' => 'Brammo/BootstrapUI.Card']);
         $this->addHelper('Nav', ['className' => 'Brammo/BootstrapUI.Nav']);
-        
+
+        // Load Content helpers
+        $this->addHelper('Date', ['className' => 'Brammo/Content.Date']);
+        $this->addHelper('Image', ['className' => 'Brammo/Content.Image']);
+        $this->addHelper('Flag', ['className' => 'Brammo/Content.Flag']);
+
         // Load custom Admin helpers
         $this->addHelper('Button', ['className' => 'Brammo/Admin.Button']);
 
