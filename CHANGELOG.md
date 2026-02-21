@@ -7,7 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-02-21
+
+### Added
+- Add title configuration and element for admin panel layout
+
 ### Changed
+- Rename Plugin to AdminPlugin as it's deprecated in CakePHP 5.3
+- Update admin configuration to remove I18n settings and use defaultLocale
+- Refactor CSS variables and styles for improved theme consistency
+- Refactor page header to use a variable for page heading
+- Refactor login layout
+- Refactor breadcrumbs element to streamline icon handling
+- Update view variable annotations to use the correct namespace
+- Update composer dependencies and enhance AppView helper properties
+- Update development dependencies and improve script commands in composer.json
+- Refactor locale configuration keys in AppControllerTest for consistency
 - Refactor pagination element
 - Add breadcrumbs element and integrate it into the page header
 - Fix title translation fallback in sidebar menu
