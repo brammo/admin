@@ -47,6 +47,12 @@ Provides user profile management:
 
 - `profile()` - View and edit user profile
 
+#### FileManagerController
+
+Built-in file and image manager with upload, browse, and management capabilities.
+
+See [docs/FILEMANAGER.md](docs/FILEMANAGER.md) for detailed documentation.
+
 ### Authentication
 
 The plugin integrates with CakePHP Authentication and Brammo Auth plugin for user management and authentication.

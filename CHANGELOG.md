@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **FileManagerController**: Built-in file and image manager with upload, browse, and management capabilities
+- **FormHelper**: Added `image` control type for image picker/uploader integration with File Manager
+- File Manager documentation (`docs/FILEMANAGER.md`)
+
 ## [1.2.0] - 2026-02-21
 
 ### Added

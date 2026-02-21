@@ -5,6 +5,7 @@ The Brammo Admin plugin provides several view helpers to simplify building Boots
 ## Table of Contents
 
 - [ButtonHelper](#buttonhelper)
+- [FormHelper](#formhelper)
 
 ---
 
@@ -95,6 +96,81 @@ echo $this->Button->postLink('Archive', ['action' => 'archive', $id], [
     'confirm' => 'Are you sure you want to archive this item?',
 ]);
 ```
+
+---
+
+## FormHelper
+
+Extends BootstrapUI Form helper with additional control types.
+
+### Image Control
+
+The `image` type renders an image picker/uploader that integrates with the [File Manager](FILEMANAGER.md).
+
+#### Basic Usage
+
+```php
+// In a form context
+echo $this->Form->create($entity);
+
+// Simple image field
+echo $this->Form->control('image', ['type' => 'image']);
+
+// With custom folder
+echo $this->Form->control('thumbnail', [
+    'type' => 'image',
+    'folder' => 'images/thumbnails',
+]);
+
+echo $this->Form->end();
+```
+
+#### Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `folder` | string | `'images'` | The folder path for image selection in File Manager |
+| `label` | string | Field name | Custom label for the control |
+| `allowEmpty` | bool | `true` | Whether empty values are allowed |
+
+#### Examples
+
+```php
+// Featured image with custom label
+echo $this->Form->control('featured_image', [
+    'type' => 'image',
+    'label' => 'Featured Image',
+    'folder' => 'images/featured',
+]);
+
+// Required product image
+echo $this->Form->control('product_image', [
+    'type' => 'image',
+    'folder' => 'images/products',
+    'allowEmpty' => false,
+]);
+
+// Gallery image in specific subfolder
+echo $this->Form->control('gallery_image', [
+    'type' => 'image',
+    'folder' => 'images/gallery/2024',
+    'label' => 'Gallery Image',
+]);
+```
+
+#### Features
+
+The image control provides:
+
+- **Preview**: Displays a thumbnail of the currently selected image
+- **Select**: Opens the File Manager modal to browse and select existing images
+- **Upload**: Direct upload button to upload new images to the specified folder
+- **Delete**: Remove the selected image (clears the field value)
+
+The control automatically:
+- Stores the full path relative to the webroot (e.g., `/images/photo.jpg`)
+- Validates that the folder is within the configured File Manager base path
+- Uses AJAX for image selection and upload operations
 
 ## Loading Helpers
 
