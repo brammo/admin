@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Brammo\Admin\Test\TestCase;
 
 use Authentication\Middleware\AuthenticationMiddleware;
-use Brammo\Admin\Plugin;
+use Brammo\Admin\AdminPlugin;
 use Cake\Console\CommandCollection;
 use Cake\Core\Container;
 use Cake\Core\PluginApplicationInterface;
@@ -13,16 +13,16 @@ use Cake\TestSuite\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 
 /**
- * Brammo\Admin\Plugin Test Case
+ * Brammo\Admin\AdminPlugin Test Case
  */
-class PluginTest extends TestCase
+class AdminPluginTest extends TestCase
 {
     /**
      * Subject under test
      *
-     * @var \Brammo\Admin\Plugin
+     * @var \Brammo\Admin\AdminPlugin
      */
-    protected Plugin $plugin;
+    protected AdminPlugin $plugin;
 
     /**
      * setUp method
@@ -32,7 +32,7 @@ class PluginTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->plugin = new Plugin();
+        $this->plugin = new AdminPlugin();
     }
 
     /**
@@ -61,7 +61,7 @@ class PluginTest extends TestCase
             ->with('Brammo/Auth');
 
         // Create a minimal plugin instance that doesn't load full bootstrap
-        $plugin = new class extends Plugin {
+        $plugin = new class extends AdminPlugin {
             public function bootstrap(PluginApplicationInterface $app): void
             {
                 // Only test the plugin loading, skip full bootstrap

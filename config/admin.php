@@ -11,12 +11,8 @@ return [
 
         /* 
          * Default locale for the admin panel
-         * 
-         * Uses the I18n package format
          */
-        'I18n' => [
-            'default' => 'en_US',
-        ],
+        'defaultLocale' => 'bg',
 
         /**
          * Layout configuration
@@ -26,6 +22,11 @@ return [
          * @see docs/CONFIGURATION.md for detailed options
          */
         'Layout' => [
+
+            /**
+             * The title of the admin panel
+             */
+            'title' => 'Brammo Admin',
 
             /**
              * Default CSS assets (Bootstrap and Icons)

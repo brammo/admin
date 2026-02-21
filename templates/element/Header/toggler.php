@@ -2,7 +2,7 @@
 /**
  * Admin header toggler element
  * 
- * @var \Admin\View\AppView $this
+ * @var \Brammo\Admin\View\AppView $this
  */
 
 ?>

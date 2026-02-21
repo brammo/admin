@@ -2,37 +2,32 @@
  * Stylesheet for Brammo Admin theme
  */ 
 
-:root {
-  --ba-light-color: #f8f9fa;
-  --ba-dark-color: #121426;
-
-  --ba-sidebar-width: 18rem;
-  --ba-sidebar-mini-width: 4rem;
-
-  --bs-font-sans-serif: Inter, sans-serif;
-  --bs-body-font-weight: 400;
-}
-
 /* Light Theme Variables */
 
 :root, 
 [data-bs-theme="light"] {
 
-  --ba-header-bg: #fff;
-  --ba-sidebar-bg: #fff;
+  --ba-dark-color: #121426;
 
   --ba-primary-color: #4154f1;
   --ba-primary-color-rgb: 65, 84, 241;
   --ba-primary-color-light: #5465f2;
   --ba-primary-color-light-rgb: 84, 101, 242;
   --ba-primary-color-disabled: #b3bbf9;
-
   --ba-secondary-color: #506583;
   --ba-secondary-color-rgb: 80, 101, 131;
-
   --ba-text-color: #2a3547;
 
-  --bs-body-bg: var(--ba-light-color);
+  --ba-header-bg: #fff;
+  --ba-sidebar-bg: #35374e/*var(--ba-dark-color)*/;
+  --bs-sidebar-icon-color: #b3bbf9;
+
+  --ba-sidebar-width: 18rem;
+  --ba-sidebar-mini-width: 4rem;
+
+  --bs-font-sans-serif: Inter, sans-serif;
+  --bs-body-font-weight: 400;
+  --bs-body-bg: #f8f9fa;
   --bs-body-color: var(--ba-text-color);
   --bs-emphasis-color: var(--ba-emphasis-color);
   --bs-primary-rgb: var(--ba-primary-color-rgb);
@@ -49,7 +44,6 @@
 [data-bs-theme="dark"] {
 
   --ba-header-bg: var(--ba-dark-color);
-  --ba-sidebar-bg: var(--ba-dark-color);
 
   --ba-primary-color: #5465f2;
   --ba-primary-color-rgb: 84, 101, 242;
@@ -353,7 +347,7 @@ dd > *::last-child {
   transition: margin-left 0.3s ease-in-out, width 0.3s ease-in-out;
 }
 
-[data-bs-theme="dark"] .main-sidebar {
+.main-sidebar {
   color: #fff;
 }
 
@@ -387,16 +381,16 @@ dd > *::last-child {
   text-align: center;
   text-decoration: none;
   overflow: hidden;
-  color: var(--ba-secondary-color);
+  color: inherit;
+  transition: color 0.3s ease-in-out;
 }
 
 .sidebar-brand:hover {
   color: var(--ba-secondary-color);
 }
 
-[data-bs-theme="dark"] .sidebar-brand,
-[data-bs-theme="dark"] .sidebar-brand:hover {
-  color: #fff;
+.sidebar-brand:hover {
+  color: var(--ba-primary-color);
 }
 
 .sidebar-brand img {
@@ -420,27 +414,27 @@ dd > *::last-child {
   border-radius: .375rem;
   position: relative;
   overflow: hidden;
+  color: #fff;
   transition: all 0.3s ease-in-out;
 }
 
 .sidebar-menu .nav-link .icon {
+  width: 1.25rem;
   margin-right: .5rem;
-  opacity: .6;
+  color: var(--bs-sidebar-icon-color);
+  text-align: center;
+  transition: all 0.3s ease-in-out;
 }
 
 .sidebar-menu .nav-link:hover {
-  background-color: rgba(65, 84, 241, 0.1);
-  color: var(--ba-primary-color);
+  background-color: rgba(var(--ba-primary-color-rgb), 0.5);
+  color: #fff;
   padding-left: .75rem;
 }
 
 .sidebar-menu .nav-link.active {
   background-color: var(--ba-primary-color);
-  color: #fff;
-}
-
-.sidebar-menu .nav-link.active .icon {
-  opacity: 1;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 @media (min-width: 992px) {
@@ -534,7 +528,7 @@ dd > *::last-child {
 }
 
 .sidebar-menu .submenu .nav-link:hover {
-  background-color: rgba(65, 84, 241, 0.05);
+  background-color: rgba(var(--ba-primary-color-rgb), 0.5);
   padding-left: 2.75rem;
 }
 

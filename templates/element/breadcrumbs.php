@@ -2,24 +2,23 @@
 /**
  * Breadcrumbs element
  * 
- * @var Brammo\Admin\View\AppView $this
+ * @var \Brammo\Admin\View\AppView $this
  */
 
 use Cake\Core\Configure;
-
-if (!$this->Breadcrumbs->getCrumbs()) {
-    return;
-}
 
 $config = Configure::read('Admin.Home');
 
 $homeUrl = $config['url'] ?? '/admin';
 $homeTitle = $config['title'] ?? __d('brammo/admin', 'Home');
+$homeOptions = [];
 
 if (!empty($config['icon'])) {
-    $this->Breadcrumbs->prepend($this->Html->icon($config['icon']), $homeUrl, ['title' => $homeTitle]);
-} else {
-    $this->Breadcrumbs->prepend($homeTitle, $homeUrl);
+    $homeOptions['icon'] = $config['icon'];
+    $homeOptions['title'] = $homeTitle;
+    $homeTitle = $this->Html->icon($config['icon']);
 }
+
+$this->Breadcrumbs->prepend($homeTitle, $homeUrl, $homeOptions);
 
 echo $this->Breadcrumbs->render();

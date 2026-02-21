@@ -79,7 +79,7 @@ class AppControllerTest extends TestCase
      */
     public function testBeforeFilterSetsLocale(): void
     {
-        Configure::write('Admin.I18n.default', 'bg');
+        Configure::write('Admin.defaultLocale', 'bg');
 
         $this->AppController->initialize();
         $this->AppController->beforeFilter(
@@ -96,7 +96,7 @@ class AppControllerTest extends TestCase
      */
     public function testBeforeFilterWithoutConfiguredLocale(): void
     {
-        Configure::write('Admin.I18n.default', null);
+        Configure::write('Admin.defaultLocale', null);
         $originalLocale = I18n::getLocale();
 
         $this->AppController->initialize();

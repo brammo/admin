@@ -2,7 +2,7 @@
 /**
  * Sidebar menu element
  * 
- * @var Brammo\Admin\View\AppView $this
+ * @var \Brammo\Admin\View\AppView $this
  */
 
 use Cake\Core\Configure;
