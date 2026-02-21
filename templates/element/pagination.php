@@ -1,10 +1,9 @@
 <?php
 /**
  * Pagination element
- * 
  * Uses BootstrapUI pagination with icons.
  * 
- * @var Brammo\Admin\View\AppView $this
+ * @var \Brammo\Admin\View\AppView $this
  */
 
 // If total count of pages <= 1, don't show pagination

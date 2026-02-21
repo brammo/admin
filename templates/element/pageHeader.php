@@ -2,7 +2,7 @@
 /**
  * Page Header element
  * 
- * @var Brammo\Admin\View\AppView $this
+ * @var \Brammo\Admin\View\AppView $this
  */
 
 if ($this->get('hidePageHeader')) {
