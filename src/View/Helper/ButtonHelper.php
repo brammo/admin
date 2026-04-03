@@ -12,6 +12,7 @@ use function Cake\I18n\__d;
  *
  * @property \BootstrapUI\View\Helper\HtmlHelper $Html
  * @property \BootstrapUI\View\Helper\FormHelper $Form
+ * @extends \Cake\View\Helper<\Cake\View\View>
  */
 class ButtonHelper extends Helper
 {
@@ -50,6 +51,7 @@ class ButtonHelper extends Helper
             'size' => '',
             'style' => 'normal',
             'confirm' => '',
+            'target' => '',
         ];
 
         if (isset($options['title'])) {
@@ -88,6 +90,10 @@ class ButtonHelper extends Helper
 
         if ($confirm) {
             $htmlOptions['confirm'] = $confirm;
+        }
+
+        if ($options['target']) {
+            $htmlOptions['target'] = $options['target'];
         }
 
         if ($method == 'post') {
@@ -228,6 +234,7 @@ class ButtonHelper extends Helper
             'variant' => 'info',
             'icon' => 'box-arrow-up-right',
             'style' => 'compact',
+            'target' => '_blank',
         ]);
     }
 }
