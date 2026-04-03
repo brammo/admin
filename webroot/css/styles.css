@@ -268,10 +268,23 @@
 
 /* Tabs */
 
-.nav-tabs .nav-link {
+.nav-tabs {
   --bs-nav-tabs-link-color: var(--bs-body-color);
+  --bs-nav-tabs-border-width: .125rem;
   --bs-nav-tabs-link-hover-border-color: transparent;
   --bs-nav-tabs-link-active-bg: transparent;
+}
+
+.nav-tabs .nav-link {
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border-radius: 0;
+}
+
+.nav-tabs .nav-link.active {
+  --bs-nav-tabs-link-active-border-color: var(--ba-primary-color);
+  font-weight: 600;
 }
 
 .tab-pane {
