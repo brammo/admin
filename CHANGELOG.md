@@ -5,12 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.3.0] - 2026-04-03
 
 ### Added
 - **FileManagerController**: Built-in file and image manager with upload, browse, and management capabilities
 - **FormHelper**: Added `image` control type for image picker/uploader integration with File Manager
 - File Manager documentation (`docs/FILEMANAGER.md`)
+- Tests for `FormHelper::imageControl()` covering entity handling and UI rendering
+- Flag icon styles
+- Target option to ButtonHelper for link rendering
+- PHPStan configuration for improved static analysis
+
+### Changed
+- Refactor FileManager and Form image element for improved security and usability
+- Update composer dependencies for static analysis tooling
+- Enhanced button, badge, and tab styles
+- Updated form and table elements
+- Added translations for various UI elements and improve existing entries
+
+### Fixed
+- Fix default language configuration in AppController
 
 ## [1.2.0] - 2026-02-21
 
@@ -138,3 +152,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CakePHP CodeSniffer >= 5.0
 
 [1.0.0]: https://github.com/brammo/admin/releases/tag/v1.0.0
+[1.1.0]: https://github.com/brammo/admin/releases/tag/v1.1.0
+[1.1.1]: https://github.com/brammo/admin/releases/tag/v1.1.1
+[1.2.0]: https://github.com/brammo/admin/releases/tag/v1.2.0
+[Unreleased]: https://github.com/brammo/admin/compare/v1.2.0...HEAD
