@@ -45,7 +45,7 @@ class AppController extends Controller
         parent::beforeFilter($event);
 
         // Set default language
-        $defaultLang = (string)Configure::read('Admin.I18n.default');
+        $defaultLang = Configure::read('Admin.defaultLocale');
         if (!empty($defaultLang)) {
             I18n::setLocale($defaultLang);
         }
