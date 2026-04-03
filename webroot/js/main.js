@@ -27,6 +27,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Update theme icons visibility
     function updateThemeIcon(theme) {
+        if (!themeIconLight || !themeIconDark) {
+            return;
+        }
         themeIconLight.classList.add('d-none');
         themeIconDark.classList.add('d-none');
         if (theme === 'light') {
