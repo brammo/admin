@@ -168,6 +168,12 @@
 
 /* Forms */
 
+legend {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--bs-secondary-color);
+}
+
 .form-group {
   margin-bottom: 1rem;
 }
@@ -177,6 +183,11 @@
   margin-left: .25rem;
   color: var(--bs-danger);
   font-size: .9rem;
+}
+
+.form-check-input:checked {
+  background-color: var(--ba-primary-color);
+  border-color: var(--ba-primary-color);
 }
 
 /* Table */
@@ -213,6 +224,10 @@
   text-decoration: none;
 }
 
+.table td {
+  vertical-align: middle;
+}
+
 .table .action,
 .table .actions {
   width: 1%;
@@ -229,13 +244,15 @@
   --bs-card-bg: #fff;  
   --bs-card-cap-bg: rgba(0, 0, 0, 0);
   --bs-card-cap-padding-y: 1rem;
-  --bs-card-border-width: 0;
+  --bs-card-cap-color: var(--bs-secondary-color);
+  --bs-card-border-color: var(--bs-border-color);
   --bs-body-color: var(--ba-text-color);
   box-shadow: var(--bs-box-shadow-sm);
 }
 
-.card-footer {
-  padding-top: 0;
+.card-header {
+  font-weight: 700;
+  font-size: 1.125rem;
 }
 
 [data-bs-theme="dark"] .card {
@@ -307,36 +324,12 @@ dt {
 }
 
 dd {
+  min-height: 2.5rem;
   margin-bottom: 1rem;
   padding: .5rem;
   border-radius: .375rem;
   background-color: var(--bs-body-bg);
 }
-/*
-dd > *::last-child {
-  margin-bottom: 0;
-}
-
-@media (min-width: 567px) {
-
-  dl {
-    display: flex;
-    flex-wrap: wrap;
-  }
-
-  dt {
-    width: var(--ba-dt-width);
-    margin-bottom: .5rem;
-    padding-right: 1rem;
-    color: var(--ba-secondary-color);
-  }
-
-  dd {
-    width: calc(100% - var(--ba-dt-width));
-    color: var(--ba-text-color);
-  }
-}
-*/
 
 /* Pagination */
 
@@ -358,6 +351,13 @@ dd > *::last-child {
 .drag-handle {
   cursor: ns-resize;
   color: var(--ba-secondary-color);
+}
+
+/**
+ * Flags icons
+ */
+.flag-icon {
+  margin-right: .25rem;
 }
 
 /* Header */
@@ -536,7 +536,7 @@ dd > *::last-child {
 }
 
 [data-bs-theme="dark"] .sidebar-menu .nav-link:hover {
-  background-color: rgba(65, 84, 241, 0.15);
+  background-color: rgba(var(--ba-primary-color-rgb), 0.15);
   color: #fff;
 }
 
@@ -602,7 +602,7 @@ dd > *::last-child {
 }
 
 [data-bs-theme="dark"] .sidebar-menu .submenu .nav-link:hover {
-  background-color: rgba(65, 84, 241, 0.1);
+  background-color: rgba(var(--ba-primary-color-rgb), 0.1);
 }
 
 /* Sidebar collapse mode submenu adjustments */
@@ -812,14 +812,11 @@ dd > *::last-child {
   text-align: center;
 }
 
+.file-browser-images .card-body:hover {
+  background-color: rgba(var(--ba-primary-color-rgb), 0.1);
+}
+
 .file-browser-images a {
   color: inherit;
   text-decoration: none;
 }
-
-.file-browser-images a:hover {
-  text-decoration: none;
-  background-color: rgba(65, 84, 241, 0.1);
-}
-
-/* Quill Editor */
