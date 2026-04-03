@@ -91,12 +91,25 @@
   --bs-btn-disabled-border-color: var(--ba-primary-color-disabled);
 }
 
+.btn-outline-primary {
+  --bs-btn-color: var(--ba-primary-color);
+  --bs-btn-border-color: var(--ba-primary-color);
+  --bs-btn-hover-bg: var(--ba-primary-color);
+  --bs-btn-hover-border-color: var(--ba-primary-color);
+  --bs-btn-active-bg: var(--ba-primary-color);
+  --bs-btn-active-border-color: var(--ba-primary-color);
+  --bs-btn-disabled-color: var(--ba-primary-color-disabled);
+  --bs-btn-disabled-border-color: var(--ba-primary-color-disabled);
+}
+
 .btn-link {
   text-decoration: none;
 }
 
 .btn-link:hover {
-  background-color: var(--ba-);
+  background-color: var(--ba-primary-color-light);
+}
+
 }
 
 /* Navs */
