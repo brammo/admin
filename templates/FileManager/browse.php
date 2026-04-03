@@ -182,7 +182,7 @@ $action = $this->request->getParam('action');
                 </div>
             <?php else : ?>
                 <div class="card card-image">
-                    <div class="card-img-top ratio ratio-4x3" style="background-image:url('<?= addslashes($path . $item['filename']) ?>')"></div>
+                    <div class="card-img-top ratio ratio-4x3 bg-dark" style="background-image:url('<?= h($path . $item['filename']) ?>')"></div>
                     <div class="card-body">
                         <?= $this->Html->link(
                             $item['filename'], 

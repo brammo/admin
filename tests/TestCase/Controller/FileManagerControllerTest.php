@@ -9,6 +9,9 @@ use Cake\Http\Response;
 use Cake\Http\ServerRequest;
 use Cake\TestSuite\IntegrationTestTrait;
 use Cake\TestSuite\TestCase;
+use Laminas\Diactoros\UploadedFile;
+use ReflectionClass;
+use RuntimeException;
 
 /**
  * Brammo\Admin\Controller\FileManagerController Test Case
@@ -148,7 +151,7 @@ class FileManagerControllerTest extends TestCase
     {
         Configure::write('Admin.FileManager.basePath', '');
 
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('File Manager base path is not configured');
 
         $request = new ServerRequest(['url' => '/admin/file-manager']);
@@ -164,7 +167,7 @@ class FileManagerControllerTest extends TestCase
     {
         Configure::write('Admin.FileManager.topFolders', []);
 
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('File Manager top folders are not configured');
 
         $request = new ServerRequest(['url' => '/admin/file-manager']);
@@ -180,7 +183,7 @@ class FileManagerControllerTest extends TestCase
     {
         Configure::write('Admin.FileManager.fileTypes.files', []);
 
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('File Manager file types are not configured');
 
         $request = new ServerRequest(['url' => '/admin/file-manager']);
@@ -196,7 +199,7 @@ class FileManagerControllerTest extends TestCase
     {
         Configure::write('Admin.FileManager.fileTypes.images', []);
 
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('File Manager image types are not configured');
 
         $request = new ServerRequest(['url' => '/admin/file-manager']);
@@ -232,7 +235,7 @@ class FileManagerControllerTest extends TestCase
         $request = new ServerRequest(['url' => '/admin/file-manager']);
         $controller = new FileManagerController($request);
 
-        $reflection = new \ReflectionClass($controller);
+        $reflection = new ReflectionClass($controller);
         $method = $reflection->getMethod('isValidFolder');
         $method->setAccessible(true);
 
@@ -251,7 +254,7 @@ class FileManagerControllerTest extends TestCase
         $request = new ServerRequest(['url' => '/admin/file-manager']);
         $controller = new FileManagerController($request);
 
-        $reflection = new \ReflectionClass($controller);
+        $reflection = new ReflectionClass($controller);
         $method = $reflection->getMethod('isValidFolder');
         $method->setAccessible(true);
 
@@ -260,6 +263,121 @@ class FileManagerControllerTest extends TestCase
         $this->assertFalse($method->invoke($controller, 'invalid'));
         $this->assertFalse($method->invoke($controller, '../etc'));
         $this->assertFalse($method->invoke($controller, 'secret/files'));
+    }
+
+    /**
+     * Test isValidFolder blocks path traversal sequences
+     *
+     * @return void
+     */
+    public function testIsValidFolderBlocksPathTraversal(): void
+    {
+        $request = new ServerRequest(['url' => '/admin/file-manager']);
+        $controller = new FileManagerController($request);
+
+        $reflection = new ReflectionClass($controller);
+        $method = $reflection->getMethod('isValidFolder');
+        $method->setAccessible(true);
+
+        $this->assertFalse($method->invoke($controller, 'uploads/../etc'));
+        $this->assertFalse($method->invoke($controller, 'uploads/..'));
+        $this->assertFalse($method->invoke($controller, 'images/../../../etc/passwd'));
+        $this->assertFalse($method->invoke($controller, "uploads/\0evil"));
+    }
+
+    /**
+     * Test isPathWithinBase with valid paths
+     *
+     * @return void
+     */
+    public function testIsPathWithinBaseValid(): void
+    {
+        $request = new ServerRequest(['url' => '/admin/file-manager']);
+        $controller = new FileManagerController($request);
+
+        $reflection = new ReflectionClass($controller);
+        $method = $reflection->getMethod('isPathWithinBase');
+        $method->setAccessible(true);
+
+        $this->assertTrue($method->invoke(
+            $controller,
+            $this->testDir . DS . 'uploads',
+        ));
+        $this->assertTrue($method->invoke(
+            $controller,
+            $this->testDir . DS . 'uploads' . DS . 'subfolder',
+        ));
+        $this->assertTrue($method->invoke(
+            $controller,
+            $this->testDir . DS . 'images',
+        ));
+    }
+
+    /**
+     * Test isPathWithinBase rejects paths outside basePath
+     *
+     * @return void
+     */
+    public function testIsPathWithinBaseRejectsOutsidePaths(): void
+    {
+        $request = new ServerRequest(['url' => '/admin/file-manager']);
+        $controller = new FileManagerController($request);
+
+        $reflection = new ReflectionClass($controller);
+        $method = $reflection->getMethod('isPathWithinBase');
+        $method->setAccessible(true);
+
+        $this->assertFalse($method->invoke($controller, '/etc'));
+        $this->assertFalse($method->invoke($controller, '/tmp'));
+        $this->assertFalse($method->invoke($controller, '/nonexistent/path'));
+    }
+
+    /**
+     * Test sanitizeFilename removes dangerous characters
+     *
+     * @return void
+     */
+    public function testSanitizeFilename(): void
+    {
+        $request = new ServerRequest(['url' => '/admin/file-manager']);
+        $controller = new FileManagerController($request);
+
+        $reflection = new ReflectionClass($controller);
+        $method = $reflection->getMethod('sanitizeFilename');
+        $method->setAccessible(true);
+
+        // Basic filename passes through
+        $this->assertEquals('test.txt', $method->invoke($controller, 'test.txt'));
+
+        // Path separators are stripped, then basename is applied
+        $this->assertEquals('pathtotest.txt', $method->invoke($controller, 'path/to/test.txt'));
+        $this->assertEquals('pathtotest.txt', $method->invoke($controller, 'path\\to\\test.txt'));
+
+        // Traversal sequences are stripped
+        $this->assertEquals('test.txt', $method->invoke($controller, '../test.txt'));
+        $this->assertEquals('test.txt', $method->invoke($controller, '../../test.txt'));
+
+        // Null bytes are stripped
+        $this->assertEquals('test.txt', $method->invoke($controller, "test.txt\0"));
+    }
+
+    /**
+     * Test getUniqueFilename sanitizes unsafe characters
+     *
+     * @return void
+     */
+    public function testGetUniqueFilenameSanitizesUnsafeChars(): void
+    {
+        $request = new ServerRequest(['url' => '/admin/file-manager']);
+        $controller = new FileManagerController($request);
+
+        $reflection = new ReflectionClass($controller);
+        $method = $reflection->getMethod('getUniqueFilename');
+        $method->setAccessible(true);
+
+        // Special characters get replaced with underscores
+        $result = $method->invoke($controller, $this->testDir . DS . 'uploads', 'my@file#name.txt');
+        $this->assertEquals('my_file_name.txt', $result);
     }
 
     /**
@@ -272,7 +390,7 @@ class FileManagerControllerTest extends TestCase
         $request = new ServerRequest(['url' => '/admin/file-manager']);
         $controller = new FileManagerController($request);
 
-        $reflection = new \ReflectionClass($controller);
+        $reflection = new ReflectionClass($controller);
         $method = $reflection->getMethod('getFullPath');
         $method->setAccessible(true);
 
@@ -280,7 +398,7 @@ class FileManagerControllerTest extends TestCase
         $this->assertEquals($this->testDir . DS . 'uploads', $method->invoke($controller, 'uploads'));
         $this->assertEquals(
             $this->testDir . DS . 'uploads' . DS . 'subfolder',
-            $method->invoke($controller, 'uploads' . DS . 'subfolder')
+            $method->invoke($controller, 'uploads' . DS . 'subfolder'),
         );
     }
 
@@ -294,7 +412,7 @@ class FileManagerControllerTest extends TestCase
         $request = new ServerRequest(['url' => '/admin/file-manager']);
         $controller = new FileManagerController($request);
 
-        $reflection = new \ReflectionClass($controller);
+        $reflection = new ReflectionClass($controller);
         $method = $reflection->getMethod('getFileType');
         $method->setAccessible(true);
 
@@ -315,7 +433,7 @@ class FileManagerControllerTest extends TestCase
         $request = new ServerRequest(['url' => '/admin/file-manager']);
         $controller = new FileManagerController($request);
 
-        $reflection = new \ReflectionClass($controller);
+        $reflection = new ReflectionClass($controller);
         $method = $reflection->getMethod('getUniqueFilename');
         $method->setAccessible(true);
 
@@ -333,7 +451,7 @@ class FileManagerControllerTest extends TestCase
         $request = new ServerRequest(['url' => '/admin/file-manager']);
         $controller = new FileManagerController($request);
 
-        $reflection = new \ReflectionClass($controller);
+        $reflection = new ReflectionClass($controller);
         $method = $reflection->getMethod('getUniqueFilename');
         $method->setAccessible(true);
 
@@ -352,7 +470,7 @@ class FileManagerControllerTest extends TestCase
         $request = new ServerRequest(['url' => '/admin/file-manager']);
         $controller = new FileManagerController($request);
 
-        $reflection = new \ReflectionClass($controller);
+        $reflection = new ReflectionClass($controller);
         $method = $reflection->getMethod('getUniqueFilename');
         $method->setAccessible(true);
 
@@ -370,7 +488,7 @@ class FileManagerControllerTest extends TestCase
         $request = new ServerRequest(['url' => '/admin/file-manager']);
         $controller = new FileManagerController($request);
 
-        $reflection = new \ReflectionClass($controller);
+        $reflection = new ReflectionClass($controller);
         $method = $reflection->getMethod('folderCount');
         $method->setAccessible(true);
 
@@ -397,7 +515,7 @@ class FileManagerControllerTest extends TestCase
         $request = new ServerRequest(['url' => '/admin/file-manager']);
         $controller = new FileManagerController($request);
 
-        $reflection = new \ReflectionClass($controller);
+        $reflection = new ReflectionClass($controller);
         $method = $reflection->getMethod('readFolder');
         $method->setAccessible(true);
 
@@ -405,7 +523,7 @@ class FileManagerControllerTest extends TestCase
             $controller,
             $this->testDir . DS . 'uploads',
             'uploads',
-            ''
+            '',
         );
 
         $this->assertIsArray($items);
@@ -435,7 +553,7 @@ class FileManagerControllerTest extends TestCase
         $request = new ServerRequest(['url' => '/admin/file-manager']);
         $controller = new FileManagerController($request);
 
-        $reflection = new \ReflectionClass($controller);
+        $reflection = new ReflectionClass($controller);
         $method = $reflection->getMethod('readFolder');
         $method->setAccessible(true);
 
@@ -443,7 +561,7 @@ class FileManagerControllerTest extends TestCase
             $controller,
             $this->testDir . DS . 'uploads',
             'uploads',
-            'pdf'
+            'pdf',
         );
 
         $this->assertCount(1, $items);
@@ -460,7 +578,7 @@ class FileManagerControllerTest extends TestCase
         $request = new ServerRequest(['url' => '/admin/file-manager']);
         $controller = new FileManagerController($request);
 
-        $reflection = new \ReflectionClass($controller);
+        $reflection = new ReflectionClass($controller);
         $method = $reflection->getMethod('readFolder');
         $method->setAccessible(true);
 
@@ -468,7 +586,7 @@ class FileManagerControllerTest extends TestCase
             $controller,
             $this->testDir . DS . 'nonexistent',
             'uploads',
-            ''
+            '',
         );
 
         $this->assertIsArray($items);
@@ -485,7 +603,7 @@ class FileManagerControllerTest extends TestCase
         $request = new ServerRequest(['url' => '/admin/file-manager']);
         $controller = new FileManagerController($request);
 
-        $reflection = new \ReflectionClass($controller);
+        $reflection = new ReflectionClass($controller);
         $method = $reflection->getMethod('sortFiles');
         $method->setAccessible(true);
 
@@ -507,7 +625,7 @@ class FileManagerControllerTest extends TestCase
         $request = new ServerRequest(['url' => '/admin/file-manager']);
         $controller = new FileManagerController($request);
 
-        $reflection = new \ReflectionClass($controller);
+        $reflection = new ReflectionClass($controller);
         $method = $reflection->getMethod('sortFiles');
         $method->setAccessible(true);
 
@@ -530,7 +648,7 @@ class FileManagerControllerTest extends TestCase
         $request = new ServerRequest(['url' => '/admin/file-manager']);
         $controller = new FileManagerController($request);
 
-        $reflection = new \ReflectionClass($controller);
+        $reflection = new ReflectionClass($controller);
         $method = $reflection->getMethod('returnJson');
         $method->setAccessible(true);
 
@@ -556,7 +674,7 @@ class FileManagerControllerTest extends TestCase
         $request = new ServerRequest(['url' => '/admin/file-manager']);
         $controller = new FileManagerController($request);
 
-        $reflection = new \ReflectionClass($controller);
+        $reflection = new ReflectionClass($controller);
         $method = $reflection->getMethod('returnJsonError');
         $method->setAccessible(true);
 
@@ -571,6 +689,58 @@ class FileManagerControllerTest extends TestCase
     }
 
     /**
+     * Test errorResponse returns JSON error for AJAX requests
+     *
+     * @return void
+     */
+    public function testErrorResponseAjax(): void
+    {
+        $request = new ServerRequest(['url' => '/admin/file-manager']);
+        $request = $request->withHeader('X-Requested-With', 'XMLHttpRequest');
+        $controller = new FileManagerController($request);
+
+        $reflection = new ReflectionClass($controller);
+        $method = $reflection->getMethod('errorResponse');
+        $method->setAccessible(true);
+
+        $response = $method->invoke($controller, 'Something went wrong');
+
+        $this->assertInstanceOf(Response::class, $response);
+        $this->assertEquals('application/json', $response->getType());
+
+        $body = (string)$response->getBody();
+        $data = json_decode($body, true);
+
+        $this->assertEquals('Something went wrong', $data['error']);
+    }
+
+    /**
+     * Test successResponse returns JSON success for AJAX requests
+     *
+     * @return void
+     */
+    public function testSuccessResponseAjax(): void
+    {
+        $request = new ServerRequest(['url' => '/admin/file-manager']);
+        $request = $request->withHeader('X-Requested-With', 'XMLHttpRequest');
+        $controller = new FileManagerController($request);
+
+        $reflection = new ReflectionClass($controller);
+        $method = $reflection->getMethod('successResponse');
+        $method->setAccessible(true);
+
+        $response = $method->invoke($controller, 'Operation completed');
+
+        $this->assertInstanceOf(Response::class, $response);
+        $this->assertEquals('application/json', $response->getType());
+
+        $body = (string)$response->getBody();
+        $data = json_decode($body, true);
+
+        $this->assertEquals('Operation completed', $data['success']);
+    }
+
+    /**
      * Test upload requires POST method
      *
      * @return void
@@ -582,6 +752,7 @@ class FileManagerControllerTest extends TestCase
             'environment' => ['REQUEST_METHOD' => 'GET'],
             'query' => ['folder' => 'uploads'],
         ]);
+        $request = $request->withHeader('X-Requested-With', 'XMLHttpRequest');
         $controller = new FileManagerController($request);
 
         $response = $controller->upload();
@@ -721,6 +892,61 @@ class FileManagerControllerTest extends TestCase
     }
 
     /**
+     * Test delete sanitizes deleteFile to prevent path traversal
+     *
+     * @return void
+     */
+    public function testDeleteSanitizesFilename(): void
+    {
+        $request = new ServerRequest([
+            'url' => '/admin/file-manager/delete',
+            'environment' => ['REQUEST_METHOD' => 'POST'],
+            'query' => ['folder' => 'uploads', 'deleteFile' => '../../../etc/passwd'],
+        ]);
+        $request = $request->withEnv('REQUEST_METHOD', 'POST');
+        $request = $request->withHeader('X-Requested-With', 'XMLHttpRequest');
+
+        $controller = new FileManagerController($request);
+
+        $response = $controller->delete();
+
+        $this->assertInstanceOf(Response::class, $response);
+        $body = (string)$response->getBody();
+        $data = json_decode($body, true);
+
+        // Should return an error, not delete a file outside the folder
+        $this->assertArrayHasKey('error', $data);
+    }
+
+    /**
+     * Test createFolder sanitizes folder name
+     *
+     * @return void
+     */
+    public function testCreateFolderSanitizesFolderName(): void
+    {
+        $request = new ServerRequest([
+            'url' => '/admin/file-manager/create-folder',
+            'environment' => ['REQUEST_METHOD' => 'POST'],
+            'query' => ['folder' => 'uploads'],
+            'post' => ['folder' => '../../../etc/evil'],
+        ]);
+        $request = $request->withEnv('REQUEST_METHOD', 'POST');
+        $request = $request->withHeader('X-Requested-With', 'XMLHttpRequest');
+        $request = $request->withParsedBody(['folder' => '../../../etc/evil']);
+
+        $controller = new FileManagerController($request);
+
+        $response = $controller->createFolder();
+
+        $this->assertInstanceOf(Response::class, $response);
+
+        // After sanitization, the folder name should be just "evil" or harmless
+        // It should NOT create a folder outside of uploads
+        $this->assertDirectoryDoesNotExist($this->testDir . DS . '..' . DS . 'etc');
+    }
+
+    /**
      * Test delete can delete a file
      *
      * @return void
@@ -825,7 +1051,7 @@ class FileManagerControllerTest extends TestCase
         $request = new ServerRequest(['url' => '/admin/file-manager']);
         $controller = new FileManagerController($request);
 
-        $reflection = new \ReflectionClass($controller);
+        $reflection = new ReflectionClass($controller);
         $method = $reflection->getMethod('isValidFolder');
         $method->setAccessible(true);
 
@@ -909,12 +1135,12 @@ class FileManagerControllerTest extends TestCase
         $tmpFile = $this->testDir . DS . 'tmp_upload.jpg';
         file_put_contents($tmpFile, 'fake image content');
 
-        $uploadedFile = new \Laminas\Diactoros\UploadedFile(
+        $uploadedFile = new UploadedFile(
             $tmpFile,
             filesize($tmpFile),
             UPLOAD_ERR_OK,
             'test_image.jpg',
-            'image/jpeg'
+            'image/jpeg',
         );
 
         $request = new ServerRequest([
@@ -957,12 +1183,12 @@ class FileManagerControllerTest extends TestCase
         $tmpFile = $this->testDir . DS . 'tmp_upload.exe';
         file_put_contents($tmpFile, 'fake executable content');
 
-        $uploadedFile = new \Laminas\Diactoros\UploadedFile(
+        $uploadedFile = new UploadedFile(
             $tmpFile,
             filesize($tmpFile),
             UPLOAD_ERR_OK,
             'malware.exe',
-            'application/x-msdownload'
+            'application/x-msdownload',
         );
 
         $request = new ServerRequest([
@@ -996,12 +1222,12 @@ class FileManagerControllerTest extends TestCase
      */
     public function testAjaxUploadHandlesUploadError(): void
     {
-        $uploadedFile = new \Laminas\Diactoros\UploadedFile(
+        $uploadedFile = new UploadedFile(
             '',
             0,
             UPLOAD_ERR_INI_SIZE,
             'large_image.jpg',
-            'image/jpeg'
+            'image/jpeg',
         );
 
         $request = new ServerRequest([
@@ -1032,12 +1258,12 @@ class FileManagerControllerTest extends TestCase
      */
     public function testAjaxUploadHandlesNoFileError(): void
     {
-        $uploadedFile = new \Laminas\Diactoros\UploadedFile(
+        $uploadedFile = new UploadedFile(
             '',
             0,
             UPLOAD_ERR_NO_FILE,
             'empty.jpg',
-            'image/jpeg'
+            'image/jpeg',
         );
 
         $request = new ServerRequest([
@@ -1071,12 +1297,12 @@ class FileManagerControllerTest extends TestCase
         $tmpFile = $this->testDir . DS . 'tmp_upload.jpg';
         file_put_contents($tmpFile, 'fake image content');
 
-        $uploadedFile = new \Laminas\Diactoros\UploadedFile(
+        $uploadedFile = new UploadedFile(
             $tmpFile,
             filesize($tmpFile),
             UPLOAD_ERR_OK,
             'test_image.jpg',
-            'image/jpeg'
+            'image/jpeg',
         );
 
         $request = new ServerRequest([
@@ -1110,12 +1336,12 @@ class FileManagerControllerTest extends TestCase
         $tmpFile = $this->testDir . DS . 'tmp_upload.jpg';
         file_put_contents($tmpFile, 'fake image content');
 
-        $uploadedFile = new \Laminas\Diactoros\UploadedFile(
+        $uploadedFile = new UploadedFile(
             $tmpFile,
             filesize($tmpFile),
             UPLOAD_ERR_OK,
             'test_image.jpg',
-            'image/jpeg'
+            'image/jpeg',
         );
 
         $request = new ServerRequest([
@@ -1180,12 +1406,12 @@ class FileManagerControllerTest extends TestCase
         $tmpFile = $this->testDir . DS . 'tmp_upload.jpg';
         file_put_contents($tmpFile, 'new content');
 
-        $uploadedFile = new \Laminas\Diactoros\UploadedFile(
+        $uploadedFile = new UploadedFile(
             $tmpFile,
             filesize($tmpFile),
             UPLOAD_ERR_OK,
             'existing.jpg',
-            'image/jpeg'
+            'image/jpeg',
         );
 
         $request = new ServerRequest([
@@ -1225,12 +1451,12 @@ class FileManagerControllerTest extends TestCase
         $tmpFile = $this->testDir . DS . 'tmp_upload.jpg';
         file_put_contents($tmpFile, 'fake image content');
 
-        $uploadedFile = new \Laminas\Diactoros\UploadedFile(
+        $uploadedFile = new UploadedFile(
             $tmpFile,
             filesize($tmpFile),
             UPLOAD_ERR_OK,
             'my new image.jpg',
-            'image/jpeg'
+            'image/jpeg',
         );
 
         $request = new ServerRequest([
@@ -1264,12 +1490,12 @@ class FileManagerControllerTest extends TestCase
         $tmpFile = $this->testDir . DS . 'tmp_upload.txt';
         file_put_contents($tmpFile, 'file content');
 
-        $uploadedFile = new \Laminas\Diactoros\UploadedFile(
+        $uploadedFile = new UploadedFile(
             $tmpFile,
             filesize($tmpFile),
             UPLOAD_ERR_OK,
             'document.txt',
-            'text/plain'
+            'text/plain',
         );
 
         $request = new ServerRequest([
@@ -1303,12 +1529,12 @@ class FileManagerControllerTest extends TestCase
         $tmpFile = $this->testDir . DS . 'tmp_upload.jpg';
         file_put_contents($tmpFile, 'fake image content');
 
-        $uploadedFile = new \Laminas\Diactoros\UploadedFile(
+        $uploadedFile = new UploadedFile(
             $tmpFile,
             filesize($tmpFile),
             UPLOAD_ERR_OK,
             'test_image.jpg',
-            'image/jpeg'
+            'image/jpeg',
         );
 
         // New subfolder doesn't exist yet
@@ -1346,12 +1572,12 @@ class FileManagerControllerTest extends TestCase
         $tmpFile = $this->testDir . DS . 'tmp_upload.png';
         file_put_contents($tmpFile, 'fake png content');
 
-        $uploadedFile = new \Laminas\Diactoros\UploadedFile(
+        $uploadedFile = new UploadedFile(
             $tmpFile,
             filesize($tmpFile),
             UPLOAD_ERR_OK,
             'icon.png',
-            'image/png'
+            'image/png',
         );
 
         $request = new ServerRequest([
@@ -1383,12 +1609,12 @@ class FileManagerControllerTest extends TestCase
      */
     public function testAjaxUploadHandlesUnknownError(): void
     {
-        $uploadedFile = new \Laminas\Diactoros\UploadedFile(
+        $uploadedFile = new UploadedFile(
             '',
             0,
             UPLOAD_ERR_EXTENSION, // PHP extension stopped the upload
             'image.jpg',
-            'image/jpeg'
+            'image/jpeg',
         );
 
         $request = new ServerRequest([
@@ -1422,12 +1648,12 @@ class FileManagerControllerTest extends TestCase
         $tmpFile = $this->testDir . DS . 'tmp_upload.jpg';
         file_put_contents($tmpFile, 'fake image content');
 
-        $uploadedFile = new \Laminas\Diactoros\UploadedFile(
+        $uploadedFile = new UploadedFile(
             $tmpFile,
             filesize($tmpFile),
             UPLOAD_ERR_OK,
             '', // Empty filename
-            'image/jpeg'
+            'image/jpeg',
         );
 
         $request = new ServerRequest([
@@ -1464,20 +1690,20 @@ class FileManagerControllerTest extends TestCase
         file_put_contents($tmpFile1, 'fake image content 1');
         file_put_contents($tmpFile2, 'fake image content 2');
 
-        $uploadedFile1 = new \Laminas\Diactoros\UploadedFile(
+        $uploadedFile1 = new UploadedFile(
             $tmpFile1,
             filesize($tmpFile1),
             UPLOAD_ERR_OK,
             'image1.jpg',
-            'image/jpeg'
+            'image/jpeg',
         );
 
-        $uploadedFile2 = new \Laminas\Diactoros\UploadedFile(
+        $uploadedFile2 = new UploadedFile(
             $tmpFile2,
             filesize($tmpFile2),
             UPLOAD_ERR_OK,
             'image2.png',
-            'image/png'
+            'image/png',
         );
 
         $request = new ServerRequest([
@@ -1521,20 +1747,20 @@ class FileManagerControllerTest extends TestCase
         file_put_contents($tmpFile1, 'fake image content');
         file_put_contents($tmpFile2, 'fake executable content');
 
-        $uploadedFile1 = new \Laminas\Diactoros\UploadedFile(
+        $uploadedFile1 = new UploadedFile(
             $tmpFile1,
             filesize($tmpFile1),
             UPLOAD_ERR_OK,
             'valid_image.jpg',
-            'image/jpeg'
+            'image/jpeg',
         );
 
-        $uploadedFile2 = new \Laminas\Diactoros\UploadedFile(
+        $uploadedFile2 = new UploadedFile(
             $tmpFile2,
             filesize($tmpFile2),
             UPLOAD_ERR_OK,
             'invalid.exe',
-            'application/x-msdownload'
+            'application/x-msdownload',
         );
 
         $request = new ServerRequest([
@@ -1575,7 +1801,7 @@ class FileManagerControllerTest extends TestCase
         $request = new ServerRequest(['url' => '/admin/file-manager']);
         $controller = new FileManagerController($request);
 
-        $reflection = new \ReflectionClass($controller);
+        $reflection = new ReflectionClass($controller);
 
         // Set sort field and direction (like browseImages does)
         $sortFieldProp = $reflection->getProperty('sortField');
@@ -1613,7 +1839,7 @@ class FileManagerControllerTest extends TestCase
         $request = new ServerRequest(['url' => '/admin/file-manager']);
         $controller = new FileManagerController($request);
 
-        $reflection = new \ReflectionClass($controller);
+        $reflection = new ReflectionClass($controller);
 
         // Set sort field and direction
         $sortFieldProp = $reflection->getProperty('sortField');
@@ -1648,7 +1874,7 @@ class FileManagerControllerTest extends TestCase
         $request = new ServerRequest(['url' => '/admin/file-manager']);
         $controller = new FileManagerController($request);
 
-        $reflection = new \ReflectionClass($controller);
+        $reflection = new ReflectionClass($controller);
 
         // Set sort by date descending
         $sortFieldProp = $reflection->getProperty('sortField');

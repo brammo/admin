@@ -95,13 +95,19 @@ Browse all files and folders. Navigate through the folder structure starting fro
 
 ### Browse Images
 
-Browse only image files. Used internally by the [FormHelper image control](HELPERS.md#image-control) for AJAX-based image selection.
+Browse only image files. Used internally by the [FormHelper image control](HELPERS.md#image-control) for AJAX-based image selection. Results are sorted by date (newest first) with 12 items per page.
 
 Supports AJAX requests with a simplified layout for modal display.
 
+**Query Parameters:**
+- `folder` - Current folder path
+- `filter` - Filter files by name
+- `page` - Pagination page number
+- `target` - Target input element ID (used by image picker modals)
+
 ### Browse Files
 
-Browse only document files (non-images). Similar to browseImages but filtered for document types.
+Browse only document files (non-images). Similar to browseImages but sorted by date (newest first) with 10 items per page.
 
 ### Upload
 
@@ -118,6 +124,16 @@ Upload files to a specified folder.
     "error": false,
     "message": "2 file(s) uploaded",
     "files": ["image1.jpg", "image2.jpg"]
+}
+```
+
+**Partial Success Response (some files failed):**
+```json
+{
+    "error": "Invalid file type png",
+    "errors": ["Invalid file type png"],
+    "message": "1 file(s) uploaded",
+    "files": ["image1.jpg"]
 }
 ```
 
@@ -257,7 +273,9 @@ pecl install imagick
 
 The File Manager includes several security measures:
 
-- **Path Validation**: All paths are validated against configured `topFolders` to prevent directory traversal
+- **Path Validation**: All paths are validated against configured `topFolders` to prevent directory traversal; null bytes and `..` sequences are blocked
+- **Path Resolution Validation**: Resolved paths are verified via `realpath()` to ensure they stay within the configured base directory
+- **Filename Sanitization**: Uploaded and user-supplied filenames are sanitized — path separators, null bytes, and traversal sequences are stripped, and unsafe characters are replaced with underscores
 - **File Type Validation**: Only configured file types in `fileTypes` are allowed for upload
 - **Authentication**: Access requires authentication through the admin panel's authentication system
 - **Unique Filenames**: Uploaded files with duplicate names are automatically renamed (e.g., `image(1).jpg`)
