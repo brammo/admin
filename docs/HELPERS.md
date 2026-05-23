@@ -172,6 +172,26 @@ The control automatically:
 - Validates that the folder is within the configured File Manager base path
 - Uses AJAX for image selection and upload operations
 
+### HTML Editor Control
+
+The `html` type renders a textarea with TinyMCE (loaded once per page via the `Form/editor` element).
+
+#### Basic Usage
+
+```php
+echo $this->Form->create($entity);
+
+echo $this->Form->control('body', ['type' => 'html', 'label' => 'Content']);
+
+echo $this->Form->end();
+```
+
+Configure a TinyMCE API key in `Admin.Editor.apiKey` (see [CONFIGURATION.md](CONFIGURATION.md)). The editor opens the File Manager `browseImages` action for image selection.
+
+#### Options
+
+Supports standard BootstrapUI textarea options (`label`, `class`, etc.). The helper adds the `editor` CSS class automatically; additional classes are merged.
+
 ## Loading Helpers
 
 Helpers are automatically available when using the plugin's layouts. To use them in custom views:

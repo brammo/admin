@@ -5,13 +5,12 @@ namespace Brammo\Admin\Test\TestCase\View\Helper;
 
 use BootstrapUI\View\Helper\FormHelper as BootstrapFormHelper;
 use Brammo\Admin\View\Helper\FormHelper;
+use Cake\Core\Configure;
 use Cake\ORM\Entity;
 use Cake\Routing\RouteBuilder;
 use Cake\Routing\Router;
 use Cake\TestSuite\TestCase;
-use Cake\View\Form\EntityContext;
 use Cake\View\View;
-use ReflectionClass;
 
 /**
  * Brammo\Admin\View\Helper\FormHelper Test Case
@@ -56,6 +55,8 @@ class FormHelperTest extends TestCase
         // Load BootstrapUI Html helper which provides the icon() method
         $this->View->loadHelper('Html', ['className' => 'BootstrapUI.Html']);
         $this->Form = new FormHelper($this->View);
+
+        Configure::write('Admin.Editor', ['apiKey' => 'test-api-key']);
     }
 
     /**
@@ -66,6 +67,7 @@ class FormHelperTest extends TestCase
     protected function tearDown(): void
     {
         unset($this->Form, $this->View);
+        Configure::delete('Admin.Editor');
         Router::reload();
         parent::tearDown();
     }
@@ -260,75 +262,39 @@ class FormHelperTest extends TestCase
     }
 
     /**
-     * Test getEntityFromContext with null context
+     * Test imageControl without form context uses null value
      *
      * @return void
      */
-    public function testGetEntityFromContextNull(): void
-    {
-        // Use reflection to test protected method
-        $reflection = new ReflectionClass($this->Form);
-        $method = $reflection->getMethod('getEntityFromContext');
-        $method->setAccessible(true);
-
-        $result = $method->invoke($this->Form, null);
-
-        $this->assertNull($result);
-    }
-
-    /**
-     * Test getEntityFromContext with EntityContext
-     *
-     * @return void
-     */
-    public function testGetEntityFromContextWithEntityContext(): void
-    {
-        $entity = new Entity(['image' => '/images/test.jpg']);
-        $entity->setSource('Articles');
-
-        $context = new EntityContext([
-            'entity' => $entity,
-        ]);
-
-        $reflection = new ReflectionClass($this->Form);
-        $method = $reflection->getMethod('getEntityFromContext');
-        $method->setAccessible(true);
-
-        $result = $method->invoke($this->Form, $context);
-
-        $this->assertSame($entity, $result);
-    }
-
-    /**
-     * Test imageControl throws exception when entity is null
-     *
-     * @return void
-     */
-    public function testImageControlThrowsExceptionWithoutEntity(): void
+    public function testImageControlWithoutFormContext(): void
     {
         $this->Form->create(null);
 
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Entity variable is required');
+        $result = $this->Form->imageControl('image');
 
-        $this->Form->imageControl('image');
+        $this->assertStringContainsString('form-image', $result);
+        $this->assertStringContainsString('name="image"', $result);
+        $this->assertStringContainsString('value=""', $result);
     }
 
     /**
-     * Test imageControl throws exception when entity doesn't have field
+     * Test imageControl with entity missing field still renders
      *
      * @return void
      */
-    public function testImageControlThrowsExceptionWhenFieldMissing(): void
+    public function testImageControlWithEntityMissingField(): void
     {
-        $entity = new Entity(['title' => 'Test']); // no 'image' field
-        $entity->setSource('Articles');
-        $this->Form->create($entity, ['context' => ['table' => 'Articles']]);
+        $this->Form->create(null, [
+            'context' => [
+                'data' => ['title' => 'Test'],
+            ],
+        ]);
 
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Entity does not have the field "image"');
+        $result = $this->Form->imageControl('image');
 
-        $this->Form->imageControl('image');
+        $this->assertStringContainsString('form-image', $result);
+        $this->assertStringContainsString('name="image"', $result);
+        $this->assertStringContainsString('value=""', $result);
     }
 
     /**
@@ -479,5 +445,50 @@ class FormHelperTest extends TestCase
 
         // Filename should be visible (without display:none)
         $this->assertStringContainsString('/images/test.jpg</div>', $result);
+    }
+
+    /**
+     * Test control method with html type delegates to htmlControl
+     *
+     * @return void
+     */
+    public function testControlWithHtmlType(): void
+    {
+        $this->Form->create(null);
+
+        $result = $this->Form->control('body', ['type' => 'html', 'label' => 'Body']);
+
+        $this->assertStringContainsString('textarea', $result);
+        $this->assertStringContainsString('name="body"', $result);
+        $this->assertStringContainsString('class="editor', $result);
+    }
+
+    /**
+     * Test htmlControl loads editor assets once
+     *
+     * @return void
+     */
+    public function testHtmlControlLoadsEditorOnce(): void
+    {
+        $this->Form->create(null);
+
+        $this->Form->htmlControl('intro');
+        $this->Form->htmlControl('body');
+
+        $this->assertTrue((bool)$this->View->get('_editorLoaded'));
+    }
+
+    /**
+     * Test htmlControl merges custom CSS class with editor class
+     *
+     * @return void
+     */
+    public function testHtmlControlMergesCustomClass(): void
+    {
+        $this->Form->create(null);
+
+        $result = $this->Form->htmlControl('content', ['class' => 'form-control']);
+
+        $this->assertStringContainsString('class="form-control editor"', $result);
     }
 }
