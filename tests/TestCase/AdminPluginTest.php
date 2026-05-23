@@ -52,7 +52,6 @@ class AdminPluginTest extends TestCase
      */
     public function testBootstrap(): void
     {
-        /** @var PluginApplicationInterface&\PHPUnit\Framework\MockObject\MockObject $app */
         $app = $this->createMock(PluginApplicationInterface::class);
 
         $app->expects($this->once())
