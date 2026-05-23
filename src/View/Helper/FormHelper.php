@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace Brammo\Admin\View\Helper;
 
 use BootstrapUI\View\Helper\FormHelper as BootstrapFormHelper;
-use Cake\View\Form\ContextInterface;
 use function Cake\I18n\__;
 
 /**
@@ -19,6 +18,7 @@ class FormHelper extends BootstrapFormHelper
      *
      * Adds support for the following custom types:
      * - `image`: Renders an image picker/uploader using the Form/image element
+     * - `html`: Renders a TinyMCE WYSIWYG editor using the Form/editor element
      *
      * @param string $fieldName The field name.
      * @param array<array-key, mixed> $options The options.
@@ -32,6 +32,10 @@ class FormHelper extends BootstrapFormHelper
 
         if ($options['type'] === 'image') {
             return $this->imageControl($fieldName, $options);
+        }
+
+        if ($options['type'] === 'html') {
+            return $this->htmlControl($fieldName, $options);
         }
 
         return parent::control($fieldName, $options);
@@ -59,9 +63,8 @@ class FormHelper extends BootstrapFormHelper
 
         $options += $defaults;
 
-        // Get the entity from the form context
-        $context = $this->context();
-        $entity = $this->getEntityFromContext($context);
+        // Get current value for the field
+        $value = $this->context()->val($fieldName);
 
         // Get label from field name if not provided
         if ($options['label'] === null) {
@@ -69,30 +72,43 @@ class FormHelper extends BootstrapFormHelper
         }
 
         return $this->_View->element('Brammo/Admin.Form/image', [
-            'entity' => $entity,
             'field' => $fieldName,
             'folder' => $options['folder'],
             'label' => $options['label'],
             'allowEmpty' => $options['allowEmpty'],
+            'value' => $value,
         ]);
     }
 
     /**
-     * Get entity from form context if available.
+     * Generate an HTML editor control element using TinyMCE.
      *
-     * @param \Cake\View\Form\ContextInterface|null $context The form context.
-     * @return mixed The entity or null.
+     * Options:
+     * - `label`: The label for the control
+     *
+     * @param string $fieldName The field name.
+     * @param array<string, mixed> $options The options.
+     * @return string Generated HTML.
      */
-    protected function getEntityFromContext(?ContextInterface $context): mixed
+    public function htmlControl(string $fieldName, array $options = []): string
     {
-        if ($context === null) {
-            return null;
+        // Include the editor element (TinyMCE initialization)
+        if (empty($this->_View->get('_editorLoaded'))) {
+            $this->_View->element('Brammo/Admin.Form/editor');
+            $this->_View->set('_editorLoaded', true);
         }
 
-        if (method_exists($context, 'entity')) {
-            return $context->entity();
-        }
+        // Remove custom type to prevent infinite loop
+        unset($options['type']);
 
-        return null;
+        // Add editor class to enable TinyMCE initialization
+        $options['class'] = isset($options['class'])
+            ? $options['class'] . ' editor'
+            : 'editor';
+
+        // Set textarea type
+        $options['type'] = 'textarea';
+
+        return parent::control($fieldName, $options);
     }
 }

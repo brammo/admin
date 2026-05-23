@@ -255,5 +255,15 @@ return [
                 'resizeOnUpload' => true,
             ],
         ],
+
+        'Editor' => [
+            
+            /**
+             * TinyMCE API key
+             * 
+             * Get a free API key from https://www.tiny.cloud/
+             */
+            'apiKey' => '',
+        ],
     ],
 ];
