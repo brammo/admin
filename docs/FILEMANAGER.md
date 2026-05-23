@@ -64,6 +64,23 @@ Configure the File Manager in your application's configuration under `Admin.File
 | `webpQuality` | int | `90` | WebP compression quality (1-100) |
 | `resizeOnUpload` | bool | `true` | Automatically resize images exceeding max dimensions on upload |
 
+### Requirements
+
+- **PHP extension `imagick`**: Required when `resizeOnUpload` is enabled or when using the `fixImage` action. Install via `pecl install imagick` or your OS package manager. Composer suggests this extension via `ext-imagick`.
+
+### Security
+
+Path handling is enforced in `Brammo\Admin\FileManager\FileManagerService` (top-folder allow list, traversal blocking, `realpath` checks before delete). Uploads are validated by file extension only; host applications should restrict File Manager access to authenticated administrators.
+
+### CSRF protection
+
+Upload, delete, and create-folder actions accept `POST` requests. When calling these endpoints via AJAX (as the image picker and file browser do), include the CakePHP CSRF token:
+
+- Header: `X-CSRF-Token` with the token value from the page meta tag or `csrfToken` JavaScript variable
+- The host application must enable CSRF middleware for admin routes
+
+Non-AJAX form posts use standard CakePHP FormHelper CSRF fields.
+
 ---
 
 ## Routes

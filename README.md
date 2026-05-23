@@ -113,7 +113,7 @@ brammo/admin/
 │   └── locales/         # Translation files
 ├── src/                 # Source code
 │   ├── Controller/      # Controllers
-│   ├── Model/           # Models (Entity, Table)
+│   ├── FileManager/     # FileManagerService (filesystem logic)
 │   ├── View/            # View classes and helpers
 │   │   └── Helper/      # View helpers
 │   └── Plugin.php       # Plugin bootstrap

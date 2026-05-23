@@ -21,7 +21,7 @@ if (empty($apiKey)) {
 $imagesUrl = Router::url([
     'plugin' => 'Brammo/Admin',
     'controller' => 'FileManager',
-    'action' => 'images',
+    'action' => 'browseImages',
 ]);
 
 $height = $height ?? $settings['height'] ?? 500;

@@ -161,10 +161,10 @@ msgstr "Влез"
 msgid "Size"
 msgstr "Размер"
 
-msgid "Successfuly created folder"
+msgid "Successfully created folder"
 msgstr "Папката е създадена успешно"
 
-msgid "Successfuly deleted"
+msgid "Successfully deleted"
 msgstr "Успешно изтрито"
 
 msgid "The file could not be deleted"

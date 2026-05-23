@@ -26,6 +26,9 @@
         "brammo/content": "^1.0",
         "brammo/auth": "^1.1"
     },
+    "suggest": {
+        "ext-imagick": "Required for automatic image resize in the File Manager"
+    },
     "require-dev": {
         "cakephp/bake": "^3.0.0",
         "cakephp/cakephp-codesniffer": "^5.3",
@@ -47,7 +50,12 @@
     "scripts": {
         "check": [
             "@test",
-            "@cs-check"
+            "@cs-check",
+            "@stan"
+        ],
+        "check-full": [
+            "@check",
+            "@psalm"
         ],
         "analyse": [
             "@stan",
@@ -57,6 +65,7 @@
         "cs-fix": "phpcbf --colors -p src tests",
         "test": "phpunit --colors=always",
         "stan": "phpstan analyse",
+        "stan-tests": "phpstan analyse -c phpstan-tests.neon",
         "psalm": "psalm --show-info=false"
     },
     "config": {

@@ -3,13 +3,8 @@ declare(strict_types=1);
 
 namespace Brammo\Admin\Controller;
 
-use Cake\Core\Configure;
+use Brammo\Admin\FileManager\FileManagerService;
 use Cake\Http\Response;
-use Exception;
-use Imagick;
-use ImagickException;
-use Psr\Http\Message\UploadedFileInterface;
-use RuntimeException;
 use function Cake\I18n\__d;
 
 /**
@@ -17,52 +12,11 @@ use function Cake\I18n\__d;
  */
 class FileManagerController extends AppController
 {
-    /**
-     * Folder type constant
-     */
-    private const string TYPE_FOLDER = '[folder]';
-
-    /**
-     * Sort field
-     *
-     * @var string
-     */
     private string $sortField = 'filename';
 
-    /**
-     * Sort direction
-     *
-     * @var string
-     */
     private string $sortDirection = 'asc';
 
-    /**
-     * Base path
-     *
-     * @var string
-     */
-    private string $basePath = '';
-
-    /**
-     * Top level folders
-     *
-     * @var array<string>
-     */
-    private array $topFolders = [];
-
-    /**
-     * File types
-     *
-     * @var array<string>
-     */
-    private array $fileTypes = [];
-
-    /**
-     * Image types
-     *
-     * @var array<string>
-     */
-    private array $imageTypes = [];
+    private FileManagerService $fileManager;
 
     /**
      * Initialize method
@@ -73,27 +27,7 @@ class FileManagerController extends AppController
     {
         parent::initialize();
 
-        $config = Configure::read('Admin.FileManager');
-
-        $this->basePath = $config['basePath'] ?? '';
-        if (empty($this->basePath)) {
-            throw new RuntimeException('File Manager base path is not configured');
-        }
-
-        $this->topFolders = $config['topFolders'] ?? [];
-        if (empty($this->topFolders)) {
-            throw new RuntimeException('File Manager top folders are not configured');
-        }
-
-        $this->fileTypes = $config['fileTypes']['files'] ?? [];
-        if (empty($this->fileTypes)) {
-            throw new RuntimeException('File Manager file types are not configured');
-        }
-
-        $this->imageTypes = $config['fileTypes']['images'] ?? [];
-        if (empty($this->imageTypes)) {
-            throw new RuntimeException('File Manager image types are not configured');
-        }
+        $this->fileManager = FileManagerService::fromConfigure();
     }
 
     /**
@@ -109,9 +43,9 @@ class FileManagerController extends AppController
     /**
      * Browse images
      *
-     * @return void
+     * @return \Cake\Http\Response|null
      */
-    public function browseImages(): void
+    public function browseImages(): ?Response
     {
         if ($this->request->is('ajax')) {
             $this->viewBuilder()->setLayout('ajax');
@@ -120,15 +54,16 @@ class FileManagerController extends AppController
         $this->sortField = 'date';
         $this->sortDirection = 'desc';
         $this->browse('images', 12);
-        $this->render('browse');
+
+        return $this->render('browse');
     }
 
     /**
      * Browse files
      *
-     * @return void
+     * @return \Cake\Http\Response|null
      */
-    public function browseFiles(): void
+    public function browseFiles(): ?Response
     {
         if ($this->request->is('ajax')) {
             $this->viewBuilder()->setLayout('ajax');
@@ -137,7 +72,8 @@ class FileManagerController extends AppController
         $this->sortField = 'date';
         $this->sortDirection = 'desc';
         $this->browse('files', 10);
-        $this->render('browse');
+
+        return $this->render('browse');
     }
 
     /**
@@ -156,19 +92,18 @@ class FileManagerController extends AppController
         $folder = $this->request->getQuery('folder');
         $folderUrl = ['action' => 'index', '?' => ['folder' => $folder]];
 
-        if (empty($folder) || !is_string($folder) || !$this->isValidFolder($folder)) {
+        if (empty($folder) || !is_string($folder) || !$this->fileManager->isValidFolder($folder)) {
             return $this->errorResponse(__d('brammo/admin', 'Invalid folder'));
         }
 
-        $fullPath = $this->getFullPath($folder);
+        $fullPath = $this->fileManager->getFullPath($folder);
 
-        if (!file_exists($fullPath) && !@mkdir($fullPath, 0755, true)) {
+        if (!is_dir($fullPath) && !mkdir($fullPath, 0755, true)) {
             return $this->errorResponse(__d('brammo/admin', 'Invalid folder') . ' /' . $folder);
         }
 
         $uploadedFiles = $this->request->getUploadedFiles();
 
-        // Collect uploaded files from either files[] or file field
         $filesToProcess = [];
         if (isset($uploadedFiles['files']) && is_array($uploadedFiles['files'])) {
             $filesToProcess = $uploadedFiles['files'];
@@ -176,14 +111,14 @@ class FileManagerController extends AppController
             $filesToProcess = [$uploadedFiles['file']];
         }
 
-        if (empty($filesToProcess)) {
+        if ($filesToProcess === []) {
             return $this->errorResponse(__d('brammo/admin', 'No files uploaded'), $folderUrl);
         }
 
         $files = [];
         $errors = [];
         foreach ($filesToProcess as $uploadedFile) {
-            $res = $this->processUploadedFile($folder, $uploadedFile);
+            $res = $this->fileManager->processUploadedFile($folder, $uploadedFile);
             if ($res['error']) {
                 $errors[] = $res['error'];
             } else {
@@ -229,7 +164,7 @@ class FileManagerController extends AppController
         }
 
         $folder = $this->request->getQuery('folder');
-        if (!is_string($folder) || !$this->isValidFolder($folder)) {
+        if (!is_string($folder) || !$this->fileManager->isValidFolder($folder)) {
             return $this->errorResponse(__d('brammo/admin', 'Invalid folder'));
         }
 
@@ -241,13 +176,13 @@ class FileManagerController extends AppController
                 return $this->errorResponse(__d('brammo/admin', 'Missing folder name'), $returnUrl);
             }
 
-            $newFolder = $this->sanitizeFilename((string)$newFolder);
-            if (empty($newFolder)) {
+            $newFolder = $this->fileManager->sanitizeFilename((string)$newFolder);
+            if ($newFolder === '') {
                 return $this->errorResponse(__d('brammo/admin', 'Invalid folder name'), $returnUrl);
             }
 
-            $fullPath = $this->getFullPath($folder);
-            if (!@mkdir($fullPath . DS . $newFolder, 0755, true)) {
+            $fullPath = $this->fileManager->getFullPath($folder);
+            if (!mkdir($fullPath . DS . $newFolder, 0755, true)) {
                 return $this->errorResponse(
                     __d('brammo/admin', 'Cannot create folder') . ' ' . $folder . DS . $newFolder,
                     $returnUrl,
@@ -255,7 +190,7 @@ class FileManagerController extends AppController
             }
 
             return $this->successResponse(
-                __d('brammo/admin', 'Successfuly created folder') . ' ' . $folder . DS . $newFolder,
+                __d('brammo/admin', 'Successfully created folder') . ' ' . $folder . DS . $newFolder,
                 ['action' => 'index', '?' => ['folder' => $folder . DS . $newFolder]],
             );
         }
@@ -281,20 +216,20 @@ class FileManagerController extends AppController
         $folder = $this->request->getQuery('folder');
         $returnUrl = ['action' => 'index', '?' => compact('folder')];
 
-        if (empty($folder) || !$this->isValidFolder($folder)) {
+        if (empty($folder) || !$this->fileManager->isValidFolder($folder)) {
             return $this->errorResponse(__d('brammo/admin', 'Invalid folder'), $returnUrl);
         }
 
         $deleteFile = $this->request->getQuery('deleteFile');
         $deleteFolder = $this->request->getQuery('deleteFolder');
-        $fullPath = $this->getFullPath($folder);
+        $fullPath = $this->fileManager->getFullPath($folder);
 
-        if (!$this->isPathWithinBase($fullPath)) {
+        if (!$this->fileManager->isPathWithinBase($fullPath)) {
             return $this->errorResponse(__d('brammo/admin', 'Invalid folder'), $returnUrl);
         }
 
         if (!empty($deleteFile)) {
-            $deleteFile = $this->sanitizeFilename((string)$deleteFile);
+            $deleteFile = $this->fileManager->sanitizeFilename((string)$deleteFile);
             $fullPath .= '/' . $deleteFile;
             if (!file_exists($fullPath) || !is_file($fullPath) || !is_writable($fullPath)) {
                 return $this->errorResponse(__d('brammo/admin', 'Invalid file'), $returnUrl);
@@ -303,7 +238,7 @@ class FileManagerController extends AppController
                 return $this->errorResponse(__d('brammo/admin', 'The file could not be deleted'), $returnUrl);
             }
         } elseif (!empty($deleteFolder)) {
-            $deleteFolder = $this->sanitizeFilename((string)$deleteFolder);
+            $deleteFolder = $this->fileManager->sanitizeFilename((string)$deleteFolder);
             $fullPath .= '/' . $deleteFolder;
             if (!file_exists($fullPath) || !is_dir($fullPath) || !is_writable($fullPath)) {
                 return $this->errorResponse(__d('brammo/admin', 'Invalid folder'), $returnUrl);
@@ -317,12 +252,12 @@ class FileManagerController extends AppController
             if (count($dirContents) !== 0) {
                 return $this->errorResponse(__d('brammo/admin', 'The folder is not empty'), $returnUrl);
             }
-            if (!@rmdir($fullPath)) {
+            if (!rmdir($fullPath)) {
                 return $this->errorResponse(__d('brammo/admin', 'The folder could not be deleted'), $returnUrl);
             }
         }
 
-        return $this->successResponse(__d('brammo/admin', 'Successfuly deleted'), $returnUrl);
+        return $this->successResponse(__d('brammo/admin', 'Successfully deleted'), $returnUrl);
     }
 
     /**
@@ -337,31 +272,31 @@ class FileManagerController extends AppController
         $folderQuery = $this->request->getQuery('folder');
         $fileQuery = $this->request->getQuery('file');
         $folder = is_string($folderQuery) ? urldecode($folderQuery) : '';
-        $filename = is_string($fileQuery) ? $this->sanitizeFilename(urldecode($fileQuery)) : '';
+        $filename = is_string($fileQuery) ? $this->fileManager->sanitizeFilename(urldecode($fileQuery)) : '';
 
-        if (empty($folder) || !$this->isValidFolder($folder)) {
+        if ($folder === '' || !$this->fileManager->isValidFolder($folder)) {
             $this->Flash->error(__d('brammo/admin', 'Invalid folder'));
 
             return $this->redirect(['action' => 'index']);
         }
 
         $returnUrl = ['action' => 'index', '?' => compact('folder')];
-        $fullPath = $this->getFullPath($folder) . DS . $filename;
+        $fullPath = $this->fileManager->getFullPath($folder) . DS . $filename;
 
-        if (empty($filename) || !file_exists($fullPath)) {
+        if ($filename === '' || !file_exists($fullPath)) {
             $this->Flash->error(__d('brammo/admin', 'Invalid file'));
 
             return $this->redirect($returnUrl);
         }
 
-        $fileType = $this->getFileType($fullPath);
-        if (!in_array($fileType, $this->imageTypes, true)) {
+        $fileType = $this->fileManager->getFileType($fullPath);
+        if (!in_array($fileType, $this->fileManager->getImageTypes(), true)) {
             $this->Flash->error(__d('brammo/admin', 'The specified file is not an image'));
 
             return $this->redirect($returnUrl);
         }
 
-        if (!$this->fixImageSize($fullPath)) {
+        if (!$this->fileManager->fixImageSize($fullPath)) {
             return $this->errorResponse(__d('brammo/admin', 'Cannot fix image size'), $returnUrl);
         }
 
@@ -369,26 +304,7 @@ class FileManagerController extends AppController
     }
 
     /**
-     * Get full path
-     *
-     * @param string $path Path
-     * @return string Full path
-     */
-    private function getFullPath(string $path): string
-    {
-        $fullPath = rtrim($this->basePath, DS);
-        if (!empty($path)) {
-            $fullPath .= DS . $path;
-        }
-
-        return $fullPath;
-    }
-
-    /**
-     * Return JSON response
-     *
      * @param array<string, mixed> $data Data
-     * @return \Cake\Http\Response
      */
     private function returnJson(array $data): Response
     {
@@ -400,10 +316,7 @@ class FileManagerController extends AppController
     }
 
     /**
-     * Return JSON error response
-     *
-     * @param string $message Error message
-     * @return \Cake\Http\Response
+     * Return JSON error response.
      */
     private function returnJsonError(string $message): Response
     {
@@ -411,11 +324,7 @@ class FileManagerController extends AppController
     }
 
     /**
-     * Return an error response, choosing JSON or flash+redirect based on request type.
-     *
-     * @param string $message Error message
      * @param array<string, mixed>|string $redirectUrl Redirect URL for non-ajax requests
-     * @return \Cake\Http\Response
      */
     private function errorResponse(string $message, array|string $redirectUrl = ['action' => 'index']): Response
     {
@@ -430,11 +339,7 @@ class FileManagerController extends AppController
     }
 
     /**
-     * Return a success response, choosing JSON or flash+redirect based on request type.
-     *
-     * @param string $message Success message
      * @param array<string, mixed>|string $redirectUrl Redirect URL for non-ajax requests
-     * @return \Cake\Http\Response
      */
     private function successResponse(string $message, array|string $redirectUrl = ['action' => 'index']): Response
     {
@@ -449,25 +354,29 @@ class FileManagerController extends AppController
     }
 
     /**
-     * Browse method
+     * Browse folder contents and set view variables.
      *
-     * @param string $type File type (images, files, all)
-     * @return void
+     * @param string $type Unused browse filter hint (kept for action compatibility)
      */
     private function browse(string $type, int $itemsPerPage): void
     {
         $folder = $this->request->getQuery('folder') ?: '';
-        if (!empty($folder) && !$this->isValidFolder($folder)) {
+        if ($folder !== '' && !$this->fileManager->isValidFolder($folder)) {
             $folder = '';
         }
 
         $filter = $this->request->getQuery('filter') ?: '';
 
-        $fullPath = $this->getFullPath($folder);
+        $fullPath = $this->fileManager->getFullPath($folder);
 
-        $items = $this->readFolder($fullPath, $folder, $filter);
+        $items = $this->fileManager->readFolder($fullPath, $folder, $filter);
 
-        uasort($items, [$this, 'sortFiles']);
+        $sortField = $this->sortField;
+        $sortDirection = $this->sortDirection;
+        uasort(
+            $items,
+            fn(array $a, array $b): int => $this->fileManager->sortFiles($a, $b, $sortField, $sortDirection),
+        );
 
         $pages = (int)ceil(count($items) / $itemsPerPage);
         $page = min(max((int)$this->request->getQuery('page'), 1), $pages);
@@ -477,21 +386,21 @@ class FileManagerController extends AppController
         $items = array_slice($items, $first, $itemsPerPage);
 
         foreach ($items as $i => $item) {
-            if ($item['type'] === self::TYPE_FOLDER) {
-                $items[$i]['size'] = $this->folderCount($fullPath . DS . $item['filename']);
+            if ($item['type'] === FileManagerService::TYPE_FOLDER) {
+                $items[$i]['size'] = $this->fileManager->folderCount($fullPath . DS . $item['filename']);
             } else {
                 $filePath = $fullPath . DS . $item['filename'];
-                $fileType = $this->getFileType($filePath);
-                $fileSize = @filesize($filePath);
+                $fileType = $this->fileManager->getFileType($filePath);
+                $fileSize = filesize($filePath);
 
                 $items[$i]['type'] = $fileType;
                 $items[$i]['size'] = $fileSize !== false ? $fileSize : 0;
 
-                if (in_array($fileType, $this->imageTypes, true)) {
-                    $imageSize = @getimagesize($filePath);
+                if (in_array($fileType, $this->fileManager->getImageTypes(), true)) {
+                    $imageSize = getimagesize($filePath);
                     $items[$i]['image'] = true;
-                    $items[$i]['width'] = $imageSize[0] ?? 0;
-                    $items[$i]['height'] = $imageSize[1] ?? 0;
+                    $items[$i]['width'] = $imageSize !== false ? $imageSize[0] : 0;
+                    $items[$i]['height'] = $imageSize !== false ? $imageSize[1] : 0;
                 }
             }
         }
@@ -501,355 +410,5 @@ class FileManagerController extends AppController
         $this->set(compact('folder', 'filter', 'target', 'items'));
         $this->set('sort', $this->sortField);
         $this->set('sortDirection', $this->sortDirection);
-    }
-
-    /**
-     * Reads a folder
-     *
-     * @param string $path Path
-     * @param string $folder Folder
-     * @param string $filter Filter
-     * @return array<int, array<string, mixed>> Files and folders
-     */
-    private function readFolder(string $path, string $folder, string $filter = ''): array
-    {
-        $items = [];
-
-        if (empty($path) || !file_exists($path)) {
-            return $items;
-        }
-
-        $dirHandle = opendir($path);
-        if ($dirHandle) {
-            while (($filename = readdir($dirHandle)) !== false) {
-                if ($filename == '.' || $filename == '..') {
-                    continue;
-                }
-
-                $filePath = $path . DS . $filename;
-                $mtime = filemtime($filePath);
-                $dateStr = $mtime !== false ? date('Y-m-d H:i:s', $mtime) : '';
-
-                if (is_dir($filePath)) {
-                    if (
-                        (empty($folder) && !in_array($filename, $this->topFolders, true)) ||
-                        (!empty($filter) && stripos($filename, $filter) === false)
-                    ) {
-                        continue;
-                    }
-
-                    $items[] = [
-                        'filename' => $filename,
-                        'type' => self::TYPE_FOLDER,
-                        'date' => $dateStr,
-                    ];
-                } else {
-                    if (empty($folder) || (!empty($filter) && stripos($filename, $filter) === false)) {
-                        continue;
-                    }
-
-                    $items[] = [
-                        'filename' => $filename,
-                        'type' => null,
-                        'date' => $dateStr,
-                    ];
-                }
-            }
-
-            closedir($dirHandle);
-        }
-
-        return $items;
-    }
-
-    /**
-     * Counts items in a folder
-     *
-     * @param string $path Path
-     * @return int Number of items
-     */
-    private function folderCount(string $path): int
-    {
-        $count = 0;
-
-        $dirHandle = opendir($path);
-        if ($dirHandle) {
-            while (($filename = readdir($dirHandle)) !== false) {
-                if ($filename == '.' || $filename == '..') {
-                    continue;
-                }
-                $count++;
-            }
-
-            closedir($dirHandle);
-        }
-
-        return $count;
-    }
-
-    /**
-     * Sort files
-     *
-     * @param array<string, mixed> $file1 File 1
-     * @param array<string, mixed> $file2 File 2
-     * @return int
-     */
-    private function sortFiles(array $file1, array $file2): int
-    {
-        if ($file1['type'] === self::TYPE_FOLDER && $file2['type'] !== self::TYPE_FOLDER) {
-            return -1;
-        }
-
-        if ($file1['type'] !== self::TYPE_FOLDER && $file2['type'] === self::TYPE_FOLDER) {
-            return 1;
-        }
-
-        if ($file1[$this->sortField] < $file2[$this->sortField]) {
-            $res = -1;
-        } elseif ($file1[$this->sortField] > $file2[$this->sortField]) {
-            $res = 1;
-        } else {
-            $res = 0;
-        }
-
-        return $this->sortDirection == 'asc' ? $res : -$res;
-    }
-
-    /**
-     * Process an uploaded file using PSR-7 UploadedFileInterface
-     *
-     * @param string $folder Target folder
-     * @param \Psr\Http\Message\UploadedFileInterface $uploadedFile Uploaded file
-     * @return array<string, mixed> Result with error or filename
-     */
-    private function processUploadedFile(string $folder, UploadedFileInterface $uploadedFile): array
-    {
-        $filename = $uploadedFile->getClientFilename();
-        if ($filename === null || $filename === '') {
-            return ['error' => __d('brammo/admin', 'Invalid filename')];
-        }
-        $error = $uploadedFile->getError();
-
-        if ($error !== UPLOAD_ERR_OK) {
-            if ($error === UPLOAD_ERR_NO_FILE) {
-                return ['error' => $filename . ': ' . __d('brammo/admin', 'File not uploaded')];
-            } elseif ($error === UPLOAD_ERR_INI_SIZE || $error === UPLOAD_ERR_FORM_SIZE) {
-                return ['error' => $filename . ': ' . __d('brammo/admin', 'Exceeded file size limit')];
-            }
-
-            return ['error' => $filename . ': ' . __d('brammo/admin', 'Unknown error')];
-        }
-
-        $fullPath = $this->getFullPath($folder);
-        $type = $this->getFileType($filename);
-
-        $isFileType = in_array($type, $this->fileTypes);
-        $isImageType = in_array($type, $this->imageTypes);
-
-        if (!$isFileType && !$isImageType) {
-            return ['error' => __d('brammo/admin', 'Invalid file type') . ' ' . $type];
-        }
-
-        $filename = $this->getUniqueFilename($fullPath, $filename);
-
-        try {
-            $uploadedFile->moveTo($fullPath . DS . $filename);
-        } catch (Exception $e) {
-            return ['error' => __d('brammo/admin', 'Cannot save file') . ' ' . $filename];
-        }
-
-        if ($isImageType && Configure::read('Admin.FileManager.Images.resizeOnUpload')) {
-            $this->fixImageSize($fullPath . DS . $filename);
-        }
-
-        return [
-            'error' => false,
-            'filename' => $filename,
-        ];
-    }
-
-    /**
-     * Validate path - checks if path starts with allowed top folder
-     * and does not contain path traversal sequences.
-     *
-     * @param string|null $path Path
-     * @return bool
-     */
-    private function isValidFolder(?string $path): bool
-    {
-        if ($path === null || $path === '') {
-            return false;
-        }
-
-        // Block path traversal sequences
-        if (str_contains($path, '..') || str_contains($path, "\0")) {
-            return false;
-        }
-
-        $parts = explode(DS, $path);
-
-        return in_array($parts[0], $this->topFolders, true);
-    }
-
-    /**
-     * Validate that a resolved path is within the base path.
-     *
-     * @param string $fullPath The resolved path to validate.
-     * @return bool
-     */
-    private function isPathWithinBase(string $fullPath): bool
-    {
-        $realBase = realpath($this->basePath);
-        $realPath = realpath($fullPath);
-
-        if ($realBase === false || $realPath === false) {
-            return false;
-        }
-
-        return str_starts_with($realPath, $realBase . DS) || $realPath === $realBase;
-    }
-
-    /**
-     * Sanitize a filename by removing path separators and traversal sequences.
-     *
-     * @param string $name The filename to sanitize.
-     * @return string
-     */
-    private function sanitizeFilename(string $name): string
-    {
-        // Remove null bytes, path separators, and traversal sequences
-        $name = str_replace(["\0", '/', '\\', '..'], '', $name);
-
-        return basename($name);
-    }
-
-    /**
-     * Get unique filename
-     *
-     * @param string $fullPath Full path
-     * @param string $filename Filename
-     * @return string Fixed filename
-     */
-    private function getUniqueFilename(string $fullPath, string $filename): string
-    {
-        // Sanitize: use basename, replace spaces and unsafe chars
-        $filename = basename($filename);
-        $filename = preg_replace('/[^\w.\-()]/', '_', $filename) ?: $filename;
-
-        if (file_exists($fullPath . DS . $filename)) {
-            $match = [];
-            if (preg_match('/(.+)(\..{1,4})$/', $filename, $match)) {
-                $name = $match[1];
-                $ext = $match[2];
-            } else {
-                $name = $filename;
-                $ext = '';
-            }
-
-            $i = 0;
-            do {
-                $filename = $name . '(' . ++$i . ')' . $ext;
-            } while (file_exists($fullPath . DS . $filename));
-        }
-
-        return $filename;
-    }
-
-    /**
-     * Fix image size
-     *
-     * @param string $path Path
-     * @return bool
-     */
-    private function fixImageSize(string $path): bool
-    {
-        $config = Configure::read('Admin.FileManager.Images');
-
-        $maxWidth = $config['maxWidth'] ?? 2048;
-        $maxHeight = $config['maxHeight'] ?? 2048;
-
-        $size = @getimagesize($path);
-        if (!$size) {
-            return false;
-        }
-
-        $width = $size[0];
-        $height = $size[1];
-
-        if ($width == 0 || $height == 0) {
-            return false;
-        }
-
-        if ($width <= $maxWidth && $height <= $maxHeight) {
-            return true;
-        }
-
-        try {
-            $image = new Imagick($path);
-        } catch (ImagickException $e) {
-            return false;
-        }
-
-        $newWidth = $width;
-        $newHeight = $height;
-
-        if ($width > $maxWidth) {
-            $newWidth = $maxWidth;
-            $newHeight = (int)round($height * $maxWidth / $width);
-        }
-
-        if ($newHeight > $maxHeight) {
-            $newHeight = $maxHeight;
-            $newWidth = (int)round($width * $maxHeight / $height);
-        }
-
-        try {
-            $res = $image->resizeImage($newWidth, $newHeight, Imagick::FILTER_CATROM, 1, true);
-        } catch (ImagickException $e) {
-            $image->clear();
-
-            return false;
-        }
-
-        if (!$res) {
-            $image->clear();
-
-            return false;
-        }
-
-        try {
-            $fileType = $this->getFileType($path);
-            switch ($fileType) {
-                case 'png':
-                    $image->setImageCompressionQuality(($config['pngQuality'] ?? 6) * 10);
-                    break;
-                case 'webp':
-                    $image->setImageCompressionQuality($config['webpQuality'] ?? 90);
-                    break;
-                case 'jpg':
-                    $image->setImageCompressionQuality($config['jpegQuality'] ?? 90);
-                    break;
-            }
-            $image->writeImage($path);
-        } catch (ImagickException $e) {
-            $image->clear();
-
-            return false;
-        }
-
-        $image->clear();
-
-        return true;
-    }
-
-    /**
-     * Get file type
-     *
-     * @param string $file_path File path
-     * @return string File type
-     */
-    private function getFileType(string $file_path): string
-    {
-        return strtolower(pathinfo($file_path, PATHINFO_EXTENSION));
     }
 }
