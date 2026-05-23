@@ -34,7 +34,7 @@ class ButtonHelper extends Helper
      * - `variant`: Button variant (default: 'secondary')
      * - `icon`: Icon name
      * - `size`: Button size (default: '')
-     * - `style`: 'compact' or 'noraml' (default: 'noraml')
+     * - `style`: 'compact' or 'normal' (default: 'normal')
      * - `confirm`: confirmation message for post links
      *
      * @param string $title Title
@@ -67,8 +67,6 @@ class ButtonHelper extends Helper
         $size = $options['size'];
         $style = $options['style'];
         $confirm = $options['confirm'];
-
-        // TODO: check options
 
         $htmlOptions = [
             'class' => 'btn btn-' . $variant,
