@@ -9,6 +9,11 @@ return [
 
     'Auth' => [
 
+        'Authentication' => [
+            'sessionKey' => 'AdminAuth',
+            'cookieName' => 'AdminCookieAuth',
+        ],
+
         'Routes' => [
             'login' => '/admin/login',
             'logout' => '/admin/logout',
