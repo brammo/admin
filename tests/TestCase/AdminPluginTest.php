@@ -10,7 +10,6 @@ use Cake\Core\Container;
 use Cake\Core\PluginApplicationInterface;
 use Cake\Http\MiddlewareQueue;
 use Cake\TestSuite\TestCase;
-use PHPUnit\Framework\MockObject\MockObject;
 
 /**
  * Brammo\Admin\AdminPlugin Test Case
@@ -53,7 +52,7 @@ class AdminPluginTest extends TestCase
      */
     public function testBootstrap(): void
     {
-        /** @var PluginApplicationInterface&MockObject $app */
+        /** @var PluginApplicationInterface&\PHPUnit\Framework\MockObject\MockObject $app */
         $app = $this->createMock(PluginApplicationInterface::class);
 
         $app->expects($this->once())
