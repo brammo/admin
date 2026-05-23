@@ -4,9 +4,10 @@ Admin dashboard plugin for CakePHP 5 with Bootstrap UI integration.
 
 ## Requirements
 
-- PHP 8.1 or higher
-- CakePHP 5.0 or higher
-- CakePHP Authentication plugin 3.0 or higher
+- PHP 8.2 or higher
+- CakePHP 5.3 or higher
+- [brammo/auth](https://github.com/brammo/auth) ^1.1 (loaded automatically)
+- Optional: `ext-imagick` for image resize in the File Manager
 
 ## Installation
 
@@ -90,8 +91,11 @@ composer stan
 # Run Psalm (level 1)
 composer psalm
 
-# Run all checks (tests + static analysis)
+# Run tests, code style, and PHPStan
 composer check
+
+# Run PHPStan + Psalm
+composer analyse
 ```
 
 See [docs/PHPSTAN.md](docs/PHPSTAN.md) and [docs/PSALM.md](docs/PSALM.md) for detailed documentation.
@@ -100,8 +104,7 @@ See [docs/PHPSTAN.md](docs/PHPSTAN.md) and [docs/PSALM.md](docs/PSALM.md) for de
 
 - **PHPStan Level**: 8 (strictest)
 - **Psalm Level**: 1 (strictest)
-- **Test Coverage**: 45 tests, 120 assertions
-- **PHP Version**: 8.1+
+- **PHP Version**: 8.2+
 
 ## Directory Structure
 
@@ -116,7 +119,7 @@ brammo/admin/
 │   ├── FileManager/     # FileManagerService (filesystem logic)
 │   ├── View/            # View classes and helpers
 │   │   └── Helper/      # View helpers
-│   └── Plugin.php       # Plugin bootstrap
+│   └── AdminPlugin.php  # Plugin bootstrap
 ├── templates/           # Templates
 │   ├── element/         # Template elements
 │   ├── layout/          # Layouts
