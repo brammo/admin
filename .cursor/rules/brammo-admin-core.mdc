@@ -1,0 +1,21 @@
+---
+description: Brammo Admin plugin — core conventions and quality bar
+alwaysApply: true
+---
+
+# Brammo Admin (CakePHP 5 plugin)
+
+- Namespace `Brammo\Admin\`; plugin name `Brammo/Admin`; routes prefix `/admin`.
+- `declare(strict_types=1);` on every PHP file; type-hint parameters and returns.
+- User strings: `__d('brammo/admin', '...')` — update `resources/locales/` when adding UI text.
+- Templates/elements: `Brammo/Admin.*` (e.g. `Brammo/Admin.Form/image`). Assets: `Brammo/Admin.{css,js}` in `webroot/`.
+- Config: `Configure::read('Admin.*')` from `config/admin.php`; document new keys in `docs/CONFIGURATION.md`.
+- Depends on `brammo/auth` (auto-loaded). Controllers extend `AppController` → `AppView` + Authentication.
+
+Before finishing: `composer check` (tests, PHPCS, PHPStan on `src/`). Use `composer check-full` for Psalm.
+
+File manager logic lives in `src/FileManager/FileManagerService.php`; keep HTTP/flash/JSON in the controller.
+
+File manager: preserve `isValidFolder`, `sanitizeFilename`, `isPathWithinBase` — no path traversal regressions.
+
+Keep diffs small; follow patterns in existing helpers/controllers/tests.

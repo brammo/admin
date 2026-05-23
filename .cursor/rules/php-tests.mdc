@@ -1,0 +1,24 @@
+---
+description: PHPUnit and PHP patterns for Brammo Admin
+globs: "{src,tests}/**/*.php"
+alwaysApply: false
+---
+
+# PHP / tests
+
+## Adding features
+
+- Mirror `src/` under `tests/TestCase/` (`*Test.php`).
+- FileManager tests: isolated dir in `TMP`, restore `Configure` in `tearDown`, use `Laminas\Diactoros\UploadedFile` for uploads.
+- Helper tests: `new View()` + load `BootstrapUI.Html` if output uses icons.
+
+## FormHelper
+
+- Custom types via `control()`: `image` → element `Brammo/Admin.Form/image`; `html` → loads `Form/editor` once, adds class `editor`.
+- `imageControl` uses `$this->context()->val($fieldName)` — tests need `Form->create($entity)` with valid entity context, not reflection on removed helpers.
+
+## Do not
+
+- Reference private methods removed from production code in tests.
+- Use `in_array` without strict comparison for extension/MIME checks (use `in_array(..., true)`).
+- Commit without running PHPUnit when touching `src/` or `tests/`.
