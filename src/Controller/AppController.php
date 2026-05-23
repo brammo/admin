@@ -11,6 +11,8 @@ use Cake\I18n\I18n;
 
 /**
  * Admin Application Controller
+ *
+ * @psalm-suppress PropertyNotSetInConstructor
  */
 class AppController extends Controller
 {

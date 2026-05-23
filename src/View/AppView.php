@@ -22,7 +22,6 @@ use Cake\View\View;
  * @property \Brammo\Content\View\Helper\FlagHelper $Flag
  * @property \Brammo\Admin\View\Helper\ButtonHelper $Button
  * @property \Authentication\View\Helper\IdentityHelper $Identity
- * @extends \Cake\View\View<\Brammo\Admin\View\AppView>
  * @psalm-suppress PropertyNotSetInConstructor
  */
 class AppView extends View
