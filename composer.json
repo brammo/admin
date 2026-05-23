@@ -19,9 +19,9 @@
     "version": "1.3.0",
     "prefer-stable": true,
     "require": {
-        "php": ">=8.1",
+        "php": ">=8.2",
         "cakephp/cakephp": "^5.3",
-        "friendsofcake/bootstrap-ui": "^5.0",
+        "friendsofcake/bootstrap-ui": "^5.1",
         "brammo/bootstrap-ui": "^1.0",
         "brammo/content": "^1.0",
         "brammo/auth": "^1.1"
