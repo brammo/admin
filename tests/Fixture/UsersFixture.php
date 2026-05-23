@@ -13,7 +13,7 @@ class UsersFixture extends TestFixture
     /**
      * Import table schema
      *
-     * @var array
+     * @var array<string, mixed>
      */
     public array $import = ['table' => 'users', 'connection' => 'test'];
 

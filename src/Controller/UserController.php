@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Brammo\Admin\Controller;
 
+use Cake\Http\Response;
+
 /**
  * User Controller
  *
@@ -13,9 +15,9 @@ class UserController extends AppController
     /**
      * Profile action - View and edit logged user details
      *
-     * @return \Cake\Http\Response|null|void
+     * @return \Cake\Http\Response|null
      */
-    public function profile()
+    public function profile(): ?Response
     {
         $this->request->allowMethod(['get', 'post']);
 
@@ -52,5 +54,7 @@ class UserController extends AppController
         }
 
         $this->set(compact('user'));
+
+        return null;
     }
 }

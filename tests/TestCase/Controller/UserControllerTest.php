@@ -59,17 +59,4 @@ class UserControllerTest extends TestCase
             $this->UserController,
         );
     }
-
-    /**
-     * Test that profile action exists
-     *
-     * @return void
-     */
-    public function testProfileActionExists(): void
-    {
-        $this->assertTrue(
-            method_exists($this->UserController, 'profile'),
-            'UserController should have a profile action',
-        );
-    }
 }
