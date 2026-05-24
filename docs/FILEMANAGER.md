@@ -4,11 +4,22 @@ The Brammo Admin plugin includes a built-in File Manager for uploading, browsing
 
 ## Table of Contents
 
+- [Architecture](#architecture)
 - [Configuration](#configuration)
 - [Routes](#routes)
 - [Actions](#actions)
 - [Integration](#integration)
 - [Image Processing](#image-processing)
+
+---
+
+## Architecture
+
+Filesystem operations are implemented in `Brammo\Admin\FileManager\FileManagerService`. The service is constructed from `Configure::read('Admin.FileManager')` via `FileManagerService::fromConfigure()`.
+
+`FileManagerController` delegates uploads, browsing, deletes, and image resize to the service. The service instance is lazy-loaded on first use (and initialized in `initialize()` so configuration errors surface early).
+
+HTTP concerns (flash messages, JSON responses, layouts) remain in the controller.
 
 ---
 

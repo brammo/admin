@@ -34,9 +34,12 @@ public function bootstrap(): void
 
 ### View Helpers
 
-The plugin provides several view helpers to simplify UI development:
+The plugin provides view helpers to simplify UI development:
 
-- **ButtonHelper** - Generate Bootstrap-styled buttons with icons
+- **ButtonHelper** — Bootstrap-styled buttons with icons
+- **FormHelper** — extends BootstrapUI with `image` (File Manager picker) and `html` (TinyMCE) control types
+
+`AppView` also loads Brammo Content helpers (`Date`, `Image`, `Flag`) and `Authentication.Identity`.
 
 See [docs/HELPERS.md](docs/HELPERS.md) for detailed documentation and examples.
 
@@ -62,11 +65,14 @@ The plugin integrates with CakePHP Authentication and Brammo Auth plugin for use
 
 All configuration options are documented in [docs/CONFIGURATION.md](docs/CONFIGURATION.md), including:
 
-- Internationalization
+- Internationalization (`defaultLocale`)
+- Authentication defaults (`config/auth.php`)
+- TinyMCE editor (`Admin.Editor.apiKey`)
 - Brand customization
-- Home link
+- Home link and page title
 - Sidebar menu
 - Layout assets (CSS, JavaScript, fonts)
+- File Manager (`Admin.FileManager`)
 
 ## Development
 

@@ -2,6 +2,20 @@
 
 All configuration options are stored under the `Admin` key in your application's configuration.
 
+## Table of Contents
+
+- [Internationalization](#internationalization)
+- [Authentication](#authentication)
+- [Editor](#editor)
+- [Brand](#brand)
+- [Home Link](#home-link)
+- [Title](#title)
+- [Sidebar Menu](#sidebar-menu)
+- [Layout Assets](#layout-assets)
+- [File Manager](#file-manager)
+
+---
+
 ## Internationalization
 
 Set the default language for the admin panel:
@@ -11,6 +25,56 @@ Set the default language for the admin panel:
     'defaultLocale' => 'bg' // or any other locale
 ]
 ```
+
+The locale is applied in `AppController::beforeFilter()` when `defaultLocale` is non-empty.
+
+## Authentication
+
+The plugin ships `config/auth.php` with defaults for [brammo/auth](https://github.com/brammo/auth). Merge or copy into your application configuration:
+
+```php
+'Auth' => [
+    'Authentication' => [
+        'sessionKey' => 'AdminAuth',
+        'cookieName' => 'AdminCookieAuth',
+    ],
+    'Routes' => [
+        'login' => '/admin/login',
+        'logout' => '/admin/logout',
+        'loginRedirect' => '/admin',
+    ],
+    'Templates' => [
+        'login' => 'Brammo/Admin.User/login',
+    ],
+],
+```
+
+| Key | Default | Description |
+|-----|---------|-------------|
+| `Authentication.sessionKey` | `AdminAuth` | Session key for the authenticated admin user |
+| `Authentication.cookieName` | `AdminCookieAuth` | Remember-me cookie name |
+| `Routes.login` | `/admin/login` | Login URL |
+| `Routes.logout` | `/admin/logout` | Logout URL |
+| `Routes.loginRedirect` | `/admin` | Redirect after successful login |
+| `Templates.login` | `Brammo/Admin.User/login` | Login view template |
+
+Authentication middleware is registered in `AdminPlugin::middleware()`. Controllers load the `Authentication` component; views can use `$this->Identity` (see `AppView`).
+
+## Editor
+
+Rich text fields (`FormHelper` `html` control) use [TinyMCE](https://www.tiny.cloud/). Set an API key in configuration:
+
+```php
+'Admin' => [
+    'Editor' => [
+        'apiKey' => 'your-tinymce-api-key',
+    ],
+],
+```
+
+Get a free API key from [Tiny Cloud](https://www.tiny.cloud/). Without `apiKey`, the editor element throws a runtime exception when rendered.
+
+The editor integrates with the File Manager for image insertion (`browseImages` action). See [HELPERS.md](HELPERS.md#html-editor-control).
 
 ## Brand
 
@@ -321,6 +385,10 @@ Configure::write('Admin.Layout.fonts', [
     ],
 ]);
 ```
+
+## File Manager
+
+File Manager options live under `Admin.FileManager` (base path, allowed folders, file types, image resize settings). See [FILEMANAGER.md](FILEMANAGER.md) for the full option reference, routes, and security notes.
 
 ### Asset Loading Order
 

@@ -72,6 +72,7 @@ echo $this->Button->render('Download', '/files/download', [
 | `size` | string | `''` | Button size: `'sm'`, `'lg'`, or empty for default |
 | `style` | string | `'normal'` | Display style: `'normal'` or `'compact'` (icon only with title as tooltip) |
 | `confirm` | string | `''` | Confirmation message for post links |
+| `target` | string | `''` | Link `target` attribute (e.g. `'_blank'` for `preview()`) |
 
 ### Examples
 
