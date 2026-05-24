@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2026-04-24
+
+### Added
+- **FileManagerService**: Filesystem logic extracted from the controller (path validation, uploads, image resize)
+- **FormHelper**: `html` control type with TinyMCE WYSIWYG editor
+- Plugin authentication defaults in `config/auth.php` (`AdminAuth` session key, `AdminCookieAuth` cookie)
+- **AppView**: `Authentication.Identity` helper; `Brammo/Content` helpers (`Date`, `Image`, `Flag`)
+- Tests for `htmlControl()`; `FileManagerService` unit tests
+- `phpstan.neon` and `AGENTS.md` for static analysis and agent workflows
+- Optional `ext-imagick` suggested in Composer for File Manager image resize
+
+### Changed
+- Require **PHP 8.2+** and **CakePHP 5.3+**; upgrade `friendsofcake/bootstrap-ui` to ^5.1
+- Replace Summernote with **TinyMCE** for rich text (`Admin.Editor.apiKey` configuration)
+- **FileManagerController** uses lazy-loaded `FileManagerService::fromConfigure()`
+- Refactor **UserController** profile action
+- README: requirements, File Manager `imagick` note, and `composer analyse` workflow
+
 ## [1.3.0] - 2026-04-03
 
 ### Added
@@ -155,4 +173,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.1.0]: https://github.com/brammo/admin/releases/tag/v1.1.0
 [1.1.1]: https://github.com/brammo/admin/releases/tag/v1.1.1
 [1.2.0]: https://github.com/brammo/admin/releases/tag/v1.2.0
-[Unreleased]: https://github.com/brammo/admin/compare/v1.2.0...HEAD
+[1.3.0]: https://github.com/brammo/admin/releases/tag/v1.3.0
+[1.4.0]: https://github.com/brammo/admin/releases/tag/v1.3.0
+[Unreleased]: https://github.com/brammo/admin/compare/v1.4.0...HEAD
