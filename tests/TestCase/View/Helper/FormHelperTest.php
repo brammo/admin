@@ -491,4 +491,87 @@ class FormHelperTest extends TestCase
 
         $this->assertStringContainsString('class="form-control editor"', $result);
     }
+
+    /**
+     * Test control method with dateRange type renders from/to date inputs
+     *
+     * @return void
+     */
+    public function testControlWithDateRangeType(): void
+    {
+        $this->Form->create(null);
+
+        $result = $this->Form->control('period', [
+            'type' => 'dateRange',
+            'label' => 'Period',
+            'from' => ['value' => '2024-01-01'],
+            'to' => ['value' => '2024-12-31'],
+        ]);
+
+        $this->assertStringContainsString('input-group', $result);
+        $this->assertStringContainsString('name="period_from"', $result);
+        $this->assertStringContainsString('name="period_to"', $result);
+        $this->assertStringContainsString('type="date"', $result);
+        $this->assertStringContainsString('Period', $result);
+        $this->assertStringContainsString('value="2024-01-01"', $result);
+        $this->assertStringContainsString('value="2024-12-31"', $result);
+    }
+
+    /**
+     * Test dateRange returns only the input group without label or container
+     *
+     * @return void
+     */
+    public function testDateRangeReturnsInputGroupOnly(): void
+    {
+        $this->Form->create(null);
+
+        $result = $this->Form->dateRange('period', [
+            'from' => ['value' => '2024-01-01'],
+            'to' => ['value' => '2024-12-31'],
+        ]);
+
+        $this->assertStringStartsWith('<div class="input-group">', $result);
+        $this->assertStringEndsWith('</div>', $result);
+        $this->assertStringNotContainsString('<label', $result);
+        $this->assertStringNotContainsString('mb-3', $result);
+    }
+
+    /**
+     * Test dateRange with custom suffixes
+     *
+     * @return void
+     */
+    public function testDateRangeWithCustomSuffixes(): void
+    {
+        $this->Form->create(null);
+
+        $result = $this->Form->control('period', [
+            'type' => 'dateRange',
+            'suffixes' => ['start', 'end'],
+            'from' => ['value' => '2024-01-01'],
+            'to' => ['value' => '2024-12-31'],
+        ]);
+
+        $this->assertStringContainsString('name="period_start"', $result);
+        $this->assertStringContainsString('name="period_end"', $result);
+        $this->assertStringNotContainsString('name="period_from"', $result);
+        $this->assertStringNotContainsString('name="period_to"', $result);
+    }
+
+    /**
+     * Test control with dateRange wraps input group with label and container
+     *
+     * @return void
+     */
+    public function testControlWithDateRangeWrapsInputGroup(): void
+    {
+        $this->Form->create(null);
+
+        $result = $this->Form->control('date_range', ['type' => 'dateRange']);
+
+        $this->assertStringContainsString('input-group', $result);
+        $this->assertStringContainsString('<label', $result);
+        $this->assertStringContainsString('mb-3', $result);
+    }
 }

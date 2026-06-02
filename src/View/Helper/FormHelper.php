@@ -19,6 +19,7 @@ class FormHelper extends BootstrapFormHelper
      * Adds support for the following custom types:
      * - `image`: Renders an image picker/uploader using the Form/image element
      * - `html`: Renders a TinyMCE WYSIWYG editor using the Form/editor element
+     * - `dateRange`: Renders an input group with configurable `{name}_{suffix}` date fields
      *
      * @param string $fieldName The field name.
      * @param array<array-key, mixed> $options The options.
@@ -36,6 +37,16 @@ class FormHelper extends BootstrapFormHelper
 
         if ($options['type'] === 'html') {
             return $this->html($fieldName, $options);
+        }
+
+        if ($options['type'] === 'dateRange') {
+            unset($options['type']);
+            $input = $this->dateRange($fieldName, $options);
+
+            return parent::control($fieldName, [
+                'type' => 'date',
+                'input' => $input,
+            ] + $options);
         }
 
         return parent::control($fieldName, $options);
@@ -110,5 +121,73 @@ class FormHelper extends BootstrapFormHelper
         $options['type'] = 'textarea';
 
         return parent::control($fieldName, $options);
+    }
+
+    /**
+     * Generate a date range input group with `_from` and `_to` date fields.
+     *
+     * Returns only the `input-group` markup. Use `control()` with `type => dateRange`
+     * for label and container wrapping.
+     *
+     * Options:
+     * - `suffixes`: Field name suffixes for the range ends. Default `['from', 'to']` (fields
+     *   `{name}_from`, `{name}_to`). Pass a list e.g. `['start', 'end']` or associative
+     *   `['from' => 'start', 'to' => 'end']`.
+     * - `from`: Extra options passed to the first date input
+     * - `to`: Extra options passed to the second date input
+     *
+     * @param string $fieldName The field name (without range suffix).
+     * @param array<string, mixed> $options The options.
+     * @return string Generated HTML.
+     */
+    public function dateRange(string $fieldName, array $options = []): string
+    {
+        unset($options['type'], $options['label'], $options['error']);
+
+        [$fromSuffix, $toSuffix] = $this->parseDateRangeSuffixes($options);
+
+        $fromField = $fieldName . '_' . $fromSuffix;
+        $toField = $fieldName . '_' . $toSuffix;
+
+        $fromOptions = is_array($options['from'] ?? null) ? $options['from'] : [];
+        $toOptions = is_array($options['to'] ?? null) ? $options['to'] : [];
+        unset($options['from'], $options['to']);
+
+        $fromInput = $this->date($fromField, array_merge($options, $fromOptions));
+        $toInput = $this->date($toField, array_merge($options, $toOptions));
+
+        return $this->Html->tag('div', $fromInput . $toInput, ['class' => 'input-group']);
+    }
+
+    /**
+     * Resolve date range field suffixes from options.
+     *
+     * @param array<string, mixed> $options Control options; `suffixes` is removed when set.
+     * @return array{0: string, 1: string} First and second field suffix (without leading underscore).
+     */
+    protected function parseDateRangeSuffixes(array &$options): array
+    {
+        $suffixes = $options['suffixes'] ?? null;
+        unset($options['suffixes']);
+
+        if ($suffixes === null) {
+            return ['from', 'to'];
+        }
+
+        if (is_array($suffixes) && array_is_list($suffixes)) {
+            return [
+                is_string($suffixes[0] ?? null) ? $suffixes[0] : 'from',
+                is_string($suffixes[1] ?? null) ? $suffixes[1] : 'to',
+            ];
+        }
+
+        if (is_array($suffixes)) {
+            return [
+                is_string($suffixes['from'] ?? null) ? $suffixes['from'] : 'from',
+                is_string($suffixes['to'] ?? null) ? $suffixes['to'] : 'to',
+            ];
+        }
+
+        return ['from', 'to'];
     }
 }

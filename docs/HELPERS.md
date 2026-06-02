@@ -193,6 +193,36 @@ Configure a TinyMCE API key in `Admin.Editor.apiKey` (see [CONFIGURATION.md](CON
 
 Supports standard BootstrapUI textarea options (`label`, `class`, etc.). The helper adds the `editor` CSS class automatically; additional classes are merged.
 
+### Date Range Control
+
+The `dateRange` type renders two `type="date"` fields in a Bootstrap input group. By default they are named `{name}_from` and `{name}_to`. `control()` adds the label and form-group wrapper like other types; `dateRange()` returns only the input group.
+
+#### Basic Usage
+
+```php
+echo $this->Form->control('period', ['type' => 'dateRange', 'label' => 'Period']);
+
+// Custom field suffixes (period_start, period_end):
+echo $this->Form->control('period', [
+    'type' => 'dateRange',
+    'suffixes' => ['start', 'end'],
+]);
+
+// Input group only (no label/container):
+echo $this->Form->dateRange('period');
+```
+
+#### Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `label` | string | (via `control()`) | Label for the control when using `control()` |
+| `suffixes` | array | `['from', 'to']` | Suffixes for the two fields. List `['start', 'end']` or `['from' => 'start', 'to' => 'end']` |
+| `from` | array | `[]` | Extra options for the first date input |
+| `to` | array | `[]` | Extra options for the second date input |
+
+Other options (e.g. `class`, `required`) are applied to both date inputs.
+
 ## Loading Helpers
 
 Helpers are automatically available when using the plugin's layouts. To use them in custom views:

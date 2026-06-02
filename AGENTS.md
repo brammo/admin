@@ -40,7 +40,7 @@ docs/                        HELPERS, FILEMANAGER, CONFIGURATION, PHPSTAN, PSALM
 - **Views**: Controllers set `AppView`; layout `Brammo/Admin.default`
 - **Config**: Read with `Configure::read('Admin.*')`; defaults in `config/admin.php`
 - **File manager**: Requires `Admin.FileManager` (basePath, topFolders, fileTypes); path validation via `isValidFolder` / `isPathWithinBase` / `sanitizeFilename`
-- **FormHelper**: Extends BootstrapUI; custom `control` types: `image`, `html` (TinyMCE)
+- **FormHelper**: Extends BootstrapUI; custom `control` types: `image`, `html` (TinyMCE), `dateRange`
 
 ## Commands
 
