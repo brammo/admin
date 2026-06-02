@@ -145,7 +145,7 @@ class FormHelperTest extends TestCase
         $entity->setSource('Articles');
         $this->Form->create($entity, ['context' => ['table' => 'Articles']]);
 
-        $result = $this->Form->imageControl('image');
+        $result = $this->Form->image('image');
 
         $this->assertStringContainsString('form-image', $result);
         // ID is dynamically generated with uniqid()
@@ -164,7 +164,7 @@ class FormHelperTest extends TestCase
         $entity->setSource('Articles');
         $this->Form->create($entity, ['context' => ['table' => 'Articles']]);
 
-        $result = $this->Form->imageControl('thumbnail', [
+        $result = $this->Form->image('thumbnail', [
             'folder' => 'uploads',
         ]);
 
@@ -184,7 +184,7 @@ class FormHelperTest extends TestCase
         $entity->setSource('Articles');
         $this->Form->create($entity, ['context' => ['table' => 'Articles']]);
 
-        $result = $this->Form->imageControl('photo', [
+        $result = $this->Form->image('photo', [
             'label' => 'Profile Photo',
         ]);
 
@@ -202,7 +202,7 @@ class FormHelperTest extends TestCase
         $entity->setSource('Articles');
         $this->Form->create($entity, ['context' => ['table' => 'Articles']]);
 
-        $result = $this->Form->imageControl('image', [
+        $result = $this->Form->image('image', [
             'allowEmpty' => false,
         ]);
 
@@ -220,7 +220,7 @@ class FormHelperTest extends TestCase
         $entity->setSource('Articles');
         $this->Form->create($entity, ['context' => ['table' => 'Articles']]);
 
-        $result = $this->Form->imageControl('image', [
+        $result = $this->Form->image('image', [
             'allowEmpty' => true,
         ]);
 
@@ -238,7 +238,7 @@ class FormHelperTest extends TestCase
         $entity->setSource('Articles');
         $this->Form->create($entity, ['context' => ['table' => 'Articles']]);
 
-        $result = $this->Form->imageControl('image');
+        $result = $this->Form->image('image');
 
         $this->assertStringContainsString('form-image', $result);
         $this->assertStringContainsString('name="image"', $result);
@@ -255,7 +255,7 @@ class FormHelperTest extends TestCase
         $entity->setSource('Articles');
         $this->Form->create($entity, ['context' => ['table' => 'Articles']]);
 
-        $result = $this->Form->imageControl('featured_image');
+        $result = $this->Form->image('featured_image');
 
         // Label should be generated from field name
         $this->assertStringContainsString('Featured image', $result);
@@ -270,7 +270,7 @@ class FormHelperTest extends TestCase
     {
         $this->Form->create(null);
 
-        $result = $this->Form->imageControl('image');
+        $result = $this->Form->image('image');
 
         $this->assertStringContainsString('form-image', $result);
         $this->assertStringContainsString('name="image"', $result);
@@ -290,7 +290,7 @@ class FormHelperTest extends TestCase
             ],
         ]);
 
-        $result = $this->Form->imageControl('image');
+        $result = $this->Form->image('image');
 
         $this->assertStringContainsString('form-image', $result);
         $this->assertStringContainsString('name="image"', $result);
@@ -302,13 +302,13 @@ class FormHelperTest extends TestCase
      *
      * @return void
      */
-    public function testImageControlFolderFromImagePath(): void
+    public function testImageFolderFromImagePath(): void
     {
         $entity = new Entity(['image' => '/images/gallery/test.jpg']);
         $entity->setSource('Articles');
         $this->Form->create($entity, ['context' => ['table' => 'Articles']]);
 
-        $result = $this->Form->imageControl('image');
+        $result = $this->Form->image('image');
 
         // Should contain form-image with data-folder attribute
         $this->assertStringContainsString('form-image', $result);
@@ -320,13 +320,13 @@ class FormHelperTest extends TestCase
      *
      * @return void
      */
-    public function testImageControlShowsPreview(): void
+    public function testImageShowsPreview(): void
     {
         $entity = new Entity(['image' => '/images/photo.jpg']);
         $entity->setSource('Articles');
         $this->Form->create($entity, ['context' => ['table' => 'Articles']]);
 
-        $result = $this->Form->imageControl('image');
+        $result = $this->Form->image('image');
 
         // Should contain image preview
         $this->assertStringContainsString('image-preview', $result);
@@ -338,13 +338,13 @@ class FormHelperTest extends TestCase
      *
      * @return void
      */
-    public function testImageControlContainsButtons(): void
+    public function testImageContainsButtons(): void
     {
         $entity = new Entity(['image' => '']);
         $entity->setSource('Articles');
         $this->Form->create($entity, ['context' => ['table' => 'Articles']]);
 
-        $result = $this->Form->imageControl('image');
+        $result = $this->Form->image('image');
 
         // Should contain action buttons
         $this->assertStringContainsString('class="btn btn-info btn-sm select"', $result);
@@ -357,13 +357,13 @@ class FormHelperTest extends TestCase
      *
      * @return void
      */
-    public function testImageControlHidesDeleteWhenEmpty(): void
+    public function testImageHidesDeleteWhenEmpty(): void
     {
         $entity = new Entity(['image' => '']);
         $entity->setSource('Articles');
         $this->Form->create($entity, ['context' => ['table' => 'Articles']]);
 
-        $result = $this->Form->imageControl('image');
+        $result = $this->Form->image('image');
 
         // Delete button should be hidden when no image
         $this->assertMatchesRegularExpression('/delete"[^>]*style="display:none"/', $result);
@@ -374,13 +374,13 @@ class FormHelperTest extends TestCase
      *
      * @return void
      */
-    public function testImageControlShowsDeleteWhenImageExists(): void
+    public function testImageShowsDeleteWhenImageExists(): void
     {
         $entity = new Entity(['image' => '/images/test.jpg']);
         $entity->setSource('Articles');
         $this->Form->create($entity, ['context' => ['table' => 'Articles']]);
 
-        $result = $this->Form->imageControl('image');
+        $result = $this->Form->image('image');
 
         // Delete button should be visible (no style="display:none" in delete link)
         $this->assertMatchesRegularExpression('/class="btn btn-danger btn-sm delete"\s*>/', $result);
@@ -424,7 +424,7 @@ class FormHelperTest extends TestCase
         $entity->setSource('Articles');
         $this->Form->create($entity, ['context' => ['table' => 'Articles']]);
 
-        $result = $this->Form->imageControl('image');
+        $result = $this->Form->image('image');
 
         // Filename display should be hidden
         $this->assertMatchesRegularExpression('/class="[^"]*filename[^"]*"[^>]*style="display:none"/', $result);
@@ -441,7 +441,7 @@ class FormHelperTest extends TestCase
         $entity->setSource('Articles');
         $this->Form->create($entity, ['context' => ['table' => 'Articles']]);
 
-        $result = $this->Form->imageControl('image');
+        $result = $this->Form->image('image');
 
         // Filename should be visible (without display:none)
         $this->assertStringContainsString('/images/test.jpg</div>', $result);
@@ -472,8 +472,8 @@ class FormHelperTest extends TestCase
     {
         $this->Form->create(null);
 
-        $this->Form->htmlControl('intro');
-        $this->Form->htmlControl('body');
+        $this->Form->html('intro');
+        $this->Form->html('body');
 
         $this->assertTrue((bool)$this->View->get('_editorLoaded'));
     }
@@ -487,7 +487,7 @@ class FormHelperTest extends TestCase
     {
         $this->Form->create(null);
 
-        $result = $this->Form->htmlControl('content', ['class' => 'form-control']);
+        $result = $this->Form->html('content', ['class' => 'form-control']);
 
         $this->assertStringContainsString('class="form-control editor"', $result);
     }

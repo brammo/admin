@@ -31,11 +31,11 @@ class FormHelper extends BootstrapFormHelper
         ];
 
         if ($options['type'] === 'image') {
-            return $this->imageControl($fieldName, $options);
+            return $this->image($fieldName, $options);
         }
 
         if ($options['type'] === 'html') {
-            return $this->htmlControl($fieldName, $options);
+            return $this->html($fieldName, $options);
         }
 
         return parent::control($fieldName, $options);
@@ -53,7 +53,7 @@ class FormHelper extends BootstrapFormHelper
      * @param array<string, mixed> $options The options.
      * @return string Generated HTML.
      */
-    public function imageControl(string $fieldName, array $options = []): string
+    public function image(string $fieldName, array $options = []): string
     {
         $defaults = [
             'folder' => 'images',
@@ -90,7 +90,7 @@ class FormHelper extends BootstrapFormHelper
      * @param array<string, mixed> $options The options.
      * @return string Generated HTML.
      */
-    public function htmlControl(string $fieldName, array $options = []): string
+    public function html(string $fieldName, array $options = []): string
     {
         // Include the editor element (TinyMCE initialization)
         if (empty($this->_View->get('_editorLoaded'))) {
