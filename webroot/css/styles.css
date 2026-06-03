@@ -242,7 +242,7 @@ legend {
 
 .card {
   --bs-card-bg: #fff;  
-  --bs-card-cap-bg: rgba(0, 0, 0, 0);
+  --bs-card-cap-bg: #fff;
   --bs-card-cap-padding-y: 1rem;
   --bs-card-cap-color: var(--bs-secondary-color);
   --bs-card-border-color: var(--bs-border-color);
@@ -257,6 +257,7 @@ legend {
 
 [data-bs-theme="dark"] .card {
   --bs-card-bg: var(--ba-dark-color);
+  --bs-card-cap-bg: var(--ba-dark-color);
 }
 
 /* Breadcrumb */
@@ -787,6 +788,7 @@ dd {
     padding: 1rem;
   }
 }
+
 /**
  * File Browser
  */
