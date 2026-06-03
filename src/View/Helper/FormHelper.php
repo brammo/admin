@@ -133,6 +133,8 @@ class FormHelper extends BootstrapFormHelper
      * - `suffixes`: Field name suffixes for the range ends. Default `['from', 'to']` (fields
      *   `{name}_from`, `{name}_to`). Pass a list e.g. `['start', 'end']` or associative
      *   `['from' => 'start', 'to' => 'end']`.
+     * - `value`: Range values as `[$from, $to]` or `['from' => $from, 'to' => $to]`
+     * - `valueFrom`, `valueTo`: Values for the first and second date inputs
      * - `from`: Extra options passed to the first date input
      * - `to`: Extra options passed to the second date input
      *
@@ -145,6 +147,7 @@ class FormHelper extends BootstrapFormHelper
         unset($options['type'], $options['label'], $options['error']);
 
         [$fromSuffix, $toSuffix] = $this->parseDateRangeSuffixes($options);
+        [$fromValue, $toValue] = $this->parseDateRangeValues($options);
 
         $fromField = $fieldName . '_' . $fromSuffix;
         $toField = $fieldName . '_' . $toSuffix;
@@ -152,6 +155,13 @@ class FormHelper extends BootstrapFormHelper
         $fromOptions = is_array($options['from'] ?? null) ? $options['from'] : [];
         $toOptions = is_array($options['to'] ?? null) ? $options['to'] : [];
         unset($options['from'], $options['to']);
+
+        if ($fromValue !== null) {
+            $fromOptions += ['value' => $fromValue];
+        }
+        if ($toValue !== null) {
+            $toOptions += ['value' => $toValue];
+        }
 
         $fromInput = $this->date($fromField, array_merge($options, $fromOptions));
         $toInput = $this->date($toField, array_merge($options, $toOptions));
@@ -189,5 +199,50 @@ class FormHelper extends BootstrapFormHelper
         }
 
         return ['from', 'to'];
+    }
+
+    /**
+     * Resolve date range values from options.
+     *
+     * @param array<string, mixed> $options Control options; value keys are removed when set.
+     * @return array{0: mixed, 1: mixed} First and second date values, or null when not set.
+     */
+    protected function parseDateRangeValues(array &$options): array
+    {
+        $fromValue = null;
+        $toValue = null;
+
+        $value = $options['value'] ?? null;
+        if ($value !== null) {
+            unset($options['value']);
+            if (is_array($value)) {
+                if (array_is_list($value)) {
+                    if (array_key_exists(0, $value)) {
+                        $fromValue = $value[0];
+                    }
+                    if (array_key_exists(1, $value)) {
+                        $toValue = $value[1];
+                    }
+                } else {
+                    if (array_key_exists('from', $value)) {
+                        $fromValue = $value['from'];
+                    }
+                    if (array_key_exists('to', $value)) {
+                        $toValue = $value['to'];
+                    }
+                }
+            }
+        }
+
+        if (array_key_exists('valueFrom', $options)) {
+            $fromValue = $options['valueFrom'];
+            unset($options['valueFrom']);
+        }
+        if (array_key_exists('valueTo', $options)) {
+            $toValue = $options['valueTo'];
+            unset($options['valueTo']);
+        }
+
+        return [$fromValue, $toValue];
     }
 }

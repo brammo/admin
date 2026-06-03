@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **FormHelper** (`dateRange`): `value` as `[$from, $to]` or `['from' => …, 'to' => …]`; `valueFrom` / `valueTo` for separate defaults
+
+### Changed
+- Refactor pageHeader layout and update styles for improved responsiveness and padding adjustments in page-header and page-content sections
+
 ## [1.5.0] - 2026-06-02
 
 ### Added

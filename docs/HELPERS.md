@@ -208,6 +208,21 @@ echo $this->Form->control('period', [
     'suffixes' => ['start', 'end'],
 ]);
 
+// Values (list, associative, or separate keys):
+echo $this->Form->control('period', [
+    'type' => 'dateRange',
+    'value' => ['2024-01-01', '2024-12-31'],
+]);
+echo $this->Form->control('period', [
+    'type' => 'dateRange',
+    'value' => ['from' => '2024-01-01', 'to' => '2024-12-31'],
+]);
+echo $this->Form->control('period', [
+    'type' => 'dateRange',
+    'valueFrom' => '2024-01-01',
+    'valueTo' => '2024-12-31',
+]);
+
 // Input group only (no label/container):
 echo $this->Form->dateRange('period');
 ```
@@ -218,8 +233,11 @@ echo $this->Form->dateRange('period');
 |--------|------|---------|-------------|
 | `label` | string | (via `control()`) | Label for the control when using `control()` |
 | `suffixes` | array | `['from', 'to']` | Suffixes for the two fields. List `['start', 'end']` or `['from' => 'start', 'to' => 'end']` |
-| `from` | array | `[]` | Extra options for the first date input |
-| `to` | array | `[]` | Extra options for the second date input |
+| `value` | array | — | `[$from, $to]` or `['from' => $from, 'to' => $to]` |
+| `valueFrom` | mixed | — | Value for the first date input (overrides `value['from']` / list index 0) |
+| `valueTo` | mixed | — | Value for the second date input (overrides `value['to']` / list index 1) |
+| `from` | array | `[]` | Extra options for the first date input (overrides range `value` for that field) |
+| `to` | array | `[]` | Extra options for the second date input (overrides range `value` for that field) |
 
 Other options (e.g. `class`, `required`) are applied to both date inputs.
 

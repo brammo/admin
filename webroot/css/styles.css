@@ -727,24 +727,17 @@ dd {
 
   .main-content {
     margin-left: var(--ba-sidebar-width);
-    padding: 1rem;
   }
 
   .sidebar-collapse .main-content {
     margin-left: var(--ba-sidebar-mini-width);
-  }
-
-  @media (min-width: 992px) {
-    .main-content {
-      padding: 1.5rem;
-    }
   }
 }
 
 /* Page header */
 
 .page-header {
-  margin-bottom: 1rem;
+  padding: 1rem;
 }
 
 .page-header h1 {
@@ -766,13 +759,6 @@ dd {
 
 @media (min-width: 992px) {
 
-  .page-header {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    margin-bottom: 1.5rem;
-  }
-
   .page-header h1 {
     font-size: 2rem;
   }
@@ -788,6 +774,19 @@ dd {
   }
 }
 
+/* Page content */
+
+.page-content {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+@media (min-width: 992px) {
+
+  .page-content {
+    padding: 1rem;
+  }
+}
 /**
  * File Browser
  */

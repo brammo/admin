@@ -235,4 +235,66 @@ class ButtonHelper extends Helper
             'target' => '_blank',
         ]);
     }
+
+    /**
+     * Renders a filter button
+     *
+     * @param array<string, mixed> $options Options
+     * @return string HTML code
+     */
+    public function filter(array $options = []): string
+    {
+        $defaults = [
+            'type' => 'submit',
+            'variant' => 'secondary',
+            'icon' => 'filter',
+            'size' => '',
+            'style' => 'normal',
+            'title' => __d('brammo/admin', 'Filter'),
+        ];
+
+        $options += $defaults;
+
+        $title = $options['title'];
+        unset($options['title']);
+
+        $variant = $options['variant'];
+        $icon = $options['icon'];
+        $size = $options['size'];
+        $style = $options['style'];
+
+        $htmlOptions = [
+            'class' => 'text-nowrap btn btn-' . $variant,
+        ];
+
+        if ($style == 'compact') {
+            $htmlOptions['title'] = $title;
+            $title = '';
+        }
+
+        if ($icon) {
+            $title = $this->Html->icon($icon) . ' ' . h($title);
+            $htmlOptions['escapeTitle'] = false;
+        }
+
+        if ($size) {
+            $htmlOptions['class'] .= ' btn-' . $size;
+        }
+
+        return $this->Form->button($title, $htmlOptions);
+    }
+
+    /**
+     * Renders a compact filter button
+     *
+     * @param array<string, mixed> $options Options
+     * @return string HTML code
+     */
+    public function filterCompact(array $options = []): string
+    {
+        return $this->filter($options + [
+            'size' => 'sm',
+            'style' => 'compact',
+        ]);
+    }
 }

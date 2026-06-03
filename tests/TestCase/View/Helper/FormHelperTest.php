@@ -560,6 +560,78 @@ class FormHelperTest extends TestCase
     }
 
     /**
+     * Test dateRange with value as list
+     *
+     * @return void
+     */
+    public function testDateRangeWithValueList(): void
+    {
+        $this->Form->create(null);
+
+        $result = $this->Form->dateRange('period', [
+            'value' => ['2024-01-01', '2024-12-31'],
+        ]);
+
+        $this->assertStringContainsString('value="2024-01-01"', $result);
+        $this->assertStringContainsString('value="2024-12-31"', $result);
+    }
+
+    /**
+     * Test dateRange with value as associative array
+     *
+     * @return void
+     */
+    public function testDateRangeWithValueAssociative(): void
+    {
+        $this->Form->create(null);
+
+        $result = $this->Form->dateRange('period', [
+            'value' => ['from' => '2024-02-01', 'to' => '2024-11-30'],
+        ]);
+
+        $this->assertStringContainsString('value="2024-02-01"', $result);
+        $this->assertStringContainsString('value="2024-11-30"', $result);
+    }
+
+    /**
+     * Test dateRange with valueFrom and valueTo
+     *
+     * @return void
+     */
+    public function testDateRangeWithValueFromAndValueTo(): void
+    {
+        $this->Form->create(null);
+
+        $result = $this->Form->control('period', [
+            'type' => 'dateRange',
+            'valueFrom' => '2024-03-01',
+            'valueTo' => '2024-10-31',
+        ]);
+
+        $this->assertStringContainsString('value="2024-03-01"', $result);
+        $this->assertStringContainsString('value="2024-10-31"', $result);
+    }
+
+    /**
+     * Test per-field from/to options override range value
+     *
+     * @return void
+     */
+    public function testDateRangeFromToOptionsOverrideValue(): void
+    {
+        $this->Form->create(null);
+
+        $result = $this->Form->dateRange('period', [
+            'value' => ['2024-01-01', '2024-12-31'],
+            'from' => ['value' => '2024-06-01'],
+        ]);
+
+        $this->assertStringContainsString('value="2024-06-01"', $result);
+        $this->assertStringContainsString('value="2024-12-31"', $result);
+        $this->assertStringNotContainsString('value="2024-01-01"', $result);
+    }
+
+    /**
      * Test control with dateRange wraps input group with label and container
      *
      * @return void

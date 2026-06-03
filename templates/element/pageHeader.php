@@ -12,11 +12,11 @@ if ($this->get('hidePageHeader')) {
 $pageHeading = $this->get('pageHeading', $this->fetch('title'));
 ?>
 <section class="page-header">
-    <div>
-        <?= $this->element('Brammo/Admin.breadcrumbs') ?>
+    <?= $this->element('Brammo/Admin.breadcrumbs') ?>
+    <div class="d-lg-flex align-items-start">
         <h1><?= h($pageHeading) ?></h1>
-    </div>
-    <div class="buttons">
-        <?= $this->fetch('buttons') ?>
+        <div class="buttons">
+            <?= $this->fetch('buttons') ?>
+        </div>
     </div>
 </section>
