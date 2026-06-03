@@ -7,5 +7,5 @@
 
 ?>
 <button id="sidebar-toggle" type="button" aria-label="<?= __d('brammo/admin', 'Toggle Menu') ?>">
-    <?= $this->Html->icon('list') ?>
+    <?= $this->Html->icon('layout-sidebar-inset') ?>
 </button>
