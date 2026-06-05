@@ -6,6 +6,7 @@ The Brammo Admin plugin provides several view helpers to simplify building Boots
 
 - [ButtonHelper](#buttonhelper)
 - [FormHelper](#formhelper)
+  - [Translations element](#translations-element)
 
 ---
 
@@ -240,6 +241,61 @@ echo $this->Form->dateRange('period');
 | `to` | array | `[]` | Extra options for the second date input (overrides range `value` for that field) |
 
 Other options (e.g. `class`, `required`) are applied to both date inputs.
+
+### Translations element
+
+The `Form/translations` element renders translatable fields in locale tabs. Each tab shows the same controls; non-default locales use field names prefixed with `_translations.{locale}.` for [CakePHP Translate](https://book.cakephp.org/5/en/orm/behaviors/translate.html) behavior.
+
+#### Basic usage
+
+```php
+echo $this->Form->create($article);
+
+echo $this->element('Brammo/Admin.Form/translations', [
+    'controls' => [
+        'title' => ['label' => 'Title'],
+        'slug' => ['label' => 'Slug'],
+        'body' => ['type' => 'html', 'label' => 'Content'],
+    ],
+]);
+
+echo $this->Form->end();
+```
+
+The entity should use `TranslateBehavior` (or equivalent `_translations` data) so values bind correctly. On the default locale tab, fields are named `title`, `body`, etc. On other locale tabs they become `_translations.bg.title`, `_translations.bg.body`, and so on.
+
+#### Locale configuration
+
+Locales are resolved in this order:
+
+1. `Configure::read('App.locales')` — recommended; associative array of locale code to display name
+2. `Configure::read('I18n.locales')` — fallback
+3. `[Configure::read('App.defaultLocale')]` — single-locale fallback
+
+The default locale is `Configure::read('App.defaultLocale')`, or `en` when unset. Tab labels use the display name from the locales array; tab icons come from `FlagHelper` (`gb` for `en`, otherwise the locale code).
+
+Example application config:
+
+```php
+'App' => [
+    'defaultLocale' => 'bg',
+    'locales' => [
+        'bg' => 'Български',
+        'en' => 'English',
+    ],
+],
+```
+
+#### Element variables
+
+| Variable | Type | Required | Description |
+|----------|------|----------|-------------|
+| `controls` | `array<string, array>` | yes | Field names mapped to options passed to `Form->control()` (same types as elsewhere: `html`, `image`, `dateRange`, etc.) |
+
+#### Requirements
+
+- Active form context (`Form->create()` must be open)
+- `NavHelper` and `FlagHelper` (loaded automatically in plugin `AppView`)
 
 ## Loading Helpers
 

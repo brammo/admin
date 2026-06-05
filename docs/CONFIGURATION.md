@@ -28,6 +28,20 @@ Set the default language for the admin panel:
 
 The locale is applied in `AppController::beforeFilter()` when `defaultLocale` is non-empty.
 
+For translatable entity forms, configure locales in the host application (used by the `Form/translations` element — see [HELPERS.md — Translations element](HELPERS.md#translations-element)):
+
+```php
+'App' => [
+    'defaultLocale' => 'bg',
+    'locales' => [
+        'bg' => 'Български',
+        'en' => 'English',
+    ],
+],
+```
+
+The element reads `App.locales`, then `I18n.locales`, then falls back to a single tab for `App.defaultLocale`.
+
 ## Authentication
 
 The plugin ships `config/auth.php` with defaults for [brammo/auth](https://github.com/brammo/auth). Merge or copy into your application configuration:
