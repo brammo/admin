@@ -362,7 +362,7 @@ const FileBrowser = (function() {
 
         const filterForm = e.target.closest(this.modalId + ' .filter-form');
         if (!filterForm) return false;
-
+        
         e.preventDefault();
         const filterInput = document.querySelector(this.modalId + ' .filter-input');
         const filter = filterInput ? filterInput.value : '';

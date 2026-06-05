@@ -126,7 +126,8 @@ $action = $this->request->getParam('action');
         <div class="ms-lg-2">
             <?= $this->Form->create(null, [
                     'url' => [
-                        'action' => $action
+                        'action' => $action,
+                        '?' => compact('folder', 'target')
                     ], 
                     'type' => 'get', 
                     'class' => 'filter-form', 
@@ -138,7 +139,7 @@ $action = $this->request->getParam('action');
                 <div class="input-group">
                     <?= $this->Form->text('filter', [
                             'value' => $filter, 
-                            'class' => 'form-control form-control-sm', 
+                            'class' => 'form-control form-control-sm filter-input', 
                             'placeholder' => __d('brammo/admin', 'Filter by name')
                         ]) 
                     ?>
