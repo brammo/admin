@@ -3,12 +3,15 @@
  * FileManager images template
  * 
  * @var \Brammo\Admin\View\AppView $this
+ * @var string $type
  * @var string $folder
- * @var string $target
  * @var string $filter
+ * @var array<string, mixed> $items
  */
 
 $this->assign('title', __d('brammo/admin', 'File Manager'));
+
+$target = $this->request->getQuery('target') ?: '';
 
 $path = '/';
 if ($folder) {
@@ -39,14 +42,14 @@ $action = $this->request->getParam('action');
                             ],
                             [
                                 'escape' => false, 
-                                'class' => 'folder btn btn-light bg-white btn-sm', 
+                                'class' => 'folder btn btn-light btn-sm', 
                                 'title' => __d('brammo/admin', 'Back')
                             ]
                         );
                     ?>
                 </div>
             <?php endif ?>
-            <div class="me-2 py-1 px-3 bg-white rounded fw-bolder">
+            <div class="me-2 py-1 px-3 rounded fw-bolder">
                 <?= $this->Html->icon('folder') ?> /<?= $folder ?>
             </div>
             <?php if ($folder): ?>
@@ -182,7 +185,7 @@ $action = $this->request->getParam('action');
                 </div>
             <?php else : ?>
                 <div class="card card-image">
-                    <div class="card-img-top ratio ratio-4x3 bg-dark" style="background-image:url('<?= h($path . $item['filename']) ?>')"></div>
+                    <div class="card-img-top ratio ratio-4x3" style="background-image:url('<?= h($path . $item['filename']) ?>')"></div>
                     <div class="card-body">
                         <?= $this->Html->link(
                             $item['filename'], 
@@ -206,3 +209,19 @@ $action = $this->request->getParam('action');
         'action' => $action
     ]) 
 ?>
+<?php if (!$this->request->is('ajax')): ?>
+    <?php $this->append('script') ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const selectFile = document.querySelectorAll('.select');
+            selectFile.forEach(function(select) {
+                select.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const url = select.getAttribute('href');
+                    window.parent.postMessage({mceAction: 'customAction', data: {img: url}}, '*');
+                });
+            });
+        });
+    </script>
+    <?php $this->end() ?>
+<?php endif ?>

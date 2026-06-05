@@ -72,9 +72,7 @@ class FileManagerController extends AppController
      */
     public function browseImages(): ?Response
     {
-        if ($this->request->is('ajax')) {
-            $this->viewBuilder()->setLayout('ajax');
-        }
+        $this->viewBuilder()->setLayout($this->request->is('ajax') ? 'ajax' : 'simple');
 
         $this->sortField = 'date';
         $this->sortDirection = 'desc';
@@ -90,9 +88,7 @@ class FileManagerController extends AppController
      */
     public function browseFiles(): ?Response
     {
-        if ($this->request->is('ajax')) {
-            $this->viewBuilder()->setLayout('ajax');
-        }
+        $this->viewBuilder()->setLayout($this->request->is('ajax') ? 'ajax' : 'simple');
 
         $this->sortField = 'date';
         $this->sortDirection = 'desc';
@@ -430,9 +426,7 @@ class FileManagerController extends AppController
             }
         }
 
-        $target = $this->request->getQuery('target') ?: '';
-
-        $this->set(compact('folder', 'filter', 'target', 'items'));
+        $this->set(compact('type', 'folder', 'filter', 'items'));
         $this->set('sort', $this->sortField);
         $this->set('sortDirection', $this->sortDirection);
     }

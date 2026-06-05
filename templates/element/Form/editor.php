@@ -46,8 +46,14 @@ $this->append('script');
         content_css: '<?= Asset::cssUrl('Brammo/Admin.editor.css') ?>',
         extended_valid_elements: 'i[*]',
         file_picker_callback: function(callback, value, meta) {
-            const instanceApi = tinyMCE.activeEditor.windowManager.openUrl({
-                url: '<?= $imagesUrl ?>',
+            var browseUrl = '<?= $imagesUrl ?>';
+            var folder = 'images';
+            if (value) {
+                folder = value.split('/').slice(1, -1).join('/');
+            }
+            browseUrl += '?folder=' + encodeURIComponent(folder);
+            var instanceApi = tinyMCE.activeEditor.windowManager.openUrl({
+                url: browseUrl,
                 title: '<?= __d('brammo/admin', 'Select Image') ?>',
                 onMessage: function(dialogApi, details) {
                     callback(details.data.img);

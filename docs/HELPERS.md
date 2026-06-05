@@ -187,7 +187,7 @@ echo $this->Form->control('body', ['type' => 'html', 'label' => 'Content']);
 echo $this->Form->end();
 ```
 
-Configure a TinyMCE API key in `Admin.Editor.apiKey` (see [CONFIGURATION.md](CONFIGURATION.md)). The editor opens the File Manager `browseImages` action for image selection.
+Configure a TinyMCE API key in `Admin.Editor.apiKey` (see [CONFIGURATION.md](CONFIGURATION.md)). The **Image** toolbar button opens the File Manager `browseImages` action in a URL dialog (`windowManager.openUrl`). The dialog loads with the `simple` layout (no admin sidebar). The initial folder is `images`, or the parent path of the image under edit when replacing an existing image. Selected URLs are sent back to TinyMCE via `postMessage`. See [FILEMANAGER.md — Browse Images](FILEMANAGER.md#browse-images).
 
 #### Options
 

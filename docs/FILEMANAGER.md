@@ -123,19 +123,26 @@ Browse all files and folders. Navigate through the folder structure starting fro
 
 ### Browse Images
 
-Browse only image files. Used internally by the [FormHelper image control](HELPERS.md#image-control) for AJAX-based image selection. Results are sorted by date (newest first) with 12 items per page.
+Browse image files in a card grid. Used by the [FormHelper image control](HELPERS.md#image-control) (Bootstrap modal, AJAX) and by the [FormHelper html / TinyMCE editor](HELPERS.md#html-editor-control) (iframe dialog, full page). Results are sorted by date (newest first) with 12 items per page.
 
-Supports AJAX requests with a simplified layout for modal display.
+**Layouts:**
+
+| Request | Layout | Consumer |
+|---------|--------|----------|
+| Normal GET (no `X-Requested-With`) | `simple` | TinyMCE `windowManager.openUrl` — minimal chrome, no admin sidebar |
+| AJAX (`X-Requested-With: XMLHttpRequest`) | `ajax` | `file-browser.js` modal content |
+
+On non-AJAX loads, selecting an image posts `{ mceAction: 'customAction', data: { img: url } }` to the parent window so TinyMCE can insert the URL. AJAX loads rely on `file-browser.js` and the `target` query parameter instead.
 
 **Query Parameters:**
-- `folder` - Current folder path
+- `folder` - Current folder path (TinyMCE passes the folder derived from the current image URL, defaulting to `images`)
 - `filter` - Filter files by name
 - `page` - Pagination page number
-- `target` - Target input element ID (used by image picker modals)
+- `target` - Form image element ID (AJAX modal picker only; read from the query string in the template)
 
 ### Browse Files
 
-Browse only document files (non-images). Similar to browseImages but sorted by date (newest first) with 10 items per page.
+Browse files in the same card UI as browse images. Sorted by date (newest first) with 10 items per page. Uses the same layout rules as browse images (`simple` for full-page, `ajax` for modal AJAX).
 
 ### Upload
 
@@ -217,6 +224,12 @@ echo $this->Form->control('image', [
 ```
 
 See [FormHelper Image Control](HELPERS.md#image-control) for detailed documentation.
+
+### TinyMCE (html editor)
+
+The `html` form control opens `browseImages` in a TinyMCE URL dialog. The editor passes `?folder=` based on the image already in the content (or `images` when empty). The browse view uses the `simple` layout and notifies the parent editor via `postMessage` when the user picks a file.
+
+Requires `Admin.Editor.apiKey` and the same authenticated `/admin` access as the rest of the File Manager. See [HELPERS.md — HTML Editor Control](HELPERS.md#html-editor-control).
 
 ### Sidebar Menu Entry
 

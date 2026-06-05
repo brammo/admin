@@ -608,6 +608,95 @@ class FileManagerControllerTest extends TestCase
     }
 
     /**
+     * Controller stub that skips view rendering (routing not loaded in unit tests).
+     *
+     * @param \Cake\Http\ServerRequest $request Request
+     */
+    private function fileManagerControllerWithoutRender(ServerRequest $request): FileManagerController
+    {
+        return new class ($request) extends FileManagerController {
+            public function render(?string $template = null, ?string $layout = null): Response
+            {
+                return new Response();
+            }
+        };
+    }
+
+    /**
+     * Test browseImages uses simple layout for full-page requests (e.g. TinyMCE iframe)
+     *
+     * @return void
+     */
+    public function testBrowseImagesSetsSimpleLayoutForNonAjax(): void
+    {
+        $request = new ServerRequest([
+            'url' => '/admin/file-manager/browse-images',
+            'query' => ['folder' => 'images'],
+        ]);
+
+        $controller = $this->fileManagerControllerWithoutRender($request);
+        $controller->browseImages();
+
+        $this->assertSame('simple', $controller->viewBuilder()->getLayout());
+    }
+
+    /**
+     * Test browseImages uses ajax layout for modal AJAX loads (FormHelper image control)
+     *
+     * @return void
+     */
+    public function testBrowseImagesSetsAjaxLayoutForAjax(): void
+    {
+        $request = new ServerRequest([
+            'url' => '/admin/file-manager/browse-images',
+            'query' => ['folder' => 'images', 'target' => 'form-image-1'],
+        ]);
+        $request = $request->withHeader('X-Requested-With', 'XMLHttpRequest');
+
+        $controller = $this->fileManagerControllerWithoutRender($request);
+        $controller->browseImages();
+
+        $this->assertSame('ajax', $controller->viewBuilder()->getLayout());
+    }
+
+    /**
+     * Test browseFiles uses simple layout for full-page requests
+     *
+     * @return void
+     */
+    public function testBrowseFilesSetsSimpleLayoutForNonAjax(): void
+    {
+        $request = new ServerRequest([
+            'url' => '/admin/file-manager/browse-files',
+            'query' => ['folder' => 'uploads'],
+        ]);
+
+        $controller = $this->fileManagerControllerWithoutRender($request);
+        $controller->browseFiles();
+
+        $this->assertSame('simple', $controller->viewBuilder()->getLayout());
+    }
+
+    /**
+     * Test browseFiles uses ajax layout for modal AJAX loads
+     *
+     * @return void
+     */
+    public function testBrowseFilesSetsAjaxLayoutForAjax(): void
+    {
+        $request = new ServerRequest([
+            'url' => '/admin/file-manager/browse-files',
+            'query' => ['folder' => 'uploads'],
+        ]);
+        $request = $request->withHeader('X-Requested-With', 'XMLHttpRequest');
+
+        $controller = $this->fileManagerControllerWithoutRender($request);
+        $controller->browseFiles();
+
+        $this->assertSame('ajax', $controller->viewBuilder()->getLayout());
+    }
+
+    /**
      * Test fixImage requires valid folder (without router - just check response type)
      *
      * @return void
