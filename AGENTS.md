@@ -24,7 +24,7 @@ src/View/Helper/             FormHelper, ButtonHelper
 config/admin.php             Admin.* configuration (see docs/CONFIGURATION.md)
 config/routes.php            Plugin routes under /admin
 templates/                   Layouts, elements (Form/, Sidebar/, etc.)
-templates/element/Form/      image.php, editor.php (TinyMCE)
+templates/element/Form/      image.php, editor.php (TinyMCE), translations.php
 webroot/css|js/              Plugin assets
 resources/locales/           bg/brammo_admin.po
 tests/TestCase/              PHPUnit by component

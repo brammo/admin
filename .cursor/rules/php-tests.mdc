@@ -17,6 +17,7 @@ alwaysApply: false
 - Custom types via `control()`: `image` → element `Brammo/Admin.Form/image`; `html` → loads `Form/editor` once, adds class `editor`; `dateRange` → `dateRange()` input group + parent wrapper.
 - `image()` uses `$this->context()->val($fieldName)` — tests need `Form->create($entity)` with valid entity context, not reflection on removed helpers.
 - `dateRange()` returns input-group only; use `control(['type' => 'dateRange'])` to test label/container.
+- Translations element: use `AppView`, `Form->create()`, and `element('Brammo/Admin.Form/translations', ['controls' => …])`; restore `App` / `I18n.locales` in `tearDown`.
 
 ## Do not
 

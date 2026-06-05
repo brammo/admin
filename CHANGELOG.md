@@ -7,13 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-06-05
+
 ### Added
+- **Form/translations** element — locale tabs for translatable entity fields (`_translations.{locale}.*` field names); documentation in `docs/HELPERS.md` and `docs/CONFIGURATION.md`
+- **`simple` layout** — minimal layout for embedded file browser (TinyMCE image picker iframe)
 - **FormHelper** (`dateRange`): `value` as `[$from, $to]` or `['from' => …, 'to' => …]`; `valueFrom` / `valueTo` for separate defaults
+- Tests for the translations element and TinyMCE `browseImages` layout behavior
 
 ### Changed
-- Update card background styles in CSS for improved visual consistency in light and dark themes.
-- Change sidebar toggle icon to bi-layout-sidebar-inset
-- Refactor pageHeader layout and update styles for improved responsiveness and padding adjustments in page-header and page-content sections
+- **File Manager**: `browseImages` / `browseFiles` use `simple` layout for full-page requests (e.g. TinyMCE URL dialog) and `ajax` for modal loads
+- **TinyMCE editor**: image picker opens `browseImages` via `windowManager.openUrl` with `postMessage` selection
+- Update card background styles in CSS for improved visual consistency in light and dark themes
+- Change sidebar toggle icon to `bi-layout-sidebar-inset`
+- Refactor pageHeader layout and update styles for improved responsiveness and padding in page-header and page-content sections
+
+### Fixed
+- **File Manager**: preserve `folder` and `target` query params when filtering files in the browse view
 
 ## [1.5.0] - 2026-06-02
 
@@ -194,4 +204,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.3.0]: https://github.com/brammo/admin/releases/tag/v1.3.0
 [1.4.0]: https://github.com/brammo/admin/releases/tag/v1.4.0
 [1.5.0]: https://github.com/brammo/admin/releases/tag/v1.5.0
-[Unreleased]: https://github.com/brammo/admin/compare/v1.5.0...HEAD
+[1.6.0]: https://github.com/brammo/admin/releases/tag/v1.6.0
+[Unreleased]: https://github.com/brammo/admin/compare/v1.6.0...HEAD

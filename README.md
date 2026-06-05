@@ -37,7 +37,7 @@ public function bootstrap(): void
 The plugin provides view helpers to simplify UI development:
 
 - **ButtonHelper** — Bootstrap-styled buttons with icons
-- **FormHelper** — extends BootstrapUI with `image` (File Manager picker), `html` (TinyMCE), and `dateRange` (paired date inputs) control types
+- **FormHelper** — extends BootstrapUI with `image` (File Manager picker), `html` (TinyMCE), and `dateRange` (paired date inputs) control types; **Form/translations** element for locale-tabbed translatable fields
 
 `AppView` also loads Brammo Content helpers (`Date`, `Image`, `Flag`) and `Authentication.Identity`.
 
