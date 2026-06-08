@@ -7,9 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.7.0] - 2026-06-08
+
+### Added
+- **HTML editor** (`webroot/js/editor.js`): built-in contenteditable WYSIWYG with toolbar (block/inline formatting, lists, alignment, links, images, source mode)
+- Link and image property dialogs with inline File Manager browse (`browseFiles` / `browseImages`)
+- Bulgarian translations for editor UI strings
+
 ### Changed
-- **HTML editor**: replace TinyMCE with built-in contenteditable editor (no API key required); toolbar with block/inline formatting, lists, links, images, and source mode; image picker uses File Manager modal
+- **FormHelper** `html` control: replace TinyMCE with the built-in editor (no external CDN or API key)
 - **Admin.Editor**: `apiKey` removed; optional `height` setting for editor content area
+- **Form/editor** element and `editor.css` redesigned for the new toolbar and dialogs
+- **file-browser.js**: extended for editor link/image picker integration
+- Documentation updates (`HELPERS.md`, `CONFIGURATION.md`, `FILEMANAGER.md`)
+
+### Removed
+- TinyMCE dependency and `Admin.Editor.apiKey` configuration
+
+## [1.6.0] - 2026-06-05
 
 ### Added
 - **Form/translations** element — locale tabs for translatable entity fields (`_translations.{locale}.*` field names); documentation in `docs/HELPERS.md` and `docs/CONFIGURATION.md`
@@ -207,4 +222,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.4.0]: https://github.com/brammo/admin/releases/tag/v1.4.0
 [1.5.0]: https://github.com/brammo/admin/releases/tag/v1.5.0
 [1.6.0]: https://github.com/brammo/admin/releases/tag/v1.6.0
-[Unreleased]: https://github.com/brammo/admin/compare/v1.6.0...HEAD
+[1.7.0]: https://github.com/brammo/admin/releases/tag/v1.7.0
+[Unreleased]: https://github.com/brammo/admin/compare/v1.7.0...HEAD
