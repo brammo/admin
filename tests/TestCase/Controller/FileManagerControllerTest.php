@@ -623,7 +623,7 @@ class FileManagerControllerTest extends TestCase
     }
 
     /**
-     * Test browseImages uses simple layout for full-page requests (e.g. TinyMCE iframe)
+     * Test browseImages uses simple layout for full-page requests (e.g. legacy iframe embed)
      *
      * @return void
      */

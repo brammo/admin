@@ -76,17 +76,15 @@ Authentication middleware is registered in `AdminPlugin::middleware()`. Controll
 
 ## Editor
 
-Rich text fields (`FormHelper` `html` control) use [TinyMCE](https://www.tiny.cloud/). Set an API key in configuration:
+Rich text fields (`FormHelper` `html` control) use the built-in HTML editor (contenteditable WYSIWYG). Optional configuration:
 
 ```php
 'Admin' => [
     'Editor' => [
-        'apiKey' => 'your-tinymce-api-key',
+        'height' => 500,  // content area height in pixels (scrollable)
     ],
 ],
 ```
-
-Get a free API key from [Tiny Cloud](https://www.tiny.cloud/). Without `apiKey`, the editor element throws a runtime exception when rendered.
 
 The editor integrates with the File Manager for image insertion (`browseImages` action). See [HELPERS.md](HELPERS.md#html-editor-control).
 

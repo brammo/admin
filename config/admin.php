@@ -257,13 +257,11 @@ return [
         ],
 
         'Editor' => [
-            
+
             /**
-             * TinyMCE API key
-             * 
-             * Get a free API key from https://www.tiny.cloud/
+             * Default height of the HTML editor content area in pixels (scrollable)
              */
-            'apiKey' => '',
+            'height' => 500,
         ],
     ],
 ];

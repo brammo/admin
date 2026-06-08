@@ -24,7 +24,7 @@ src/View/Helper/             FormHelper, ButtonHelper
 config/admin.php             Admin.* configuration (see docs/CONFIGURATION.md)
 config/routes.php            Plugin routes under /admin
 templates/                   Layouts, elements (Form/, Sidebar/, etc.)
-templates/element/Form/      image.php, editor.php (TinyMCE), translations.php
+templates/element/Form/      image.php, editor.php, translations.php
 webroot/css|js/              Plugin assets
 resources/locales/           bg/brammo_admin.po
 tests/TestCase/              PHPUnit by component
@@ -40,7 +40,7 @@ docs/                        HELPERS, FILEMANAGER, CONFIGURATION, PHPSTAN, PSALM
 - **Views**: Controllers set `AppView`; layout `Brammo/Admin.default`
 - **Config**: Read with `Configure::read('Admin.*')`; defaults in `config/admin.php`
 - **File manager**: Requires `Admin.FileManager` (basePath, topFolders, fileTypes); path validation via `isValidFolder` / `isPathWithinBase` / `sanitizeFilename`
-- **FormHelper**: Extends BootstrapUI; custom `control` types: `image`, `html` (TinyMCE), `dateRange`
+- **FormHelper**: Extends BootstrapUI; custom `control` types: `image`, `html` (WYSIWYG HTML editor), `dateRange`
 
 ## Commands
 

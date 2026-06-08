@@ -1,6 +1,6 @@
 <?php
 /**
- * Minimal layout for embedded file browser (e.g. TinyMCE image picker iframe)
+ * Minimal layout for embedded file browser (e.g. legacy iframe embed)
  * 
  * @var \Brammo\Admin\View\AppView $this
  */

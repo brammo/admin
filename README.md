@@ -37,7 +37,7 @@ public function bootstrap(): void
 The plugin provides view helpers to simplify UI development:
 
 - **ButtonHelper** — Bootstrap-styled buttons with icons
-- **FormHelper** — extends BootstrapUI with `image` (File Manager picker), `html` (TinyMCE), and `dateRange` (paired date inputs) control types; **Form/translations** element for locale-tabbed translatable fields
+- **FormHelper** — extends BootstrapUI with `image` (File Manager picker), `html` (WYSIWYG HTML editor), and `dateRange` (paired date inputs) control types; **Form/translations** element for locale-tabbed translatable fields
 
 `AppView` also loads Brammo Content helpers (`Date`, `Image`, `Flag`) and `Authentication.Identity`.
 
@@ -67,7 +67,7 @@ All configuration options are documented in [docs/CONFIGURATION.md](docs/CONFIGU
 
 - Internationalization (`defaultLocale`)
 - Authentication defaults (`config/auth.php`)
-- TinyMCE editor (`Admin.Editor.apiKey`)
+- HTML editor (`Admin.Editor.height`)
 - Brand customization
 - Home link and page title
 - Sidebar menu

@@ -18,7 +18,7 @@ class FormHelper extends BootstrapFormHelper
      *
      * Adds support for the following custom types:
      * - `image`: Renders an image picker/uploader using the Form/image element
-     * - `html`: Renders a TinyMCE WYSIWYG editor using the Form/editor element
+     * - `html`: Renders a WYSIWYG HTML editor using the Form/editor element
      * - `dateRange`: Renders an input group with configurable `{name}_{suffix}` date fields
      *
      * @param string $fieldName The field name.
@@ -92,7 +92,7 @@ class FormHelper extends BootstrapFormHelper
     }
 
     /**
-     * Generate an HTML editor control element using TinyMCE.
+     * Generate an HTML editor control element.
      *
      * Options:
      * - `label`: The label for the control
@@ -103,7 +103,7 @@ class FormHelper extends BootstrapFormHelper
      */
     public function html(string $fieldName, array $options = []): string
     {
-        // Include the editor element (TinyMCE initialization)
+        // Include the editor element (HTML editor initialization)
         if (empty($this->_View->get('_editorLoaded'))) {
             $this->_View->element('Brammo/Admin.Form/editor');
             $this->_View->set('_editorLoaded', true);
@@ -112,7 +112,7 @@ class FormHelper extends BootstrapFormHelper
         // Remove custom type to prevent infinite loop
         unset($options['type']);
 
-        // Add editor class to enable TinyMCE initialization
+        // Add editor class to enable HTML editor initialization
         $options['class'] = isset($options['class'])
             ? $options['class'] . ' editor'
             : 'editor';

@@ -123,19 +123,19 @@ Browse all files and folders. Navigate through the folder structure starting fro
 
 ### Browse Images
 
-Browse image files in a card grid. Used by the [FormHelper image control](HELPERS.md#image-control) (Bootstrap modal, AJAX) and by the [FormHelper html / TinyMCE editor](HELPERS.md#html-editor-control) (iframe dialog, full page). Results are sorted by date (newest first) with 12 items per page.
+Browse image files in a card grid. Used by the [FormHelper image control](HELPERS.md#image-control) and the [FormHelper html editor](HELPERS.md#html-editor-control) (Bootstrap modal, AJAX). Results are sorted by date (newest first) with 12 items per page.
 
 **Layouts:**
 
 | Request | Layout | Consumer |
 |---------|--------|----------|
-| Normal GET (no `X-Requested-With`) | `simple` | TinyMCE `windowManager.openUrl` — minimal chrome, no admin sidebar |
+| Normal GET (no `X-Requested-With`) | `simple` | Full-page embeds (legacy iframe consumers) |
 | AJAX (`X-Requested-With: XMLHttpRequest`) | `ajax` | `file-browser.js` modal content |
 
-On non-AJAX loads, selecting an image posts `{ mceAction: 'customAction', data: { img: url } }` to the parent window so TinyMCE can insert the URL. AJAX loads rely on `file-browser.js` and the `target` query parameter instead.
+On non-AJAX loads, selecting an image posts `{ mceAction: 'customAction', data: { img: url } }` to the parent window (legacy iframe integration). AJAX loads rely on `file-browser.js` and the `target` query parameter instead.
 
 **Query Parameters:**
-- `folder` - Current folder path (TinyMCE passes the folder derived from the current image URL, defaulting to `images`)
+- `folder` - Current folder path (defaults to `images` for the HTML editor)
 - `filter` - Filter files by name
 - `page` - Pagination page number
 - `target` - Form image element ID (AJAX modal picker only; read from the query string in the template)
@@ -225,11 +225,9 @@ echo $this->Form->control('image', [
 
 See [FormHelper Image Control](HELPERS.md#image-control) for detailed documentation.
 
-### TinyMCE (html editor)
+### HTML editor
 
-The `html` form control opens `browseImages` in a TinyMCE URL dialog. The editor passes `?folder=` based on the image already in the content (or `images` when empty). The browse view uses the `simple` layout and notifies the parent editor via `postMessage` when the user picks a file.
-
-Requires `Admin.Editor.apiKey` and the same authenticated `/admin` access as the rest of the File Manager. See [HELPERS.md — HTML Editor Control](HELPERS.md#html-editor-control).
+The `html` form control opens `browseImages` in a Bootstrap modal via `file-browser.js`. The editor passes `?folder=images&target=` for image selection. Requires the same authenticated `/admin` access as the rest of the File Manager. See [HELPERS.md — HTML Editor Control](HELPERS.md#html-editor-control).
 
 ### Sidebar Menu Entry
 

@@ -56,7 +56,7 @@ class FormHelperTest extends TestCase
         $this->View->loadHelper('Html', ['className' => 'BootstrapUI.Html']);
         $this->Form = new FormHelper($this->View);
 
-        Configure::write('Admin.Editor', ['apiKey' => 'test-api-key']);
+        Configure::write('Admin.Editor', ['height' => 500]);
     }
 
     /**

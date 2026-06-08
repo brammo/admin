@@ -7,7 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.6.0] - 2026-06-05
+### Changed
+- **HTML editor**: replace TinyMCE with built-in contenteditable editor (no API key required); toolbar with block/inline formatting, lists, links, images, and source mode; image picker uses File Manager modal
+- **Admin.Editor**: `apiKey` removed; optional `height` setting for editor content area
 
 ### Added
 - **Form/translations** element — locale tabs for translatable entity fields (`_translations.{locale}.*` field names); documentation in `docs/HELPERS.md` and `docs/CONFIGURATION.md`

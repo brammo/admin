@@ -176,7 +176,7 @@ The control automatically:
 
 ### HTML Editor Control
 
-The `html` type renders a textarea with TinyMCE (loaded once per page via the `Form/editor` element).
+The `html` type renders a textarea upgraded to a WYSIWYG HTML editor (loaded once per page via the `Form/editor` element).
 
 #### Basic Usage
 
@@ -188,7 +188,13 @@ echo $this->Form->control('body', ['type' => 'html', 'label' => 'Content']);
 echo $this->Form->end();
 ```
 
-Configure a TinyMCE API key in `Admin.Editor.apiKey` (see [CONFIGURATION.md](CONFIGURATION.md)). The **Image** toolbar button opens the File Manager `browseImages` action in a URL dialog (`windowManager.openUrl`). The dialog loads with the `simple` layout (no admin sidebar). The initial folder is `images`, or the parent path of the image under edit when replacing an existing image. Selected URLs are sent back to TinyMCE via `postMessage`. See [FILEMANAGER.md — Browse Images](FILEMANAGER.md#browse-images).
+The toolbar supports block formats (headings, paragraph, div, blockquote, pre), inline formatting (bold, italic, underline, strikethrough, subscript, superscript, code), alignment, lists, links, and images. Use **Edit HTML** to toggle raw HTML source mode.
+
+The **Insert link** button opens a properties dialog (URL, text, title, target). Double-click an existing link to edit it. Use **Select** next to the URL field to browse files inline via the File Manager (`browseFiles`).
+
+The **Insert image** button opens a properties dialog (URL, alt, width, height, styles). If an image is selected (or the cursor is on one), the dialog opens in edit mode. Double-click an existing image to edit its properties as well. Use **Select** next to the URL field to browse images inline in the same dialog (File Manager AJAX content). Width and height are applied as CSS styles, not HTML attributes. See [FILEMANAGER.md — Browse Images](FILEMANAGER.md#browse-images).
+
+Optional `Admin.Editor.height` sets the editor content area height in pixels (default `500`). See [CONFIGURATION.md](CONFIGURATION.md#editor).
 
 #### Options
 

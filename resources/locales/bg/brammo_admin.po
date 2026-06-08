@@ -222,6 +222,147 @@ msgstr "Профил"
 msgid "Select Image"
 msgstr "Избери изображение"
 
+msgid "Block format"
+msgstr "Формат на блок"
+
+msgid "Paragraph"
+msgstr "Параграф"
+
+msgid "Heading 1"
+msgstr "Заглавие 1"
+
+msgid "Heading 2"
+msgstr "Заглавие 2"
+
+msgid "Heading 3"
+msgstr "Заглавие 3"
+
+msgid "Heading 4"
+msgstr "Заглавие 4"
+
+msgid "Heading 5"
+msgstr "Заглавие 5"
+
+msgid "Heading 6"
+msgstr "Заглавие 6"
+
+msgid "Div"
+msgstr "Div"
+
+msgid "Blockquote"
+msgstr "Цитат"
+
+msgid "Preformatted"
+msgstr "Преформатиран"
+
+msgid "Bold"
+msgstr "Удебелен"
+
+msgid "Italic"
+msgstr "Курсив"
+
+msgid "Underline"
+msgstr "Подчертан"
+
+msgid "Strikethrough"
+msgstr "Зачеркнат"
+
+msgid "Subscript"
+msgstr "Долен индекс"
+
+msgid "Superscript"
+msgstr "Горен индекс"
+
+msgid "Code"
+msgstr "Код"
+
+msgid "Align left"
+msgstr "Подравняване вляво"
+
+msgid "Align center"
+msgstr "Подравняване в центъра"
+
+msgid "Align right"
+msgstr "Подравняване вдясно"
+
+msgid "Justify"
+msgstr "Двустранно"
+
+msgid "Bulleted list"
+msgstr "Маркиран списък"
+
+msgid "Numbered list"
+msgstr "Номериран списък"
+
+msgid "Insert link"
+msgstr "Вмъкни връзка"
+
+msgid "Link URL"
+msgstr "URL на връзка"
+
+msgid "Edit link"
+msgstr "Редактирай връзка"
+
+msgid "Link text"
+msgstr "Текст на връзка"
+
+msgid "Title"
+msgstr "Заглавие"
+
+msgid "Target"
+msgstr "Цел"
+
+msgid "Same window"
+msgstr "Същият прозорец"
+
+msgid "New window"
+msgstr "Нов прозорец"
+
+msgid "Same frame (_self)"
+msgstr "Същата рамка (_self)"
+
+msgid "Parent frame (_parent)"
+msgstr "Родителска рамка (_parent)"
+
+msgid "Top frame (_top)"
+msgstr "Горна рамка (_top)"
+
+msgid "Select file"
+msgstr "Избери файл"
+
+msgid "Insert image"
+msgstr "Вмъкни изображение"
+
+msgid "Alt text"
+msgstr "Alt текст"
+
+msgid "Width"
+msgstr "Ширина"
+
+msgid "Height"
+msgstr "Височина"
+
+msgid "Styles"
+msgstr "Стилове"
+
+msgid "Image URL"
+msgstr "URL на изображение"
+
+msgid "Insert"
+msgstr "Вмъкни"
+
+msgid "Edit image"
+msgstr "Редактирай изображение"
+
+msgid "Edit HTML"
+msgstr "Редактирай HTML"
+
+msgid "Undo"
+msgstr "Отмени"
+
+msgid "Redo"
+msgstr "Повтори"
+
 msgid "Toggle Menu"
 msgstr "Превключи менюто"
 
