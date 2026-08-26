@@ -77,8 +77,9 @@ $currentController = $this->request->getParam('controller');
                             if ($subController == $currentController) {
                                 $subOptions['class'] .= ' active';
                             }
+                            $subTitle = __d('admin', $subItem['title'] ?? $subName);
                             echo $this->Html->link(
-                                $subIcon . '<span>' . h($subItem['title'] ?? __d('admin', $subName)) . '</span>', 
+                                $subIcon . '<span>' . h($subTitle) . '</span>', 
                                 $subItem['url'] ?? [
                                     'plugin' => 'Admin',
                                     'controller' => $subController, 
