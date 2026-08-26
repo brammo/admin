@@ -43,6 +43,12 @@ The plugin provides view helpers to simplify UI development:
 
 See [docs/HELPERS.md](docs/HELPERS.md) for detailed documentation and examples.
 
+### FilterComponent
+
+Config-driven GET filters for index/list actions: apply typed WHERE conditions to an ORM query, persist filters in session, and restore them via redirect. Works with Cake Paginator (`sortableFields` stay on the controller).
+
+See [docs/FILTER.md](docs/FILTER.md) for types, session behavior, and Paginator URL preservation.
+
 ### Controllers
 
 #### UserController

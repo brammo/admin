@@ -18,6 +18,7 @@ CakePHP 5 **plugin** (`brammo/admin`) providing an admin dashboard UI, file mana
 ```
 src/AdminPlugin.php          Plugin bootstrap, middleware, Auth dependency
 src/Controller/              AppController, UserController, FileManagerController
+src/Controller/Component/    FilterComponent (index list filters + session)
 src/FileManager/             FileManagerService (path validation, uploads, image resize)
 src/View/AppView.php         Registers helpers (BootstrapUI, Brammo, Admin)
 src/View/Helper/             FormHelper, ButtonHelper
@@ -41,6 +42,7 @@ docs/                        HELPERS, FILEMANAGER, CONFIGURATION, PHPSTAN, PSALM
 - **Config**: Read with `Configure::read('Admin.*')`; defaults in `config/admin.php`
 - **File manager**: Requires `Admin.FileManager` (basePath, topFolders, fileTypes); path validation via `isValidFolder` / `isPathWithinBase` / `sanitizeFilename`
 - **FormHelper**: Extends BootstrapUI; custom `control` types: `image`, `html` (WYSIWYG HTML editor), `dateRange`
+- **FilterComponent**: Opt-in list filters; see [docs/FILTER.md](docs/FILTER.md)
 
 ## Commands
 
@@ -79,5 +81,6 @@ Use `COMPOSER_ALLOW_SUPERUSER=1` if Composer refuses to run as root.
 
 - [README.md](README.md) — install & features
 - [docs/HELPERS.md](docs/HELPERS.md) — ButtonHelper, FormHelper
+- [docs/FILTER.md](docs/FILTER.md) — FilterComponent for index filters
 - [docs/FILEMANAGER.md](docs/FILEMANAGER.md) — file manager
 - [docs/CONFIGURATION.md](docs/CONFIGURATION.md) — all `Admin.*` options
