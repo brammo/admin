@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.8.0] - 2026-08-27
+
+### Added
+- **FilterComponent** — config-driven GET filters for index/list actions (`equal`, `like`, `boolean`, comparisons, `date` / `date_range`, `in` / `not_in`, etc.)
+- Session persistence and redirect restore for filters and for `sort` / `direction` / `page` (works with Cake Paginator)
+- `docs/FILTER.md` usage guide; tests for filter types, whitelist, session restore, and paging
+
+### Changed
+- **pagination** element: show page links only when there is more than one page; always show the counter
+- **Sidebar menu**: localize submenu item titles consistently
+
 ## [1.7.0] - 2026-06-08
 
 ### Added
@@ -223,4 +234,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.5.0]: https://github.com/brammo/admin/releases/tag/v1.5.0
 [1.6.0]: https://github.com/brammo/admin/releases/tag/v1.6.0
 [1.7.0]: https://github.com/brammo/admin/releases/tag/v1.7.0
-[Unreleased]: https://github.com/brammo/admin/compare/v1.7.0...HEAD
+[1.8.0]: https://github.com/brammo/admin/releases/tag/v1.8.0
+[Unreleased]: https://github.com/brammo/admin/compare/v1.8.0...HEAD

@@ -9,33 +9,20 @@ use Cake\ORM\Query\SelectQuery;
 use Cake\Routing\Router;
 
 /**
- * Applies config-driven GET filters to ORM queries and persists them in session.
+ * Applies config-driven GET filters to ORM queries and persists filters plus
+ * sort/page in session.
  *
- * Query string is the source of truth. When the URL has no filter params but the
- * session has saved filters, redirects to the same action with those params.
- * Use `?clear_filters=1` to wipe the session and redirect to a clean URL.
+ * Query string is the source of truth. When the URL is missing saved filters or
+ * paging params, redirects to the same action with those params restored.
+ * Use `?clear_filters=1` to wipe filter session, reset page to 1, and redirect.
  *
- * Sorting and paging remain Cake Paginator responsibilities (`sortableFields`, etc.).
+ * Cake Paginator still performs paging/sorting; this component only persists and
+ * restores query params (`sortableFields` on `$paginate` remain required).
  *
  * @psalm-suppress PropertyNotSetInConstructor
  */
 class FilterComponent extends Component
 {
-    /**
-     * Query keys managed by Paginator / routing that are never treated as filters.
-     *
-     * @var list<string>
-     */
-    protected array $paginationKeys = [
-        'sort',
-        'direction',
-        'page',
-        'limit',
-        '_',
-        'lang',
-        'clear_filters',
-    ];
-
     /**
      * Filter field configuration keyed by query parameter name.
      *
@@ -51,7 +38,7 @@ class FilterComponent extends Component
     protected array $values = [];
 
     /**
-     * Active filter values suitable for URL / Paginator `url` option.
+     * Active filter + paging query params for URL / Paginator `url` option.
      *
      * @var array<string, mixed>
      */
@@ -67,14 +54,21 @@ class FilterComponent extends Component
     /**
      * Default config.
      *
-     * - `sessionKey`: Session storage key; null = auto `Filter.{Plugin}.{Controller}.{action}`
+     * - `sessionKey`: Filter session key; null = `Filter.{Plugin}.{Controller}.{action}`
+     * - `pagingSessionKey`: Paging session key; null = `Paging.{Plugin}.{Controller}.{action}`
      * - `clearParam`: Query param that clears saved filters
+     * - `sortableFields`: Optional whitelist for persisted sort
+     * - `defaultSort` / `defaultDirection`: Used when query/session have no sort
      *
      * @var array<string, mixed>
      */
     protected array $_defaultConfig = [
         'sessionKey' => null,
+        'pagingSessionKey' => null,
         'clearParam' => 'clear_filters',
+        'sortableFields' => [],
+        'defaultSort' => null,
+        'defaultDirection' => 'asc',
     ];
 
     /**
@@ -93,13 +87,13 @@ class FilterComponent extends Component
     }
 
     /**
-     * Read filters from the query (or restore from session), apply WHERE, persist session.
+     * Read filters/paging from the query (or restore from session), apply WHERE, persist session.
      *
-     * May throw RedirectException when restoring or clearing filters.
+     * May throw RedirectException when restoring or clearing filters/paging.
      *
      * @param \Cake\ORM\Query\SelectQuery<\Cake\Datasource\EntityInterface> $query Query to filter
      * @return \Cake\ORM\Query\SelectQuery<\Cake\Datasource\EntityInterface>
-     * @throws \Cake\Http\Exception\RedirectException When redirecting to restore or clear filters
+     * @throws \Cake\Http\Exception\RedirectException When redirecting to restore or clear
      */
     public function apply(SelectQuery $query): SelectQuery
     {
@@ -107,26 +101,51 @@ class FilterComponent extends Component
         $request = $controller->getRequest();
         $queryParams = $request->getQueryParams();
         $clearParam = (string)$this->getConfig('clearParam');
+        $session = $request->getSession();
         $sessionKey = $this->resolveSessionKey();
+        $pagingSessionKey = $this->resolvePagingSessionKey();
 
         if (!empty($queryParams[$clearParam])) {
-            $request->getSession()->delete($sessionKey);
-            $this->redirectWithQuery($this->paginationOnlyParams($queryParams));
+            $session->delete($sessionKey);
+            $redirect = $this->clearFiltersRedirectParams($queryParams, $pagingSessionKey);
+            $this->redirectWithQuery($redirect);
         }
 
-        if ($this->queryHasFilterKeys($queryParams)) {
+        $filterKeysPresent = $this->queryHasFilterKeys($queryParams);
+        $filterUrl = [];
+        $needsRedirect = false;
+
+        if ($filterKeysPresent) {
             $this->processQueryParams($queryParams);
-            $request->getSession()->write($sessionKey, $this->url);
+            $filterUrl = $this->url;
+            $session->write($sessionKey, $filterUrl);
         } else {
-            $saved = $request->getSession()->read($sessionKey);
+            $this->values = [];
+            $this->conditions = [];
+            $this->url = [];
+            $saved = $session->read($sessionKey);
             if (is_array($saved) && $saved !== []) {
-                $redirectParams = array_merge(
-                    $this->paginationOnlyParams($queryParams),
-                    $saved,
-                );
-                $this->redirectWithQuery($redirectParams);
+                $filterUrl = $saved;
+                $needsRedirect = true;
             }
         }
+
+        [$pagingUrl, $pagingSession, $pagingNeedsRedirect] = $this->resolvePaging(
+            $queryParams,
+            $filterKeysPresent,
+        );
+        if ($pagingNeedsRedirect) {
+            $needsRedirect = true;
+        }
+
+        $targetUrl = array_merge($filterUrl, $pagingUrl);
+
+        if ($needsRedirect) {
+            $this->redirectWithQuery($targetUrl);
+        }
+
+        $session->write($pagingSessionKey, $pagingSession);
+        $this->url = $targetUrl;
 
         if ($this->conditions !== []) {
             $query->where($this->conditions);
@@ -136,7 +155,7 @@ class FilterComponent extends Component
     }
 
     /**
-     * Active filter values for form defaults.
+     * Active filter values for form defaults (no paging keys).
      *
      * @return array<string, mixed>
      */
@@ -146,7 +165,7 @@ class FilterComponent extends Component
     }
 
     /**
-     * Active filter query params for Paginator / link generation.
+     * Active filter + paging query params for Paginator / link generation.
      *
      * @return array<string, mixed>
      */
@@ -163,6 +182,183 @@ class FilterComponent extends Component
     public function getConditions(): array
     {
         return $this->conditions;
+    }
+
+    /**
+     * Build clear-filters redirect params and reset paging page to 1.
+     *
+     * @param array<string, mixed> $queryParams Request query params
+     * @param string $pagingSessionKey Paging session key
+     * @return array<string, mixed>
+     */
+    protected function clearFiltersRedirectParams(array $queryParams, string $pagingSessionKey): array
+    {
+        $session = $this->getController()->getRequest()->getSession();
+        $saved = $session->read($pagingSessionKey);
+        if (!is_array($saved)) {
+            $saved = [];
+        }
+
+        [$sort, $direction] = $this->resolveSortDirection($queryParams, $saved);
+        $pagingSession = ['page' => 1];
+        $redirect = [];
+
+        if ($sort !== null) {
+            $pagingSession['sort'] = $sort;
+            $pagingSession['direction'] = $direction;
+            $redirect['sort'] = $sort;
+            $redirect['direction'] = $direction;
+        }
+
+        $session->write($pagingSessionKey, $pagingSession);
+
+        return $redirect;
+    }
+
+    /**
+     * Resolve sort/direction/page for URL and session.
+     *
+     * @param array<string, mixed> $queryParams Request query params
+     * @param bool $filterKeysPresent Whether configured filter keys are in the query
+     * @return array{
+     *     0: array<string, mixed>,
+     *     1: array{sort?: string, direction?: string, page: int},
+     *     2: bool
+     * }
+     */
+    protected function resolvePaging(array $queryParams, bool $filterKeysPresent): array
+    {
+        $session = $this->getController()->getRequest()->getSession();
+        $saved = $session->read($this->resolvePagingSessionKey());
+        if (!is_array($saved)) {
+            $saved = [];
+        }
+
+        $needsRedirect = false;
+        $pagingUrl = [];
+        $pagingSession = ['page' => 1];
+
+        [$sort, $direction, $sortFromQuery, $sortNeedsRedirect] = $this->resolveSortDirectionDetailed(
+            $queryParams,
+            $saved,
+        );
+        if ($sortNeedsRedirect) {
+            $needsRedirect = true;
+        }
+        if ($sort !== null) {
+            $pagingSession['sort'] = $sort;
+            $pagingSession['direction'] = $direction;
+            $pagingUrl['sort'] = $sort;
+            $pagingUrl['direction'] = $direction;
+            if (!$sortFromQuery) {
+                $needsRedirect = true;
+            }
+        }
+
+        if (array_key_exists('page', $queryParams) && is_numeric($queryParams['page'])) {
+            $page = max(1, (int)$queryParams['page']);
+            $pagingSession['page'] = $page;
+            if ($page > 1) {
+                $pagingUrl['page'] = $page;
+            }
+        } elseif ($filterKeysPresent) {
+            $pagingSession['page'] = 1;
+        } elseif (!empty($saved['page']) && (int)$saved['page'] > 1) {
+            $page = (int)$saved['page'];
+            $pagingSession['page'] = $page;
+            $pagingUrl['page'] = $page;
+            $needsRedirect = true;
+        } else {
+            $pagingSession['page'] = 1;
+        }
+
+        return [$pagingUrl, $pagingSession, $needsRedirect];
+    }
+
+    /**
+     * Resolve sort and direction from query, session, or defaults.
+     *
+     * @param array<string, mixed> $queryParams Request query
+     * @param array<string, mixed> $saved Saved paging session
+     * @return array{0: string|null, 1: string}
+     */
+    protected function resolveSortDirection(array $queryParams, array $saved): array
+    {
+        $detailed = $this->resolveSortDirectionDetailed($queryParams, $saved);
+
+        return [$detailed[0], $detailed[1]];
+    }
+
+    /**
+     * Resolve sort/direction with flags for query source and redirect need.
+     *
+     * @param array<string, mixed> $queryParams Request query
+     * @param array<string, mixed> $saved Saved paging session
+     * @return array{0: string|null, 1: string, 2: bool, 3: bool}
+     */
+    protected function resolveSortDirectionDetailed(array $queryParams, array $saved): array
+    {
+        $sortableFields = $this->getConfig('sortableFields');
+        if (!is_array($sortableFields)) {
+            $sortableFields = [];
+        }
+        /** @var list<string> $sortableFields */
+
+        $defaultSort = $this->getConfig('defaultSort');
+        $defaultDirection = $this->normalizeDirection($this->getConfig('defaultDirection'));
+
+        if (!empty($queryParams['sort'])) {
+            $sort = (string)$queryParams['sort'];
+            $direction = array_key_exists('direction', $queryParams)
+                ? $this->normalizeDirection($queryParams['direction'])
+                : 'asc';
+
+            if ($sortableFields !== [] && !in_array($sort, $sortableFields, true)) {
+                if (is_string($defaultSort) && $defaultSort !== '') {
+                    return [$defaultSort, $defaultDirection, false, true];
+                }
+
+                // Invalid sort with no default: do not persist; leave request as-is.
+                return [null, 'asc', true, false];
+            }
+
+            return [$sort, $direction, true, false];
+        }
+
+        if (!empty($saved['sort']) && is_string($saved['sort'])) {
+            $sort = $saved['sort'];
+            if ($sortableFields !== [] && !in_array($sort, $sortableFields, true)) {
+                if (is_string($defaultSort) && $defaultSort !== '') {
+                    return [$defaultSort, $defaultDirection, false, true];
+                }
+
+                return [null, 'asc', false, false];
+            }
+
+            return [
+                $sort,
+                $this->normalizeDirection($saved['direction'] ?? 'asc'),
+                false,
+                true,
+            ];
+        }
+
+        if (is_string($defaultSort) && $defaultSort !== '') {
+            return [$defaultSort, $defaultDirection, false, true];
+        }
+
+        return [null, 'asc', false, false];
+    }
+
+    /**
+     * @param mixed $direction Raw direction
+     * @return string
+     */
+    protected function normalizeDirection(mixed $direction): string
+    {
+        $direction = is_string($direction) ? strtolower($direction) : 'asc';
+
+        return in_array($direction, ['asc', 'desc'], true) ? $direction : 'asc';
     }
 
     /**
@@ -195,7 +391,7 @@ class FilterComponent extends Component
     }
 
     /**
-     * Extract values, build conditions and URL map from query params.
+     * Extract values, build conditions and filter URL map from query params.
      *
      * @param array<string, mixed> $queryParams Request query params
      * @return void
@@ -509,27 +705,7 @@ class FilterComponent extends Component
     }
 
     /**
-     * Strip non-pagination params for clear / restore redirects.
-     *
-     * @param array<string, mixed> $queryParams Full query params
-     * @return array<string, mixed>
-     */
-    protected function paginationOnlyParams(array $queryParams): array
-    {
-        $clearParam = (string)$this->getConfig('clearParam');
-        $allowed = array_diff($this->paginationKeys, [$clearParam]);
-        $result = [];
-        foreach ($allowed as $key) {
-            if (array_key_exists($key, $queryParams)) {
-                $result[$key] = $queryParams[$key];
-            }
-        }
-
-        return $result;
-    }
-
-    /**
-     * Resolve session storage key.
+     * Resolve filter session storage key.
      *
      * @return string
      */
@@ -540,8 +716,34 @@ class FilterComponent extends Component
             return $configured;
         }
 
+        return $this->buildScopedSessionKey('Filter');
+    }
+
+    /**
+     * Resolve paging session storage key.
+     *
+     * @return string
+     */
+    protected function resolvePagingSessionKey(): string
+    {
+        $configured = $this->getConfig('pagingSessionKey');
+        if (is_string($configured) && $configured !== '') {
+            return $configured;
+        }
+
+        return $this->buildScopedSessionKey('Paging');
+    }
+
+    /**
+     * Build `Prefix.{Plugin}.{Controller}.{action}` session key.
+     *
+     * @param string $prefix Filter or Paging
+     * @return string
+     */
+    protected function buildScopedSessionKey(string $prefix): string
+    {
         $controller = $this->getController();
-        $parts = ['Filter'];
+        $parts = [$prefix];
         $plugin = $controller->getPlugin();
         if ($plugin) {
             $parts[] = str_replace('/', '.', $plugin);

@@ -179,6 +179,9 @@ class FilterComponentTest extends TestCase
             'date_to' => '2024-12-31',
             'country_id' => '5',
             'active' => 1,
+            'sort' => 'Events.title',
+            'direction' => 'asc',
+            'page' => 2,
         ], $this->Filter->getUrl());
 
         $this->assertNotNull($query->clause('where'));
@@ -191,6 +194,14 @@ class FilterComponentTest extends TestCase
                 'active' => 1,
             ],
             $this->session->read('Filter.Events.index'),
+        );
+        $this->assertSame(
+            [
+                'page' => 2,
+                'sort' => 'Events.title',
+                'direction' => 'asc',
+            ],
+            $this->session->read('Paging.Events.index'),
         );
     }
 
@@ -237,6 +248,7 @@ class FilterComponentTest extends TestCase
         $this->Filter->apply($this->table->find());
         $this->assertSame(['Events.active' => 0], $this->Filter->getConditions());
         $this->assertSame(['active' => 0], $this->Filter->getUrl());
+        $this->assertSame(['page' => 1], $this->session->read('Paging.Events.index'));
     }
 
     /**
@@ -371,17 +383,23 @@ class FilterComponentTest extends TestCase
     }
 
     /**
-     * Test clear_filters deletes session and redirects without filters.
+     * Test clear_filters deletes filter session, resets page, keeps sort.
      *
      * @return void
      */
     public function testClearFiltersRedirectsAndWipesSession(): void
     {
         $this->session->write('Filter.Events.index', ['title' => 'Saved']);
+        $this->session->write('Paging.Events.index', [
+            'sort' => 'Events.title',
+            'direction' => 'desc',
+            'page' => 4,
+        ]);
 
         $this->createFilter([
             'clear_filters' => '1',
             'sort' => 'Events.id',
+            'direction' => 'asc',
         ]);
         $this->Filter->configure($this->eventsFilters());
 
@@ -390,8 +408,18 @@ class FilterComponentTest extends TestCase
             $this->fail('Expected RedirectException');
         } catch (RedirectException $e) {
             $this->assertNull($this->session->read('Filter.Events.index'));
+            $this->assertSame(
+                [
+                    'page' => 1,
+                    'sort' => 'Events.id',
+                    'direction' => 'asc',
+                ],
+                $this->session->read('Paging.Events.index'),
+            );
             $this->assertStringContainsString('sort=Events.id', $e->getMessage());
+            $this->assertStringContainsString('direction=asc', $e->getMessage());
             $this->assertStringNotContainsString('title=', $e->getMessage());
+            $this->assertStringNotContainsString('page=', $e->getMessage());
             $this->assertStringNotContainsString('clear_filters', $e->getMessage());
         }
     }
@@ -411,6 +439,7 @@ class FilterComponentTest extends TestCase
 
         $this->assertSame([], $this->Filter->getConditions());
         $this->assertSame([], $this->session->read('Filter.Events.index'));
+        $this->assertSame(['page' => 1], $this->session->read('Paging.Events.index'));
     }
 
     /**
@@ -447,5 +476,168 @@ class FilterComponentTest extends TestCase
             'Events.id NOT IN' => ['4', '5'],
         ], $this->Filter->getConditions());
         $this->assertSame(['ids' => '4,5'], $this->Filter->getUrl());
+    }
+
+    /**
+     * Test sort/page from query are written to paging session.
+     *
+     * @return void
+     */
+    public function testPagingPersistedFromQuery(): void
+    {
+        $this->createFilter([
+            'sort' => 'Events.start_date',
+            'direction' => 'desc',
+            'page' => '3',
+        ]);
+        $this->Filter->configure([]);
+        $this->Filter->apply($this->table->find());
+
+        $this->assertSame([
+            'page' => 3,
+            'sort' => 'Events.start_date',
+            'direction' => 'desc',
+        ], $this->session->read('Paging.Events.index'));
+        $this->assertSame([
+            'sort' => 'Events.start_date',
+            'direction' => 'desc',
+            'page' => 3,
+        ], $this->Filter->getUrl());
+    }
+
+    /**
+     * Test empty URL restores paging session via redirect.
+     *
+     * @return void
+     */
+    public function testPagingSessionRestoreRedirects(): void
+    {
+        $this->session->write('Paging.Events.index', [
+            'sort' => 'Events.title',
+            'direction' => 'desc',
+            'page' => 5,
+        ]);
+
+        $this->createFilter([]);
+        $this->Filter->configure([]);
+
+        try {
+            $this->Filter->apply($this->table->find());
+            $this->fail('Expected RedirectException');
+        } catch (RedirectException $e) {
+            $this->assertStringContainsString('sort=Events.title', $e->getMessage());
+            $this->assertStringContainsString('direction=desc', $e->getMessage());
+            $this->assertStringContainsString('page=5', $e->getMessage());
+        }
+    }
+
+    /**
+     * Test filter + paging sessions restore together in one redirect.
+     *
+     * @return void
+     */
+    public function testFilterAndPagingRestoreTogether(): void
+    {
+        $this->session->write('Filter.Events.index', ['title' => 'Folk']);
+        $this->session->write('Paging.Events.index', [
+            'sort' => 'Events.id',
+            'direction' => 'asc',
+            'page' => 2,
+        ]);
+
+        $this->createFilter([]);
+        $this->Filter->configure($this->eventsFilters());
+
+        try {
+            $this->Filter->apply($this->table->find());
+            $this->fail('Expected RedirectException');
+        } catch (RedirectException $e) {
+            $this->assertStringContainsString('title=Folk', $e->getMessage());
+            $this->assertStringContainsString('sort=Events.id', $e->getMessage());
+            $this->assertStringContainsString('page=2', $e->getMessage());
+        }
+    }
+
+    /**
+     * Test filter keys without page reset paging session page to 1.
+     *
+     * @return void
+     */
+    public function testFilterSubmitResetsPageWithoutRedirect(): void
+    {
+        $this->session->write('Paging.Events.index', [
+            'sort' => 'Events.title',
+            'direction' => 'asc',
+            'page' => 7,
+        ]);
+
+        $this->createFilter([
+            'title' => 'Folk',
+            'sort' => 'Events.title',
+            'direction' => 'asc',
+        ]);
+        $this->Filter->configure($this->eventsFilters());
+        $this->Filter->apply($this->table->find());
+
+        $this->assertSame([
+            'page' => 1,
+            'sort' => 'Events.title',
+            'direction' => 'asc',
+        ], $this->session->read('Paging.Events.index'));
+        $this->assertSame([
+            'title' => 'Folk',
+            'sort' => 'Events.title',
+            'direction' => 'asc',
+        ], $this->Filter->getUrl());
+        $this->assertArrayNotHasKey('page', $this->Filter->getUrl());
+    }
+
+    /**
+     * Test invalid sort with sortableFields falls back to defaultSort via redirect.
+     *
+     * @return void
+     */
+    public function testInvalidSortFallsBackToDefault(): void
+    {
+        $this->createFilter(
+            ['sort' => 'Events.evil', 'direction' => 'desc'],
+            [
+                'sortableFields' => ['Events.id', 'Events.title'],
+                'defaultSort' => 'Events.id',
+                'defaultDirection' => 'asc',
+            ],
+        );
+        $this->Filter->configure([]);
+
+        try {
+            $this->Filter->apply($this->table->find());
+            $this->fail('Expected RedirectException');
+        } catch (RedirectException $e) {
+            $this->assertStringContainsString('sort=Events.id', $e->getMessage());
+            $this->assertStringContainsString('direction=asc', $e->getMessage());
+            $this->assertStringNotContainsString('evil', $e->getMessage());
+        }
+    }
+
+    /**
+     * Test defaultSort redirects when URL has no sort.
+     *
+     * @return void
+     */
+    public function testDefaultSortRedirectsWhenMissing(): void
+    {
+        $this->createFilter([], [
+            'defaultSort' => 'Events.start_date',
+            'defaultDirection' => 'desc',
+        ]);
+        $this->Filter->configure([]);
+
+        try {
+            $this->Filter->apply($this->table->find());
+            $this->fail('Expected RedirectException');
+        } catch (RedirectException $e) {
+            $this->assertStringContainsString('sort=Events.start_date', $e->getMessage());
+            $this->assertStringContainsString('direction=desc', $e->getMessage());
+        }
     }
 }
