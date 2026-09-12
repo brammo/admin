@@ -258,7 +258,12 @@ if ($folder) {
         </table>
     </div>
     <div class="card-footer">
-        <?= $this->element('FileManager/pagination') ?>
+        <?= $this->element('FileManager/pagination', [
+            'folder' => $folder,
+            'target' => '',
+            'filter' => $filter,
+            'action' => (string)$this->request->getParam('action'),
+        ]) ?>
     </div>
 </div>
 <?php $this->append('script') ?>

@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - PHPStan: remove invalid generic on `AdminPlugin::bootstrap()` `$app`; type `ButtonHelper::$helpers` to match CakePHP's Helper property
+- File Manager pagination: default `$action` and `$target` so the index view no longer warns (`Undefined variable $action` / `compact(): Undefined variable $target`)
 
 ## [1.8.0] - 2026-08-27
 

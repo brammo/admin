@@ -17,11 +17,16 @@ if ($pages < 2) {
     return;
 }
 
+$action ??= (string)$this->request->getParam('action');
+$target ??= (string)($this->request->getQuery('target') ?? '');
+$folder ??= (string)($this->request->getQuery('folder') ?? '');
+$filter ??= (string)($this->request->getQuery('filter') ?? '');
+
 $page = max(1, min($page, $pages));
 
 $url = [
-    'action' => $action, 
-    '?' => compact('folder', 'target', 'filter', 'page')
+    'action' => $action,
+    '?' => compact('folder', 'target', 'filter', 'page'),
 ];
 ?>
 <div class="mt-3">
