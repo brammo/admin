@@ -85,6 +85,7 @@ $labels = [
     'clearFormat' => __d('brammo/admin', 'Clear formatting'),
     'clearFormatConfirm' => __d('brammo/admin', 'Clear formatting from the entire document?'),
     'source' => __d('brammo/admin', 'Edit HTML'),
+    'formatSource' => __d('brammo/admin', 'Format HTML'),
     'undo' => __d('brammo/admin', 'Undo'),
     'redo' => __d('brammo/admin', 'Redo'),
     'elementPath' => __d('brammo/admin', 'Element path'),

@@ -97,6 +97,7 @@ class EditorElementTest extends TestCase
         $this->assertStringContainsString('const cleanOnPaste = true;', $script);
         $this->assertStringContainsString('cleanOnPaste: cleanOnPaste', $script);
         $this->assertStringContainsString('Clear formatting', $script);
+        $this->assertStringContainsString('Format HTML', $script);
     }
 
     /**

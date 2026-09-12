@@ -69,6 +69,389 @@ const HtmlEditor = (function() {
     const TABLE_GRID_SIZE = 10;
     const HISTORY_LIMIT = 100;
     const HISTORY_DEBOUNCE = 400;
+    const SOURCE_INDENT = '  ';
+    const SOURCE_HIGHLIGHT_LIMIT = 200000;
+
+    const VOID_TAGS = {
+        area: true, base: true, br: true, col: true, embed: true, hr: true,
+        img: true, input: true, link: true, meta: true, param: true, source: true,
+        track: true, wbr: true,
+    };
+
+    const INLINE_TAGS = {
+        a: true, abbr: true, b: true, bdi: true, bdo: true, br: true, cite: true,
+        code: true, data: true, dfn: true, em: true, i: true, img: true, kbd: true,
+        mark: true, q: true, s: true, samp: true, small: true, span: true,
+        strong: true, sub: true, sup: true, time: true, u: true, var: true, wbr: true,
+        del: true, ins: true, strike: true,
+    };
+
+    const PRESERVE_TAGS = {
+        pre: true, textarea: true, script: true, style: true,
+    };
+
+    /**
+     * @param {string} text
+     * @returns {string}
+     */
+    function escapeSource(text) {
+        return text
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+    }
+
+    /**
+     * Split HTML source into highlight tokens.
+     *
+     * @param {string} source
+     * @returns {Array<{text: string, cls: (string|null)}>}
+     */
+    function tokenizeSource(source) {
+        const tokens = [];
+        let i = 0;
+        const len = source.length;
+        let preserveTag = null;
+
+        /**
+         * @param {string} text
+         * @param {string|null} cls
+         */
+        function push(text, cls) {
+            if (text) {
+                tokens.push({ text: text, cls: cls });
+            }
+        }
+
+        while (i < len) {
+            if (preserveTag) {
+                const close = '</' + preserveTag;
+                const closeIdx = source.toLowerCase().indexOf(close, i);
+                if (closeIdx === -1) {
+                    push(source.slice(i), null);
+                    break;
+                }
+                push(source.slice(i, closeIdx), null);
+                i = closeIdx;
+                preserveTag = null;
+                continue;
+            }
+
+            if (source[i] === '<') {
+                if (source.substr(i, 4) === '<!--') {
+                    const end = source.indexOf('-->', i + 4);
+                    const endPos = end === -1 ? len : end + 3;
+                    push(source.slice(i, endPos), 'tok-comment');
+                    i = endPos;
+                    continue;
+                }
+
+                if (source[i + 1] === '!' || source[i + 1] === '?') {
+                    const end = source.indexOf('>', i + 2);
+                    const endPos = end === -1 ? len : end + 1;
+                    push(source.slice(i, endPos), 'tok-doctype');
+                    i = endPos;
+                    continue;
+                }
+
+                const tagMatch = source.slice(i).match(/^<\/?([a-zA-Z][\w:-]*)/);
+                if (!tagMatch) {
+                    push(source[i], null);
+                    i++;
+                    continue;
+                }
+
+                const isClose = source[i + 1] === '/';
+                const tagName = tagMatch[1].toLowerCase();
+                push(tagMatch[0], 'tok-tag');
+                i += tagMatch[0].length;
+
+                while (i < len) {
+                    const ch = source[i];
+                    if (ch === '>') {
+                        push('>', 'tok-tag');
+                        i++;
+                        break;
+                    }
+                    if (ch === '/' && source[i + 1] === '>') {
+                        push('/>', 'tok-tag');
+                        i += 2;
+                        break;
+                    }
+                    if (/\s/.test(ch) || ch === '=') {
+                        push(ch, null);
+                        i++;
+                        continue;
+                    }
+                    if (ch === '"' || ch === "'") {
+                        const quote = ch;
+                        let j = i + 1;
+                        while (j < len && source[j] !== quote) {
+                            j++;
+                        }
+                        if (j < len) {
+                            j++;
+                        }
+                        push(source.slice(i, j), 'tok-value');
+                        i = j;
+                        continue;
+                    }
+
+                    const attrMatch = source.slice(i).match(/^[^\s="'<>/]+/);
+                    if (attrMatch) {
+                        push(attrMatch[0], 'tok-attr');
+                        i += attrMatch[0].length;
+                        continue;
+                    }
+
+                    push(ch, null);
+                    i++;
+                }
+
+                if (!isClose && PRESERVE_TAGS[tagName] && !VOID_TAGS[tagName]) {
+                    preserveTag = tagName;
+                }
+                continue;
+            }
+
+            if (source[i] === '&') {
+                const entityMatch = source.slice(i).match(/^&(#\d+|#x[\da-fA-F]+|[a-zA-Z]\w*);/);
+                if (entityMatch) {
+                    push(entityMatch[0], 'tok-entity');
+                    i += entityMatch[0].length;
+                    continue;
+                }
+            }
+
+            let j = i + 1;
+            while (j < len && source[j] !== '<' && source[j] !== '&') {
+                j++;
+            }
+            push(source.slice(i, j), null);
+            i = j;
+        }
+
+        return tokens;
+    }
+
+    /**
+     * Syntax-highlight HTML source, one HTML string per logical line.
+     *
+     * @param {string} source
+     * @returns {Array<string>}
+     */
+    function highlightLines(source) {
+        const lines = [''];
+
+        tokenizeSource(source).forEach(function(token) {
+            const parts = token.text.split('\n');
+            parts.forEach(function(part, index) {
+                if (index > 0) {
+                    lines.push('');
+                }
+                if (!part) {
+                    return;
+                }
+                const escaped = escapeSource(part);
+                lines[lines.length - 1] += token.cls
+                    ? '<span class="' + token.cls + '">' + escaped + '</span>'
+                    : escaped;
+            });
+        });
+
+        return lines;
+    }
+
+    /**
+     * Pretty-print HTML, indenting only around block-level tags.
+     *
+     * @param {string} source
+     * @returns {string}
+     */
+    function formatHtml(source) {
+        const tokens = [];
+        let i = 0;
+        const len = source.length;
+
+        while (i < len) {
+            if (source[i] === '<') {
+                if (source.substr(i, 4) === '<!--') {
+                    const end = source.indexOf('-->', i + 4);
+                    const endPos = end === -1 ? len : end + 3;
+                    tokens.push({ type: 'comment', value: source.slice(i, endPos) });
+                    i = endPos;
+                    continue;
+                }
+
+                const tagMatch = source.slice(i).match(/^<\/?([a-zA-Z][\w:-]*)((?:\s[^>]*)?)(\/?)>/);
+                if (tagMatch) {
+                    const full = tagMatch[0];
+                    const name = tagMatch[1].toLowerCase();
+                    const isClose = full[1] === '/';
+                    const selfClosing = tagMatch[3] === '/' || VOID_TAGS[name];
+                    let type = 'open';
+                    if (isClose) {
+                        type = 'close';
+                    } else if (selfClosing) {
+                        type = 'void';
+                    }
+                    tokens.push({ type: type, name: name, value: full, inline: !!INLINE_TAGS[name] });
+                    i += full.length;
+
+                    if (type === 'open' && PRESERVE_TAGS[name]) {
+                        const close = '</' + name;
+                        const closeIdx = source.toLowerCase().indexOf(close, i);
+                        if (closeIdx !== -1) {
+                            tokens.push({ type: 'raw', value: source.slice(i, closeIdx) });
+                            i = closeIdx;
+                        }
+                    }
+                    continue;
+                }
+
+                const end = source.indexOf('>', i + 1);
+                const endPos = end === -1 ? len : end + 1;
+                tokens.push({ type: 'text', value: source.slice(i, endPos) });
+                i = endPos;
+                continue;
+            }
+
+            let j = i + 1;
+            while (j < len && source[j] !== '<') {
+                j++;
+            }
+            tokens.push({ type: 'text', value: source.slice(i, j) });
+            i = j;
+        }
+
+        let result = '';
+        let depth = 0;
+        let atLineStart = true;
+
+        /**
+         * @param {number} level
+         */
+        function writeIndent(level) {
+            result += SOURCE_INDENT.repeat(Math.max(0, level));
+        }
+
+        /**
+         * @param {boolean} [force]
+         */
+        function ensureNewline(force) {
+            if (!atLineStart || force) {
+                if (result.length && result[result.length - 1] !== '\n') {
+                    result += '\n';
+                }
+                atLineStart = true;
+            }
+        }
+
+        /**
+         * Write indent when starting a new line of content.
+         */
+        function indentIfNeeded() {
+            if (atLineStart) {
+                writeIndent(depth);
+                atLineStart = false;
+            }
+        }
+
+        tokens.forEach(function(token) {
+            if (token.type === 'text' || token.type === 'raw') {
+                if (token.type === 'raw') {
+                    result += token.value;
+                    atLineStart = token.value.length === 0 || token.value[token.value.length - 1] === '\n';
+                    return;
+                }
+
+                if (/^\s*$/.test(token.value)) {
+                    return;
+                }
+
+                const parts = token.value.split(/(\n+)/);
+                parts.forEach(function(part) {
+                    if (!part) {
+                        return;
+                    }
+                    if (/^\n+$/.test(part)) {
+                        result += '\n';
+                        atLineStart = true;
+                        return;
+                    }
+                    const content = atLineStart ? part.replace(/^[ \t]+/, '') : part;
+                    if (!content) {
+                        return;
+                    }
+                    indentIfNeeded();
+                    result += content;
+                    atLineStart = false;
+                });
+                return;
+            }
+
+            if (token.type === 'comment') {
+                ensureNewline();
+                writeIndent(depth);
+                result += token.value;
+                atLineStart = false;
+                ensureNewline();
+                return;
+            }
+
+            const isInline = token.inline;
+
+            if (token.type === 'close') {
+                if (!isInline) {
+                    depth = Math.max(0, depth - 1);
+                    ensureNewline();
+                    writeIndent(depth);
+                    result += token.value;
+                    atLineStart = false;
+                    ensureNewline();
+                } else {
+                    indentIfNeeded();
+                    result += token.value;
+                    atLineStart = false;
+                }
+                return;
+            }
+
+            if (token.type === 'void') {
+                if (!isInline) {
+                    ensureNewline();
+                    writeIndent(depth);
+                    result += token.value;
+                    atLineStart = false;
+                    ensureNewline();
+                } else {
+                    indentIfNeeded();
+                    result += token.value;
+                    atLineStart = false;
+                }
+                return;
+            }
+
+            // open
+            if (!isInline) {
+                ensureNewline();
+                writeIndent(depth);
+                result += token.value;
+                atLineStart = false;
+                depth++;
+                if (!PRESERVE_TAGS[token.name]) {
+                    ensureNewline();
+                }
+            } else {
+                indentIfNeeded();
+                result += token.value;
+                atLineStart = false;
+            }
+        });
+
+        const trimmed = result.replace(/\s+$/, '');
+        return trimmed ? trimmed + '\n' : '';
+    }
 
     /**
      * @param {HTMLTextAreaElement} textarea
@@ -84,6 +467,13 @@ const HtmlEditor = (function() {
         }
 
         this.sourceMode = false;
+        this.sourceWrap = null;
+        this.sourceGutter = null;
+        this.sourceHighlight = null;
+        this.sourceHighlightCode = null;
+        this.sourceGroup = null;
+        this.sourceRenderFrame = null;
+        this.sourceObserver = null;
         this.fileBrowser = options.fileBrowser || null;
         this.imageDialogOpen = false;
         this.imageBrowseEmbedded = false;
@@ -107,6 +497,9 @@ const HtmlEditor = (function() {
         this.onSubmit = null;
         this.onKeyDown = this.onKeyDown.bind(this);
         this.onBeforeInput = this.onBeforeInput.bind(this);
+        this.onSourceKeyDown = this.onSourceKeyDown.bind(this);
+        this.onSourceInput = this.onSourceInput.bind(this);
+        this.onSourceScroll = this.onSourceScroll.bind(this);
 
         window.BrammoEditor.instances[this.id] = this;
         this.init();
@@ -153,9 +546,44 @@ const HtmlEditor = (function() {
         this.body.setAttribute('aria-multiline', 'true');
         wrapper.insertBefore(this.body, this.textarea);
 
+        this.sourceWrap = document.createElement('div');
+        this.sourceWrap.className = 'html-editor-source-wrap';
+        this.sourceWrap.hidden = true;
+
+        this.sourceGutter = document.createElement('div');
+        this.sourceGutter.className = 'html-editor-gutter';
+        this.sourceGutter.setAttribute('aria-hidden', 'true');
+        this.sourceWrap.appendChild(this.sourceGutter);
+
+        const sourceInner = document.createElement('div');
+        sourceInner.className = 'html-editor-source-inner';
+
+        this.sourceHighlight = document.createElement('pre');
+        this.sourceHighlight.className = 'html-editor-highlight';
+        this.sourceHighlight.setAttribute('aria-hidden', 'true');
+        this.sourceHighlightCode = document.createElement('code');
+        this.sourceHighlight.appendChild(this.sourceHighlightCode);
+        sourceInner.appendChild(this.sourceHighlight);
+
         this.textarea.classList.add('html-editor-source');
-        this.textarea.style.display = 'none';
+        this.textarea.spellcheck = false;
         this.textarea.setAttribute('aria-hidden', 'true');
+        sourceInner.appendChild(this.textarea);
+        this.sourceWrap.appendChild(sourceInner);
+        wrapper.insertBefore(this.sourceWrap, this.body.nextSibling);
+
+        this.textarea.addEventListener('input', this.onSourceInput);
+        this.textarea.addEventListener('scroll', this.onSourceScroll);
+        this.textarea.addEventListener('keydown', this.onSourceKeyDown);
+
+        if (typeof ResizeObserver !== 'undefined') {
+            this.sourceObserver = new ResizeObserver(function() {
+                if (this.sourceMode) {
+                    this.scheduleSourceRender();
+                }
+            }.bind(this));
+            this.sourceObserver.observe(this.textarea);
+        }
 
         this.body.addEventListener('input', function() {
             this.sync();
@@ -259,6 +687,11 @@ const HtmlEditor = (function() {
         toolbar.appendChild(this.buildButtonGroup([
             { action: 'toggleSource', icon: 'bi-code-slash', title: labels.source },
         ]));
+        this.sourceGroup = this.buildButtonGroup([
+            { action: 'formatSource', icon: 'bi-braces', title: labels.formatSource },
+        ]);
+        this.sourceGroup.classList.add('d-none');
+        toolbar.appendChild(this.sourceGroup);
 
         return toolbar;
     };
@@ -799,6 +1232,9 @@ const HtmlEditor = (function() {
                 break;
             case 'toggleSource':
                 this.toggleSource();
+                break;
+            case 'formatSource':
+                this.formatSource();
                 break;
         }
     };
@@ -3463,7 +3899,7 @@ const HtmlEditor = (function() {
     HtmlEditor.prototype.toggleSource = function() {
         if (this.sourceMode) {
             this.body.innerHTML = this.textarea.value;
-            this.textarea.style.display = 'none';
+            this.sourceWrap.hidden = true;
             this.textarea.setAttribute('aria-hidden', 'true');
             this.body.hidden = false;
             this.body.contentEditable = 'true';
@@ -3474,15 +3910,255 @@ const HtmlEditor = (function() {
         } else {
             this.commitHistory();
             this.sync();
-            this.textarea.style.display = '';
+            this.sourceWrap.hidden = false;
             this.textarea.removeAttribute('aria-hidden');
             this.body.hidden = true;
             this.body.contentEditable = 'false';
             this.sourceMode = true;
+            this.textarea.setSelectionRange(0, 0);
+            this.textarea.scrollTop = 0;
+            this.textarea.scrollLeft = 0;
+            this.renderSource();
             this.textarea.focus();
         }
 
         this.updateToolbarState();
+    };
+
+    HtmlEditor.prototype.formatSource = function() {
+        if (!this.sourceMode) {
+            return;
+        }
+
+        this.textarea.value = formatHtml(this.textarea.value);
+        this.textarea.setSelectionRange(0, 0);
+        this.textarea.scrollTop = 0;
+        this.renderSource();
+        this.textarea.focus();
+    };
+
+    HtmlEditor.prototype.onSourceInput = function() {
+        if (!this.sourceMode) {
+            return;
+        }
+        this.scheduleSourceRender();
+    };
+
+    HtmlEditor.prototype.onSourceScroll = function() {
+        this.syncSourceScroll();
+    };
+
+    HtmlEditor.prototype.scheduleSourceRender = function() {
+        if (this.sourceRenderFrame) {
+            cancelAnimationFrame(this.sourceRenderFrame);
+        }
+        this.sourceRenderFrame = requestAnimationFrame(function() {
+            this.sourceRenderFrame = null;
+            this.renderSource();
+        }.bind(this));
+    };
+
+    HtmlEditor.prototype.renderSource = function() {
+        if (!this.sourceWrap || !this.sourceHighlightCode || !this.sourceGutter) {
+            return;
+        }
+
+        const value = this.textarea.value;
+        const plain = value.length > SOURCE_HIGHLIGHT_LIMIT;
+        this.sourceWrap.classList.toggle('is-plain', plain);
+
+        if (plain) {
+            this.sourceHighlightCode.textContent = '';
+            this.sourceGutter.textContent = '';
+            return;
+        }
+
+        // Match the textarea's wrapping width, which shrinks when its scrollbar shows.
+        this.sourceHighlight.style.width = this.textarea.clientWidth + 'px';
+
+        const lines = highlightLines(value);
+        this.sourceHighlightCode.innerHTML = lines.map(function(line) {
+            return '<div class="html-editor-line">' + (line || '&#8203;') + '</div>';
+        }).join('');
+
+        let gutterHtml = '';
+        for (let n = 1; n <= lines.length; n++) {
+            gutterHtml += '<div class="html-editor-gutter-line">' + n + '</div>';
+        }
+        this.sourceGutter.innerHTML = gutterHtml;
+
+        this.alignSourceGutter();
+        this.syncSourceScroll();
+    };
+
+    /**
+     * Give each gutter number the height of its (possibly wrapped) source line.
+     */
+    HtmlEditor.prototype.alignSourceGutter = function() {
+        const lineEls = this.sourceHighlightCode.children;
+        const gutterEls = this.sourceGutter.children;
+
+        for (let i = 0; i < gutterEls.length; i++) {
+            const line = lineEls[i];
+            if (!line) {
+                break;
+            }
+            gutterEls[i].style.height = line.getBoundingClientRect().height + 'px';
+        }
+    };
+
+    HtmlEditor.prototype.syncSourceScroll = function() {
+        if (!this.sourceHighlight || !this.sourceGutter) {
+            return;
+        }
+        this.sourceHighlight.scrollTop = this.textarea.scrollTop;
+        this.sourceGutter.scrollTop = this.textarea.scrollTop;
+    };
+
+    /**
+     * Insert text into the source textarea, preferring execCommand for native undo.
+     *
+     * @param {string} text
+     */
+    HtmlEditor.prototype.insertSourceText = function(text) {
+        this.textarea.focus();
+        let inserted = false;
+        try {
+            inserted = document.execCommand('insertText', false, text);
+        } catch (e) {
+            inserted = false;
+        }
+
+        if (!inserted) {
+            const start = this.textarea.selectionStart;
+            const end = this.textarea.selectionEnd;
+            this.textarea.setRangeText(text, start, end, 'end');
+        }
+
+        this.scheduleSourceRender();
+    };
+
+    /**
+     * Replace a range in the source textarea.
+     *
+     * @param {number} start
+     * @param {number} end
+     * @param {string} text
+     * @param {number} [cursor]
+     */
+    HtmlEditor.prototype.replaceSourceRange = function(start, end, text, cursor) {
+        this.textarea.focus();
+        this.textarea.setSelectionRange(start, end);
+
+        let inserted = false;
+        try {
+            inserted = document.execCommand('insertText', false, text);
+        } catch (e) {
+            inserted = false;
+        }
+
+        if (!inserted) {
+            this.textarea.setRangeText(text, start, end, 'end');
+        }
+
+        if (typeof cursor === 'number') {
+            this.textarea.setSelectionRange(cursor, cursor);
+        }
+
+        this.scheduleSourceRender();
+    };
+
+    /**
+     * @param {KeyboardEvent} e
+     */
+    HtmlEditor.prototype.onSourceKeyDown = function(e) {
+        if (!this.sourceMode || this.destroyed) {
+            return;
+        }
+
+        if (e.key === 'Tab' && !(e.ctrlKey || e.metaKey || e.altKey)) {
+            e.preventDefault();
+            this.handleSourceTab(e.shiftKey);
+            return;
+        }
+
+        if (e.key === 'Enter' && !(e.ctrlKey || e.metaKey || e.altKey || e.shiftKey)) {
+            e.preventDefault();
+            this.handleSourceEnter();
+        }
+    };
+
+    /**
+     * @param {boolean} outdent
+     */
+    HtmlEditor.prototype.handleSourceTab = function(outdent) {
+        const value = this.textarea.value;
+        const start = this.textarea.selectionStart;
+        const end = this.textarea.selectionEnd;
+
+        if (start !== end) {
+            const lineStart = value.lastIndexOf('\n', start - 1) + 1;
+            const selected = value.slice(lineStart, end);
+            const lines = selected.split('\n');
+            let next;
+
+            if (outdent) {
+                next = lines.map(function(line) {
+                    if (line.indexOf(SOURCE_INDENT) === 0) {
+                        return line.slice(SOURCE_INDENT.length);
+                    }
+                    if (line.charAt(0) === '\t') {
+                        return line.slice(1);
+                    }
+                    return line.replace(/^[ \t]{1,2}/, '');
+                }).join('\n');
+            } else {
+                next = lines.map(function(line) {
+                    return SOURCE_INDENT + line;
+                }).join('\n');
+            }
+
+            const delta = next.length - selected.length;
+            this.replaceSourceRange(lineStart, end, next, end + delta);
+            this.textarea.setSelectionRange(lineStart, lineStart + next.length);
+            return;
+        }
+
+        if (outdent) {
+            const lineStart = value.lastIndexOf('\n', start - 1) + 1;
+            const line = value.slice(lineStart, start);
+            const leading = line.match(/^[ \t]+/);
+            if (!leading) {
+                return;
+            }
+            const remove = leading[0].indexOf(SOURCE_INDENT) === 0
+                ? SOURCE_INDENT.length
+                : (leading[0].charAt(0) === '\t' ? 1 : Math.min(2, leading[0].length));
+            this.replaceSourceRange(lineStart, lineStart + remove, '', start - remove);
+            return;
+        }
+
+        this.insertSourceText(SOURCE_INDENT);
+    };
+
+    HtmlEditor.prototype.handleSourceEnter = function() {
+        const value = this.textarea.value;
+        const start = this.textarea.selectionStart;
+        const lineStart = value.lastIndexOf('\n', start - 1) + 1;
+        const lineBefore = value.slice(lineStart, start);
+        const leading = (lineBefore.match(/^[ \t]*/) || [''])[0];
+        let indent = leading;
+
+        const openMatch = lineBefore.match(/<([a-zA-Z][\w:-]*)\b[^>]*>\s*$/);
+        if (openMatch) {
+            const tag = openMatch[1].toLowerCase();
+            const isSelfClosing = /\/\s*>\s*$/.test(openMatch[0]) || VOID_TAGS[tag];
+            if (!isSelfClosing && !INLINE_TAGS[tag] && !PRESERVE_TAGS[tag]) {
+                indent = leading + SOURCE_INDENT;
+            }
+        }
+
+        this.insertSourceText('\n' + indent);
     };
 
     HtmlEditor.prototype.onSelectionChange = function() {
@@ -3713,8 +4389,13 @@ const HtmlEditor = (function() {
     HtmlEditor.prototype.updateToolbarState = function() {
         const disable = this.sourceMode;
         this.toolbar.querySelectorAll('button, select').forEach(function(el) {
-            el.disabled = disable && el.dataset.action !== 'toggleSource';
+            const action = el.dataset.action;
+            el.disabled = disable && action !== 'toggleSource' && action !== 'formatSource';
         });
+
+        if (this.sourceGroup) {
+            this.sourceGroup.classList.toggle('d-none', !disable);
+        }
 
         if (disable) {
             this.toolbar.querySelectorAll('button.active').forEach(function(btn) {
@@ -3747,6 +4428,14 @@ const HtmlEditor = (function() {
 
         this.destroyed = true;
         this.cancelHistoryCommit();
+        if (this.sourceRenderFrame) {
+            cancelAnimationFrame(this.sourceRenderFrame);
+            this.sourceRenderFrame = null;
+        }
+        if (this.sourceObserver) {
+            this.sourceObserver.disconnect();
+            this.sourceObserver = null;
+        }
         document.removeEventListener('selectionchange', this.onSelectionChange);
         if (this.form && this.onSubmit) {
             this.form.removeEventListener('submit', this.onSubmit);
@@ -3754,6 +4443,11 @@ const HtmlEditor = (function() {
         if (this.body) {
             this.body.removeEventListener('keydown', this.onKeyDown);
             this.body.removeEventListener('beforeinput', this.onBeforeInput);
+        }
+        if (this.textarea) {
+            this.textarea.removeEventListener('input', this.onSourceInput);
+            this.textarea.removeEventListener('scroll', this.onSourceScroll);
+            this.textarea.removeEventListener('keydown', this.onSourceKeyDown);
         }
         delete window.BrammoEditor.instances[this.id];
     };

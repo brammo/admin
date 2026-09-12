@@ -363,6 +363,9 @@ msgstr "Редактирай изображение"
 msgid "Edit HTML"
 msgstr "Редактирай HTML"
 
+msgid "Format HTML"
+msgstr "Форматирай HTML"
+
 msgid "Undo"
 msgstr "Отмени"
 

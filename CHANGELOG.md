@@ -11,10 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **HTML editor**: Clear formatting toolbar button; optional `Admin.Editor.cleanOnPaste` (default `true`) strips pasted styles/classes/spans while keeping bold, italic, and other semantic markup
 - **HTML editor**: status bar with clickable element path at the cursor (e.g. `p > span > strong`); optional `Admin.Editor.statusBar` (default `true`)
 - **HTML editor**: insert/edit tables via context-sensitive toolbar dropdown (grid size picker outside a table; row/column insert/delete, merge/split, and table/cell property dialogs inside one); optional `Admin.Editor.tableClass`; Tab navigates cells; paste/clear-format keep whitelisted table styles
+- **HTML editor**: source mode syntax highlighting with line numbers, Tab/Shift+Tab indent, Enter auto-indent, and a **Format HTML** toolbar button for on-demand pretty-printing
 
 ### Fixed
 - PHPStan: remove invalid generic on `AdminPlugin::bootstrap()` `$app`; type `ButtonHelper::$helpers` to match CakePHP's Helper property
 - File Manager pagination: default `$action` and `$target` so the index view no longer warns (`Undefined variable $action` / `compact(): Undefined variable $target`)
+- **HTML editor**: dark theme — the WYSIWYG content area used a hard-coded white background, making the (light) text unreadable; it now follows `--bs-body-bg` / `--bs-body-color`
 - **HTML editor**: undo/redo now reverts all editor changes (code wrap, alignment, clear formatting, link/image dialogs, source-mode edits, and typing) via a snapshot history stack instead of the browser native undo stack
 
 ## [1.8.0] - 2026-08-27

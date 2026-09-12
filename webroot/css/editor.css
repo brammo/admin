@@ -54,21 +54,177 @@
     border: 1px solid var(--bs-border-color);
     border-top: none;
     border-radius: 0 0 var(--bs-border-radius) var(--bs-border-radius);
-    background: #fff;
+    background: var(--bs-body-bg);
+    color: var(--bs-body-color);
     outline: none;
     height: var(--html-editor-height, 500px);
     max-height: var(--html-editor-height, 500px);
     overflow-y: auto;
 }
 
-.html-editor-source {
-    font-family: var(--bs-font-monospace, monospace);
-    font-size: 0.875rem;
+/* Source mode (highlighted textarea overlay) */
+
+.html-editor-source-wrap {
+    display: flex;
+    border: 1px solid var(--bs-border-color);
+    border-top: none;
+    border-radius: 0 0 var(--bs-border-radius) var(--bs-border-radius);
+    background: var(--bs-body-bg);
     height: var(--html-editor-height, 500px);
     max-height: var(--html-editor-height, 500px);
-    overflow-y: auto;
-    margin-top: 0;
+    overflow: hidden;
+}
+
+.html-editor-gutter {
+    flex: 0 0 auto;
+    min-width: 2.5rem;
+    padding: 0.75rem 0.5rem;
+    margin: 0;
+    border-right: 1px solid var(--bs-border-color);
+    background: var(--bs-tertiary-bg);
+    color: var(--bs-secondary-color);
+    font-family: var(--bs-font-monospace, monospace);
+    font-size: 0.875rem;
+    line-height: 1.5;
+    text-align: right;
+    overflow: hidden;
+    user-select: none;
+}
+
+.html-editor-gutter-line {
+    overflow: hidden;
+}
+
+.html-editor-source-inner {
+    position: relative;
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.html-editor-highlight {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    padding: 0.75rem 1rem;
+    border: none;
+    overflow: hidden;
+    pointer-events: none;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    font-family: var(--bs-font-monospace, monospace);
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--bs-body-color);
+    background: transparent;
+    tab-size: 2;
+}
+
+.html-editor-highlight code {
+    display: block;
+    padding: 0;
+    background: transparent;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    color: inherit;
+    white-space: inherit;
+    overflow-wrap: inherit;
+    tab-size: inherit;
+}
+
+/* Overrides .form-control (including :focus) so the highlight layer shows through */
+
+.html-editor-source-wrap .html-editor-source,
+.html-editor-source-wrap .html-editor-source:focus,
+.html-editor-source-wrap .html-editor-source:hover {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0.75rem 1rem;
+    border: none;
+    border-radius: 0;
     resize: none;
+    overflow-x: hidden;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    font-family: var(--bs-font-monospace, monospace);
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    caret-color: var(--bs-body-color);
+    background-color: transparent;
+    background-image: none;
+    box-shadow: none;
+    outline: none;
+    tab-size: 2;
+}
+
+.html-editor-source-wrap.is-plain .html-editor-source,
+.html-editor-source-wrap.is-plain .html-editor-source:focus {
+    color: var(--bs-body-color);
+    -webkit-text-fill-color: var(--bs-body-color);
+}
+
+.html-editor-source-wrap.is-plain .html-editor-highlight,
+.html-editor-source-wrap.is-plain .html-editor-gutter {
+    visibility: hidden;
+}
+
+.html-editor-source::selection {
+    background: rgba(var(--bs-primary-rgb, 13, 110, 253), 0.3);
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+}
+
+.html-editor-highlight .tok-tag {
+    color: #0550ae;
+}
+
+.html-editor-highlight .tok-attr {
+    color: #953800;
+}
+
+.html-editor-highlight .tok-value {
+    color: #0a3069;
+}
+
+.html-editor-highlight .tok-comment {
+    color: #6e7781;
+    font-style: italic;
+}
+
+.html-editor-highlight .tok-doctype {
+    color: #6e7781;
+}
+
+.html-editor-highlight .tok-entity {
+    color: #8250df;
+}
+
+[data-bs-theme="dark"] .html-editor-highlight .tok-tag {
+    color: #79c0ff;
+}
+
+[data-bs-theme="dark"] .html-editor-highlight .tok-attr {
+    color: #ffa657;
+}
+
+[data-bs-theme="dark"] .html-editor-highlight .tok-value {
+    color: #a5d6ff;
+}
+
+[data-bs-theme="dark"] .html-editor-highlight .tok-comment,
+[data-bs-theme="dark"] .html-editor-highlight .tok-doctype {
+    color: #8b949e;
+}
+
+[data-bs-theme="dark"] .html-editor-highlight .tok-entity {
+    color: #d2a8ff;
 }
 
 .html-editor-body h1,
@@ -186,7 +342,7 @@
 }
 
 .html-editor.has-statusbar .html-editor-body,
-.html-editor.has-statusbar .html-editor-source {
+.html-editor.has-statusbar .html-editor-source-wrap {
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
 }
