@@ -272,6 +272,11 @@ return [
              * Show the status bar with the element path at the cursor position
              */
             'statusBar' => true,
+
+            /**
+             * Default CSS class applied to newly inserted tables (prefilled in table dialog)
+             */
+            'tableClass' => '',
         ],
     ],
 ];

@@ -150,4 +150,42 @@ class EditorElementTest extends TestCase
 
         $this->assertStringContainsString('const statusBar = false;', $script);
     }
+
+    /**
+     * Test table labels and default tableClass are emitted
+     *
+     * @return void
+     */
+    public function testTableLabelsAndDefaultTableClass(): void
+    {
+        Configure::write('Admin.Editor', [
+            'height' => 500,
+        ]);
+
+        $script = $this->renderEditorScript();
+
+        $this->assertStringContainsString('const tableClass = "";', $script);
+        $this->assertStringContainsString('tableClass: tableClass', $script);
+        $this->assertStringContainsString('Insert table', $script);
+        $this->assertStringContainsString('Table properties', $script);
+        $this->assertStringContainsString('Merge cells', $script);
+        $this->assertStringContainsString('Cell properties', $script);
+    }
+
+    /**
+     * Test tableClass can be set via Admin.Editor config
+     *
+     * @return void
+     */
+    public function testTableClassCanBeConfigured(): void
+    {
+        Configure::write('Admin.Editor', [
+            'height' => 500,
+            'tableClass' => 'table table-bordered',
+        ]);
+
+        $script = $this->renderEditorScript();
+
+        $this->assertStringContainsString('const tableClass = "table table-bordered";', $script);
+    }
 }

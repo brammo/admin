@@ -88,10 +88,49 @@ $labels = [
     'undo' => __d('brammo/admin', 'Undo'),
     'redo' => __d('brammo/admin', 'Redo'),
     'elementPath' => __d('brammo/admin', 'Element path'),
+    'table' => __d('brammo/admin', 'Table'),
+    'tableDialogTitle' => __d('brammo/admin', 'Insert table'),
+    'tableEditTitle' => __d('brammo/admin', 'Edit table'),
+    'tableInsert' => __d('brammo/admin', 'Insert'),
+    'tableSave' => __d('brammo/admin', 'Save'),
+    'tableProperties' => __d('brammo/admin', 'Table properties'),
+    'tableRows' => __d('brammo/admin', 'Rows'),
+    'tableColumns' => __d('brammo/admin', 'Columns'),
+    'tableHeaderRow' => __d('brammo/admin', 'Header row'),
+    'tableHeaderColumn' => __d('brammo/admin', 'Header column'),
+    'tableCaption' => __d('brammo/admin', 'Caption'),
+    'tableWidth' => __d('brammo/admin', 'Width'),
+    'tableAlign' => __d('brammo/admin', 'Alignment'),
+    'tableAlignDefault' => __d('brammo/admin', 'Default'),
+    'tableClass' => __d('brammo/admin', 'CSS class'),
+    'tableStyles' => __d('brammo/admin', 'Styles'),
+    'insertRowAbove' => __d('brammo/admin', 'Insert row above'),
+    'insertRowBelow' => __d('brammo/admin', 'Insert row below'),
+    'insertColumnLeft' => __d('brammo/admin', 'Insert column left'),
+    'insertColumnRight' => __d('brammo/admin', 'Insert column right'),
+    'deleteRow' => __d('brammo/admin', 'Delete row'),
+    'deleteColumn' => __d('brammo/admin', 'Delete column'),
+    'deleteTable' => __d('brammo/admin', 'Delete table'),
+    'mergeCells' => __d('brammo/admin', 'Merge cells'),
+    'splitCell' => __d('brammo/admin', 'Split cell'),
+    'cellProperties' => __d('brammo/admin', 'Cell properties'),
+    'cellWidth' => __d('brammo/admin', 'Width'),
+    'cellHeight' => __d('brammo/admin', 'Height'),
+    'cellAlign' => __d('brammo/admin', 'Text align'),
+    'cellValign' => __d('brammo/admin', 'Vertical align'),
+    'cellValignTop' => __d('brammo/admin', 'Top'),
+    'cellValignMiddle' => __d('brammo/admin', 'Middle'),
+    'cellValignBottom' => __d('brammo/admin', 'Bottom'),
+    'cellBackground' => __d('brammo/admin', 'Background'),
+    'cellType' => __d('brammo/admin', 'Cell type'),
+    'cellTypeData' => __d('brammo/admin', 'Data cell'),
+    'cellTypeHeader' => __d('brammo/admin', 'Header cell'),
+    'cellSave' => __d('brammo/admin', 'Save'),
 ];
 
 $cleanOnPaste = $settings['cleanOnPaste'] ?? true;
 $statusBar = $settings['statusBar'] ?? true;
+$tableClass = $settings['tableClass'] ?? '';
 
 $this->Html->css('Brammo/Admin.editor', ['block' => true]);
 $this->Html->script('Brammo/Admin.file-browser', ['block' => true]);
@@ -106,6 +145,7 @@ $this->append('script');
         const height = <?= (int)$height ?>;
         const cleanOnPaste = <?= $cleanOnPaste ? 'true' : 'false' ?>;
         const statusBar = <?= $statusBar ? 'true' : 'false' ?>;
+        const tableClass = <?= json_encode($tableClass, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
         const labels = <?= json_encode($labels, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
         const modalTitle = <?= json_encode(__d('brammo/admin', 'Select Image'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
 
@@ -120,6 +160,7 @@ $this->append('script');
                 height: height,
                 cleanOnPaste: cleanOnPaste,
                 statusBar: statusBar,
+                tableClass: tableClass,
                 labels: labels,
                 fileBrowser: fileBrowser,
                 folder: 'images',

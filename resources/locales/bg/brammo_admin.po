@@ -372,6 +372,99 @@ msgstr "Повтори"
 msgid "Element path"
 msgstr "Път на елемента"
 
+msgid "Table"
+msgstr "Таблица"
+
+msgid "Insert table"
+msgstr "Вмъкни таблица"
+
+msgid "Edit table"
+msgstr "Редактирай таблица"
+
+msgid "Table properties"
+msgstr "Свойства на таблицата"
+
+msgid "Rows"
+msgstr "Редове"
+
+msgid "Columns"
+msgstr "Колони"
+
+msgid "Header row"
+msgstr "Заглавен ред"
+
+msgid "Header column"
+msgstr "Заглавна колона"
+
+msgid "Caption"
+msgstr "Надпис"
+
+msgid "Alignment"
+msgstr "Подравняване"
+
+msgid "Default"
+msgstr "По подразбиране"
+
+msgid "CSS class"
+msgstr "CSS клас"
+
+msgid "Insert row above"
+msgstr "Вмъкни ред отгоре"
+
+msgid "Insert row below"
+msgstr "Вмъкни ред отдолу"
+
+msgid "Insert column left"
+msgstr "Вмъкни колона вляво"
+
+msgid "Insert column right"
+msgstr "Вмъкни колона вдясно"
+
+msgid "Delete row"
+msgstr "Изтрий ред"
+
+msgid "Delete column"
+msgstr "Изтрий колона"
+
+msgid "Delete table"
+msgstr "Изтрий таблица"
+
+msgid "Merge cells"
+msgstr "Обедини клетки"
+
+msgid "Split cell"
+msgstr "Раздели клетка"
+
+msgid "Cell properties"
+msgstr "Свойства на клетката"
+
+msgid "Text align"
+msgstr "Хоризонтално подравняване"
+
+msgid "Vertical align"
+msgstr "Вертикално подравняване"
+
+msgid "Top"
+msgstr "Горе"
+
+msgid "Middle"
+msgstr "Среда"
+
+msgid "Bottom"
+msgstr "Долу"
+
+msgid "Background"
+msgstr "Фон"
+
+msgid "Cell type"
+msgstr "Тип клетка"
+
+msgid "Data cell"
+msgstr "Клетка с данни"
+
+msgid "Header cell"
+msgstr "Заглавна клетка"
+
 msgid "Toggle Menu"
 msgstr "Превключи менюто"
 

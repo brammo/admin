@@ -188,13 +188,15 @@ echo $this->Form->control('body', ['type' => 'html', 'label' => 'Content']);
 echo $this->Form->end();
 ```
 
-The toolbar supports block formats (headings, paragraph, div, blockquote, pre), inline formatting (bold, italic, underline, strikethrough, subscript, superscript, code), alignment, lists, links, and images. Use **Clear formatting** to strip styles, classes, ids, and wrapper tags (`span`, `font`, etc.) from the selection (or the whole document if nothing is selected) while keeping semantic formatting such as bold and italic. Use **Edit HTML** to toggle raw HTML source mode. **Undo** / **Redo** (toolbar or Ctrl/Cmd+Z and Ctrl+Shift+Z / Ctrl+Y) cover all editor changes, including code wrap, alignment, clear formatting, link and image dialogs, and source-mode edits.
+The toolbar supports block formats (headings, paragraph, div, blockquote, pre), inline formatting (bold, italic, underline, strikethrough, subscript, superscript, code), alignment, lists, links, images, and tables. Use **Clear formatting** to strip styles, classes, ids, and wrapper tags (`span`, `font`, etc.) from the selection (or the whole document if nothing is selected) while keeping semantic formatting such as bold and italic. Table `class` and whitelisted layout styles are preserved. Use **Edit HTML** to toggle raw HTML source mode. **Undo** / **Redo** (toolbar or Ctrl/Cmd+Z and Ctrl+Shift+Z / Ctrl+Y) cover all editor changes, including code wrap, alignment, clear formatting, link/image/table dialogs, and source-mode edits.
 
 When `Admin.Editor.cleanOnPaste` is enabled (default), pasted HTML from Word or websites is cleaned with the same rules. See [CONFIGURATION.md](CONFIGURATION.md#editor).
 
 The **Insert link** button opens a properties dialog (URL, text, title, target). Double-click an existing link to edit it. Use **Select** next to the URL field to browse files inline via the File Manager (`browseFiles`).
 
 The **Insert image** button opens a properties dialog (URL, alt, width, height, styles). If an image is selected (or the cursor is on one), the dialog opens in edit mode. Double-click an existing image to edit its properties as well. Use **Select** next to the URL field to browse images inline in the same dialog (File Manager AJAX content). Width and height are applied as CSS styles, not HTML attributes. See [FILEMANAGER.md — Browse Images](FILEMANAGER.md#browse-images).
+
+The **Table** toolbar button opens a dropdown with a grid size picker (up to 10×10) for quick insertion, plus actions when the caret is inside a table: table properties, insert/delete rows and columns, delete table, merge cells, split cell, and cell properties. **Table properties** covers caption, width, alignment, CSS class, styles, and header row/column. **Cell properties** covers width, height, text/vertical align, background, and cell type (`td`/`th`). Tab / Shift+Tab moves between cells; Tab in the last cell appends a row. Optional `Admin.Editor.tableClass` prefills the CSS class on insert.
 
 Optional `Admin.Editor.height` sets the editor content area height in pixels (default `500`). See [CONFIGURATION.md](CONFIGURATION.md#editor).
 
