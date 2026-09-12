@@ -41,6 +41,9 @@ const HtmlEditor = (function() {
         TH: { colspan: true, rowspan: true },
     };
 
+    const HISTORY_LIMIT = 100;
+    const HISTORY_DEBOUNCE = 400;
+
     /**
      * @param {HTMLTextAreaElement} textarea
      * @param {Object} options
@@ -66,6 +69,15 @@ const HtmlEditor = (function() {
         this.selectedImage = null;
         this.statusBar = null;
         this.statusPath = '';
+        this.history = [];
+        this.historyIndex = -1;
+        this.historyTimer = null;
+        this.historyApplying = false;
+        this.destroyed = false;
+        this.form = null;
+        this.onSubmit = null;
+        this.onKeyDown = this.onKeyDown.bind(this);
+        this.onBeforeInput = this.onBeforeInput.bind(this);
 
         window.BrammoEditor.instances[this.id] = this;
         this.init();
@@ -118,10 +130,18 @@ const HtmlEditor = (function() {
 
         this.body.addEventListener('input', function() {
             this.sync();
+            if (!this.historyApplying) {
+                this.scheduleHistoryCommit();
+            }
             this.refreshToolbarState();
         }.bind(this));
-        this.body.addEventListener('blur', this.sync.bind(this));
+        this.body.addEventListener('blur', function() {
+            this.commitHistory();
+            this.sync();
+        }.bind(this));
         this.body.addEventListener('keyup', this.refreshToolbarState.bind(this));
+        this.body.addEventListener('keydown', this.onKeyDown);
+        this.body.addEventListener('beforeinput', this.onBeforeInput);
         this.body.addEventListener('mouseup', function() {
             this.trackSelectedImage();
             this.refreshToolbarState();
@@ -156,11 +176,13 @@ const HtmlEditor = (function() {
         this.onSelectionChange = this.onSelectionChange.bind(this);
         document.addEventListener('selectionchange', this.onSelectionChange);
 
-        const form = this.textarea.closest('form');
-        if (form) {
-            form.addEventListener('submit', this.sync.bind(this));
+        this.form = this.textarea.closest('form');
+        if (this.form) {
+            this.onSubmit = this.sync.bind(this);
+            this.form.addEventListener('submit', this.onSubmit);
         }
 
+        this.historyReset();
         this.refreshToolbarState();
     };
 
@@ -174,8 +196,8 @@ const HtmlEditor = (function() {
         toolbar.setAttribute('role', 'toolbar');
 
         toolbar.appendChild(this.buildButtonGroup([
-            { cmd: 'undo', icon: 'bi-arrow-counterclockwise', title: labels.undo },
-            { cmd: 'redo', icon: 'bi-arrow-clockwise', title: labels.redo },
+            { action: 'undo', icon: 'bi-arrow-counterclockwise', title: labels.undo },
+            { action: 'redo', icon: 'bi-arrow-clockwise', title: labels.redo },
         ]));
         toolbar.appendChild(this.buildBlockSelect(labels));
         toolbar.appendChild(this.buildButtonGroup([
@@ -248,6 +270,7 @@ const HtmlEditor = (function() {
             self.focusBody();
             document.execCommand('formatBlock', false, '<' + select.value + '>');
             self.sync();
+            self.commitHistory();
             self.refreshToolbarState();
         });
 
@@ -302,12 +325,275 @@ const HtmlEditor = (function() {
     };
 
     /**
+     * @param {Node} node
+     * @param {number} offset
+     * @returns {number}
+     */
+    HtmlEditor.prototype.offsetFromNode = function(node, offset) {
+        if (!node || !this.body.contains(node)) {
+            return 0;
+        }
+
+        try {
+            const range = document.createRange();
+            range.selectNodeContents(this.body);
+            range.setEnd(node, offset);
+            return range.toString().length;
+        } catch (e) {
+            return 0;
+        }
+    };
+
+    /**
+     * @param {number} target
+     * @returns {{node: Node, offset: number}|null}
+     */
+    HtmlEditor.prototype.nodeFromOffset = function(target) {
+        if (target <= 0) {
+            return { node: this.body, offset: 0 };
+        }
+
+        const walker = document.createTreeWalker(this.body, NodeFilter.SHOW_TEXT);
+        let remaining = target;
+        let node = walker.nextNode();
+        let last = null;
+
+        while (node) {
+            last = node;
+            const length = node.nodeValue ? node.nodeValue.length : 0;
+            if (remaining <= length) {
+                return { node: node, offset: remaining };
+            }
+            remaining -= length;
+            node = walker.nextNode();
+        }
+
+        if (last) {
+            return { node: last, offset: last.nodeValue ? last.nodeValue.length : 0 };
+        }
+
+        return { node: this.body, offset: this.body.childNodes.length };
+    };
+
+    /**
+     * @returns {{start: number, end: number}|null}
+     */
+    HtmlEditor.prototype.getSelectionOffsets = function() {
+        const selection = window.getSelection();
+        if (!selection || selection.rangeCount === 0) {
+            return null;
+        }
+
+        const range = selection.getRangeAt(0);
+        if (!this.body.contains(range.commonAncestorContainer)) {
+            return null;
+        }
+
+        return {
+            start: this.offsetFromNode(range.startContainer, range.startOffset),
+            end: this.offsetFromNode(range.endContainer, range.endOffset),
+        };
+    };
+
+    /**
+     * @param {{start: number, end: number}|null} offsets
+     */
+    HtmlEditor.prototype.restoreSelectionOffsets = function(offsets) {
+        if (!offsets) {
+            return;
+        }
+
+        const start = this.nodeFromOffset(offsets.start);
+        const end = this.nodeFromOffset(offsets.end);
+        if (!start || !end) {
+            return;
+        }
+
+        try {
+            const range = document.createRange();
+            range.setStart(start.node, start.offset);
+            range.setEnd(end.node, end.offset);
+            const selection = window.getSelection();
+            if (selection) {
+                selection.removeAllRanges();
+                selection.addRange(range);
+            }
+        } catch (e) {
+            // Ignore invalid restored ranges.
+        }
+    };
+
+    /**
+     * @returns {{html: string, selection: ({start: number, end: number}|null)}}
+     */
+    HtmlEditor.prototype.captureHistoryEntry = function() {
+        return {
+            html: this.body.innerHTML,
+            selection: this.getSelectionOffsets(),
+        };
+    };
+
+    HtmlEditor.prototype.historyReset = function() {
+        this.cancelHistoryCommit();
+        this.history = [this.captureHistoryEntry()];
+        this.historyIndex = 0;
+        this.refreshHistoryButtons();
+    };
+
+    HtmlEditor.prototype.cancelHistoryCommit = function() {
+        if (this.historyTimer) {
+            clearTimeout(this.historyTimer);
+            this.historyTimer = null;
+        }
+    };
+
+    HtmlEditor.prototype.scheduleHistoryCommit = function() {
+        this.cancelHistoryCommit();
+        this.historyTimer = setTimeout(function() {
+            this.historyTimer = null;
+            this.commitHistory();
+        }.bind(this), HISTORY_DEBOUNCE);
+    };
+
+    HtmlEditor.prototype.commitHistory = function() {
+        if (this.historyApplying || this.sourceMode || this.destroyed) {
+            return;
+        }
+
+        this.cancelHistoryCommit();
+
+        const entry = this.captureHistoryEntry();
+        const current = this.history[this.historyIndex];
+        if (current && current.html === entry.html) {
+            if (current) {
+                current.selection = entry.selection;
+            }
+            this.refreshHistoryButtons();
+            return;
+        }
+
+        this.history = this.history.slice(0, this.historyIndex + 1);
+        this.history.push(entry);
+        this.historyIndex = this.history.length - 1;
+
+        while (this.history.length > HISTORY_LIMIT) {
+            this.history.shift();
+            this.historyIndex--;
+        }
+
+        this.refreshHistoryButtons();
+    };
+
+    /**
+     * @param {{html: string, selection: ({start: number, end: number}|null)}} entry
+     */
+    HtmlEditor.prototype.applyHistory = function(entry) {
+        this.historyApplying = true;
+        this.cancelHistoryCommit();
+
+        this.body.innerHTML = entry.html;
+        this.selectedImage = null;
+        this.editingImage = null;
+        this.editingLink = null;
+        this.clearSavedSelection();
+        this.statusPath = '';
+
+        this.focusBody();
+        this.restoreSelectionOffsets(entry.selection);
+        this.sync();
+        this.historyApplying = false;
+        this.refreshToolbarState();
+    };
+
+    HtmlEditor.prototype.historyUndo = function() {
+        if (this.sourceMode || this.historyIndex <= 0) {
+            return;
+        }
+
+        this.cancelHistoryCommit();
+        this.historyIndex--;
+        this.applyHistory(this.history[this.historyIndex]);
+    };
+
+    HtmlEditor.prototype.historyRedo = function() {
+        if (this.sourceMode || this.historyIndex >= this.history.length - 1) {
+            return;
+        }
+
+        this.cancelHistoryCommit();
+        this.historyIndex++;
+        this.applyHistory(this.history[this.historyIndex]);
+    };
+
+    HtmlEditor.prototype.refreshHistoryButtons = function() {
+        if (!this.toolbar) {
+            return;
+        }
+
+        const undoBtn = this.toolbar.querySelector('button[data-action="undo"]');
+        const redoBtn = this.toolbar.querySelector('button[data-action="redo"]');
+        const canUndo = !this.sourceMode && this.historyIndex > 0;
+        const canRedo = !this.sourceMode && this.historyIndex < this.history.length - 1;
+
+        if (undoBtn) {
+            undoBtn.disabled = !canUndo;
+        }
+        if (redoBtn) {
+            redoBtn.disabled = !canRedo;
+        }
+    };
+
+    /**
+     * @param {KeyboardEvent} e
+     */
+    HtmlEditor.prototype.onKeyDown = function(e) {
+        if (this.sourceMode || this.destroyed) {
+            return;
+        }
+
+        if (!(e.ctrlKey || e.metaKey) || e.altKey) {
+            return;
+        }
+
+        const key = (e.key || '').toLowerCase();
+        if (key === 'z') {
+            e.preventDefault();
+            if (e.shiftKey) {
+                this.historyRedo();
+            } else {
+                this.historyUndo();
+            }
+        } else if (key === 'y') {
+            e.preventDefault();
+            this.historyRedo();
+        }
+    };
+
+    /**
+     * @param {InputEvent} e
+     */
+    HtmlEditor.prototype.onBeforeInput = function(e) {
+        if (this.sourceMode || this.destroyed) {
+            return;
+        }
+
+        if (e.inputType === 'historyUndo') {
+            e.preventDefault();
+            this.historyUndo();
+        } else if (e.inputType === 'historyRedo') {
+            e.preventDefault();
+            this.historyRedo();
+        }
+    };
+
+    /**
      * @param {string} cmd
      */
     HtmlEditor.prototype.execCommand = function(cmd) {
         this.focusBody();
         document.execCommand(cmd, false, null);
         this.sync();
+        this.commitHistory();
         this.refreshToolbarState();
     };
 
@@ -321,6 +607,12 @@ const HtmlEditor = (function() {
         }
 
         switch (action) {
+            case 'undo':
+                this.historyUndo();
+                break;
+            case 'redo':
+                this.historyRedo();
+                break;
             case 'wrapCode':
                 this.wrapCode();
                 break;
@@ -343,35 +635,49 @@ const HtmlEditor = (function() {
      * @returns {HTMLElement|null}
      */
     HtmlEditor.prototype.getAlignmentBlock = function() {
-        const selection = window.getSelection();
-        if (!selection || selection.rangeCount === 0) {
-            return null;
-        }
-
-        let node = selection.anchorNode;
-        if (node && node.nodeType === Node.TEXT_NODE) {
-            node = node.parentNode;
-        }
-
-        while (node && node !== this.body) {
-            if (BLOCK_TAGS.includes(node.nodeName)) {
-                return node;
-            }
-            node = node.parentNode;
-        }
-
-        return null;
+        const blocks = this.getAlignmentBlocks();
+        return blocks.length ? blocks[0] : null;
     };
 
     /**
-     * @returns {string}
+     * Innermost block elements intersecting the current selection.
+     *
+     * @returns {Array<HTMLElement>}
      */
-    HtmlEditor.prototype.getCurrentTextAlign = function() {
-        const block = this.getAlignmentBlock();
-        if (!block) {
-            return '';
+    HtmlEditor.prototype.getAlignmentBlocks = function() {
+        const selection = window.getSelection();
+        if (!selection || selection.rangeCount === 0) {
+            return [];
         }
 
+        const range = selection.getRangeAt(0);
+        if (!this.body.contains(range.commonAncestorContainer)) {
+            return [];
+        }
+
+        const candidates = Array.prototype.slice.call(
+            this.body.querySelectorAll(BLOCK_TAGS.join(','))
+        );
+        const intersecting = candidates.filter(function(el) {
+            try {
+                return range.intersectsNode(el);
+            } catch (e) {
+                return false;
+            }
+        });
+
+        return intersecting.filter(function(el) {
+            return !intersecting.some(function(other) {
+                return other !== el && el.contains(other);
+            });
+        });
+    };
+
+    /**
+     * @param {HTMLElement} block
+     * @returns {string}
+     */
+    HtmlEditor.prototype.getBlockTextAlign = function(block) {
         if (block.style.textAlign) {
             return block.style.textAlign;
         }
@@ -381,40 +687,82 @@ const HtmlEditor = (function() {
     };
 
     /**
+     * @returns {string}
+     */
+    HtmlEditor.prototype.getCurrentTextAlign = function() {
+        const blocks = this.getAlignmentBlocks();
+        if (!blocks.length) {
+            return '';
+        }
+
+        const first = this.getBlockTextAlign(blocks[0]);
+        for (let i = 1; i < blocks.length; i++) {
+            if (this.getBlockTextAlign(blocks[i]) !== first) {
+                return '';
+            }
+        }
+
+        return first;
+    };
+
+    /**
      * @param {string} align
      */
     HtmlEditor.prototype.setTextAlign = function(align) {
         this.focusBody();
-        const block = this.getAlignmentBlock();
-        if (!block) {
+        const blocks = this.getAlignmentBlocks();
+        if (!blocks.length) {
             return;
         }
 
-        const current = this.getCurrentTextAlign();
-        block.removeAttribute('align');
+        const allMatch = blocks.every(function(block) {
+            return this.getBlockTextAlign(block) === align;
+        }.bind(this));
 
-        if (current === align) {
-            block.style.removeProperty('text-align');
-            if (!block.style.length) {
-                block.removeAttribute('style');
+        blocks.forEach(function(block) {
+            block.removeAttribute('align');
+
+            if (allMatch) {
+                block.style.removeProperty('text-align');
+                if (!block.style.length) {
+                    block.removeAttribute('style');
+                }
+            } else {
+                block.style.textAlign = align;
             }
-        } else {
-            block.style.textAlign = align;
-        }
+        });
 
         this.sync();
+        this.commitHistory();
         this.refreshToolbarState();
     };
 
     HtmlEditor.prototype.wrapCode = function() {
+        if (this.sourceMode) {
+            return;
+        }
+
         this.focusBody();
         const selection = window.getSelection();
         if (!selection || selection.rangeCount === 0) {
             return;
         }
 
+        const existing = this.getCodeAtSelection();
+        if (existing) {
+            const parent = existing.parentNode;
+            this.unwrapNode(existing);
+            if (parent) {
+                parent.normalize();
+            }
+            this.sync();
+            this.commitHistory();
+            this.refreshToolbarState();
+            return;
+        }
+
         const range = selection.getRangeAt(0);
-        if (range.collapsed) {
+        if (range.collapsed || !this.body.contains(range.commonAncestorContainer)) {
             return;
         }
 
@@ -426,8 +774,13 @@ const HtmlEditor = (function() {
             range.insertNode(code);
         }
 
+        const selectRange = document.createRange();
+        selectRange.selectNodeContents(code);
         selection.removeAllRanges();
+        selection.addRange(selectRange);
+
         this.sync();
+        this.commitHistory();
         this.refreshToolbarState();
     };
 
@@ -461,6 +814,7 @@ const HtmlEditor = (function() {
         this.focusBody();
         document.execCommand('insertHTML', false, cleaned);
         this.sync();
+        this.commitHistory();
         this.refreshToolbarState();
     };
 
@@ -685,6 +1039,7 @@ const HtmlEditor = (function() {
                 }
 
                 this.sync();
+                this.commitHistory();
                 this.refreshToolbarState();
                 return;
             }
@@ -697,6 +1052,7 @@ const HtmlEditor = (function() {
 
         this.cleanFragment(this.body);
         this.sync();
+        this.commitHistory();
         this.refreshToolbarState();
     };
 
@@ -816,6 +1172,7 @@ const HtmlEditor = (function() {
             this.applyLinkProperties(this.editingLink, props);
             this.editingLink = null;
             this.sync();
+            this.commitHistory();
             this.refreshToolbarState();
             return;
         }
@@ -852,6 +1209,7 @@ const HtmlEditor = (function() {
         }
 
         this.sync();
+        this.commitHistory();
         this.refreshToolbarState();
     };
 
@@ -1022,6 +1380,7 @@ const HtmlEditor = (function() {
             this.applyImageProperties(this.editingImage, props);
             this.editingImage = null;
             this.sync();
+            this.commitHistory();
             this.refreshToolbarState();
             return;
         }
@@ -1044,6 +1403,7 @@ const HtmlEditor = (function() {
         }
 
         this.sync();
+        this.commitHistory();
         this.refreshToolbarState();
     };
 
@@ -1608,8 +1968,11 @@ const HtmlEditor = (function() {
             this.body.hidden = false;
             this.body.contentEditable = 'true';
             this.sourceMode = false;
+            this.statusPath = '';
+            this.commitHistory();
             this.refreshToolbarState();
         } else {
+            this.commitHistory();
             this.sync();
             this.textarea.style.display = '';
             this.textarea.removeAttribute('aria-hidden');
@@ -1623,7 +1986,7 @@ const HtmlEditor = (function() {
     };
 
     HtmlEditor.prototype.onSelectionChange = function() {
-        if (this.sourceMode) {
+        if (this.destroyed || this.sourceMode) {
             return;
         }
 
@@ -1780,12 +2143,12 @@ const HtmlEditor = (function() {
     };
 
     /**
-     * @returns {boolean}
+     * @returns {HTMLElement|null}
      */
-    HtmlEditor.prototype.isSelectionInCode = function() {
+    HtmlEditor.prototype.getCodeAtSelection = function() {
         const selection = window.getSelection();
         if (!selection || selection.rangeCount === 0) {
-            return false;
+            return null;
         }
 
         let node = selection.anchorNode;
@@ -1795,12 +2158,12 @@ const HtmlEditor = (function() {
 
         while (node && node !== this.body) {
             if (node.nodeName === 'CODE') {
-                return true;
+                return node;
             }
             node = node.parentNode;
         }
 
-        return false;
+        return null;
     };
 
     HtmlEditor.prototype.refreshToolbarState = function() {
@@ -1825,18 +2188,6 @@ const HtmlEditor = (function() {
 
         this.toolbar.querySelectorAll('button[data-cmd]').forEach(function(btn) {
             const cmd = btn.dataset.cmd;
-
-            if (cmd === 'undo' || cmd === 'redo') {
-                let enabled = false;
-                try {
-                    enabled = document.queryCommandEnabled(cmd);
-                } catch (e) {
-                    enabled = false;
-                }
-                btn.disabled = !enabled;
-                return;
-            }
-
             let active = false;
             try {
                 active = document.queryCommandState(cmd);
@@ -1849,11 +2200,12 @@ const HtmlEditor = (function() {
 
         const codeBtn = this.toolbar.querySelector('button[data-action="wrapCode"]');
         if (codeBtn) {
-            const inCode = this.isSelectionInCode();
+            const inCode = !!this.getCodeAtSelection();
             codeBtn.classList.toggle('active', inCode);
             codeBtn.setAttribute('aria-pressed', inCode ? 'true' : 'false');
         }
 
+        this.refreshHistoryButtons();
         this.updateStatusBar();
     };
 
@@ -1868,6 +2220,7 @@ const HtmlEditor = (function() {
                 btn.classList.remove('active');
                 btn.setAttribute('aria-pressed', 'false');
             });
+            this.refreshHistoryButtons();
             this.updateStatusBar();
         } else {
             this.refreshToolbarState();
@@ -1884,6 +2237,24 @@ const HtmlEditor = (function() {
         if (!this.sourceMode) {
             this.textarea.value = this.body.innerHTML;
         }
+    };
+
+    HtmlEditor.prototype.destroy = function() {
+        if (this.destroyed) {
+            return;
+        }
+
+        this.destroyed = true;
+        this.cancelHistoryCommit();
+        document.removeEventListener('selectionchange', this.onSelectionChange);
+        if (this.form && this.onSubmit) {
+            this.form.removeEventListener('submit', this.onSubmit);
+        }
+        if (this.body) {
+            this.body.removeEventListener('keydown', this.onKeyDown);
+            this.body.removeEventListener('beforeinput', this.onBeforeInput);
+        }
+        delete window.BrammoEditor.instances[this.id];
     };
 
     return HtmlEditor;

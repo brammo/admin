@@ -188,7 +188,7 @@ echo $this->Form->control('body', ['type' => 'html', 'label' => 'Content']);
 echo $this->Form->end();
 ```
 
-The toolbar supports block formats (headings, paragraph, div, blockquote, pre), inline formatting (bold, italic, underline, strikethrough, subscript, superscript, code), alignment, lists, links, and images. Use **Clear formatting** to strip styles, classes, ids, and wrapper tags (`span`, `font`, etc.) from the selection (or the whole document if nothing is selected) while keeping semantic formatting such as bold and italic. Use **Edit HTML** to toggle raw HTML source mode.
+The toolbar supports block formats (headings, paragraph, div, blockquote, pre), inline formatting (bold, italic, underline, strikethrough, subscript, superscript, code), alignment, lists, links, and images. Use **Clear formatting** to strip styles, classes, ids, and wrapper tags (`span`, `font`, etc.) from the selection (or the whole document if nothing is selected) while keeping semantic formatting such as bold and italic. Use **Edit HTML** to toggle raw HTML source mode. **Undo** / **Redo** (toolbar or Ctrl/Cmd+Z and Ctrl+Shift+Z / Ctrl+Y) cover all editor changes, including code wrap, alignment, clear formatting, link and image dialogs, and source-mode edits.
 
 When `Admin.Editor.cleanOnPaste` is enabled (default), pasted HTML from Word or websites is cleaned with the same rules. See [CONFIGURATION.md](CONFIGURATION.md#editor).
 
