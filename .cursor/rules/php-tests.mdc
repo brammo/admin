@@ -10,6 +10,7 @@ alwaysApply: false
 
 - Mirror `src/` under `tests/TestCase/` (`*Test.php`).
 - FileManager tests: isolated dir in `TMP`, restore `Configure` in `tearDown`, use `Laminas\Diactoros\UploadedFile` for uploads.
+- SortableComponent tests: sqlite table in `test` connection, Sequence on `sort_order`, restore/drop table in `tearDown`.
 - Helper tests: `new View()` + load `BootstrapUI.Html` if output uses icons.
 
 ## FormHelper

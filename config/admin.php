@@ -81,6 +81,13 @@ return [
         ],
 
         /**
+         * SortableJS CDN script loaded by the sortable element.
+         */
+        'Sortable' => [
+            'script' => 'https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js',
+        ],
+
+        /**
          * Brand configuration
          */
         'Brand' => [

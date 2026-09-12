@@ -255,6 +255,9 @@ msgstr "Заглавие 6"
 msgid "Div"
 msgstr "Div"
 
+msgid "Drag to reorder"
+msgstr "Превлачи за подреждане"
+
 msgid "Blockquote"
 msgstr "Цитат"
 

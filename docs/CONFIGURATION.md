@@ -12,6 +12,7 @@ All configuration options are stored under the `Admin` key in your application's
 - [Title](#title)
 - [Sidebar Menu](#sidebar-menu)
 - [Layout Assets](#layout-assets)
+- [Sortable](#sortable)
 - [File Manager](#file-manager)
 
 ---
@@ -407,6 +408,24 @@ Configure::write('Admin.Layout.fonts', [
     ],
 ]);
 ```
+
+## Sortable
+
+SortableJS is loaded only on pages that include `$this->element('Brammo/Admin.sortable')`. Override the CDN URL if you vendor the library:
+
+```php
+'Admin' => [
+    'Sortable' => [
+        'script' => 'https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js',
+    ],
+],
+```
+
+| Key | Default | Description |
+|-----|---------|-------------|
+| `Sortable.script` | SortableJS 1.15.6 on jsDelivr | Script URL queued before `Brammo/Admin.sortable` |
+
+See [SORTABLE.md](SORTABLE.md) for the data-attribute contract and `SortableComponent`.
 
 ## File Manager
 

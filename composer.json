@@ -24,7 +24,8 @@
         "friendsofcake/bootstrap-ui": "^5.1",
         "brammo/bootstrap-ui": "^1.0",
         "brammo/content": "^1.0",
-        "brammo/auth": "^1.1"
+        "brammo/auth": "^1.1",
+        "admad/cakephp-sequence": "^4.0"
     },
     "suggest": {
         "ext-imagick": "Required for automatic image resize in the File Manager"

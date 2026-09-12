@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **SortableComponent** — drag-and-drop reorder for Sequence tables: SortableJS + `Brammo/Admin.sortable` / `Sortable/handle` elements, POST `ids[]`, optional owner scope; see [docs/SORTABLE.md](docs/SORTABLE.md)
+
 ## [1.9.0] - 2026-09-12
 
 ### Added

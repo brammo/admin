@@ -7,6 +7,7 @@ Admin dashboard plugin for CakePHP 5 with Bootstrap UI integration.
 - PHP 8.2 or higher
 - CakePHP 5.3 or higher
 - [brammo/auth](https://github.com/brammo/auth) ^1.1 (loaded automatically)
+- [admad/cakephp-sequence](https://github.com/ADmad/cakephp-sequence) ^4.0 (drag-and-drop reorder)
 - Optional: `ext-imagick` for image resize in the File Manager
 
 ## Installation
@@ -47,7 +48,13 @@ See [docs/HELPERS.md](docs/HELPERS.md) for detailed documentation and examples.
 
 Config-driven GET filters for index/list actions: apply typed WHERE conditions to an ORM query, persist filters and sort/page in session, and restore them via redirect. Works with Cake Paginator (`sortableFields` stay on the controller).
 
-See [docs/FILTER.md](docs/FILTER.md) for types, session behavior, and Paginator URL preservation.
+See [docs/FILTER.md](docs/FILTER.md) for types, session behavior, and Paginator URL persistence.
+
+### SortableComponent
+
+Drag-and-drop reorder for index lists and attachment grids. Host tables use `sort_order` plus ADmad Sequence; the plugin provides SortableJS, a grip-handle element, and `SortableComponent::reorder()` (POST `ids[]`, optional owner scope).
+
+See [docs/SORTABLE.md](docs/SORTABLE.md) for markup, data attributes, and controller examples.
 
 ### Controllers
 
@@ -79,6 +86,7 @@ All configuration options are documented in [docs/CONFIGURATION.md](docs/CONFIGU
 - Sidebar menu
 - Layout assets (CSS, JavaScript, fonts)
 - File Manager (`Admin.FileManager`)
+- SortableJS CDN (`Admin.Sortable.script`)
 
 ## Development
 
@@ -127,7 +135,7 @@ brammo/admin/
 ├── resources/           # Resources (translations, etc.)
 │   └── locales/         # Translation files
 ├── src/                 # Source code
-│   ├── Controller/      # Controllers
+│   ├── Controller/      # Controllers and components (Filter, Sortable)
 │   ├── FileManager/     # FileManagerService (filesystem logic)
 │   ├── View/            # View classes and helpers
 │   │   └── Helper/      # View helpers
