@@ -426,10 +426,7 @@ const HtmlEditor = (function() {
         gridWrap.appendChild(gridCaption);
         gridWrap.appendChild(grid);
         menu.appendChild(gridWrap);
-
-        const divider = document.createElement('div');
-        divider.className = 'dropdown-divider';
-        menu.appendChild(divider);
+        this.tableGridWrap = gridWrap;
 
         const actions = [
             { action: 'tableProperties', label: labels.tableProperties || 'Table properties' },
@@ -3444,9 +3441,15 @@ const HtmlEditor = (function() {
             canSplit = colspan > 1 || rowspan > 1;
         }
 
+        if (this.tableGridWrap) {
+            this.tableGridWrap.classList.toggle('d-none', inTable);
+        }
+
         this.tableMenu.querySelectorAll('[data-table-action]').forEach(function(btn) {
+            btn.classList.toggle('d-none', !inTable);
+
             const action = btn.dataset.tableAction;
-            let enabled = inTable;
+            let enabled = true;
             if (action === 'mergeCells') {
                 enabled = canMerge;
             } else if (action === 'splitCell') {
