@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- PHPStan: remove invalid generic on `AdminPlugin::bootstrap()` `$app`; type `ButtonHelper::$helpers` to match CakePHP's Helper property
+
 ## [1.8.0] - 2026-08-27
 
 ### Added
