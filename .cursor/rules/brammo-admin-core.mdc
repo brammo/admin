@@ -16,6 +16,6 @@ Before finishing: `composer check` (tests, PHPCS, PHPStan on `src/`). Use `compo
 
 File manager logic lives in `src/FileManager/FileManagerService.php`; keep HTTP/flash/JSON in the controller.
 
-File manager: preserve `isValidFolder`, `sanitizeFilename`, `isPathWithinBase` — no path traversal regressions.
+File manager: preserve `isValidFolder`, `sanitizeFilename`, `isPathWithinBase` — no path traversal regressions. Attachment upload/unlink must use the same checks.
 
 Keep diffs small; follow patterns in existing helpers/controllers/tests.

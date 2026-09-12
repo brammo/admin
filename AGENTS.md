@@ -18,8 +18,9 @@ CakePHP 5 **plugin** (`brammo/admin`) providing an admin dashboard UI, file mana
 ```
 src/AdminPlugin.php          Plugin bootstrap, middleware, Auth dependency
 src/Controller/              AppController, UserController, FileManagerController
-src/Controller/Component/    FilterComponent, SortableComponent
+src/Controller/Component/    FilterComponent, SortableComponent, AttachmentsComponent
 src/FileManager/             FileManagerService (path validation, uploads, image resize)
+src/Model/Behavior/          AttachmentFileBehavior (optional unused-file unlink)
 src/View/AppView.php         Registers helpers (BootstrapUI, Brammo, Admin)
 src/View/Helper/             FormHelper, ButtonHelper
 config/admin.php             Admin.* configuration (see docs/CONFIGURATION.md)
@@ -43,7 +44,11 @@ docs/                        HELPERS, FILEMANAGER, CONFIGURATION, PHPSTAN, PSALM
 - **File manager**: Requires `Admin.FileManager` (basePath, topFolders, fileTypes); path validation via `isValidFolder` / `isPathWithinBase` / `sanitizeFilename`
 - **FormHelper**: Extends BootstrapUI; custom `control` types: `image`, `html` (WYSIWYG HTML editor), `dateRange`
 - **FilterComponent**: Opt-in list filters + sort/page session; see [docs/FILTER.md](docs/FILTER.md)
+- **SortableComponent**: Drag-and-drop reorder; see [docs/SORTABLE.md](docs/SORTABLE.md)
+- **AttachmentsComponent**: Bulk upload + optional AttachmentFileBehavior; see [docs/ATTACHMENTS.md](docs/ATTACHMENTS.md)
 - **SortableComponent**: Drag-and-drop reorder via SortableJS + ADmad Sequence; see [docs/SORTABLE.md](docs/SORTABLE.md)
+- **AttachmentsComponent**: Bulk upload into File Manager + ORM rows; see [docs/ATTACHMENTS.md](docs/ATTACHMENTS.md)
+- **AttachmentFileBehavior**: Unlink unused attachment paths after delete (File Manager path checks)
 
 ## Commands
 
@@ -70,13 +75,15 @@ Use `COMPOSER_ALLOW_SUPERUSER=1` if Composer refuses to run as root.
 5. PHPStan does not analyse `tests/`; still keep tests typed and consistent.
 6. **Security** (file manager): never weaken folder/path checks; use `realpath` + `isPathWithinBase` for destructive ops.
 7. **Security** (sortable): never skip owner-scope filtering in `SortableComponent::reorder()`.
-8. **Scope**: Minimal diffs; do not refactor unrelated controllers/helpers.
+8. **Security** (attachments): unlink only via `AttachmentFileBehavior` path checks; keep `isValidFolder` on upload folders.
+9. **Scope**: Minimal diffs; do not refactor unrelated controllers/helpers.
 
 ## Test patterns
 
 - **Helpers**: Instantiate with `View`, load BootstrapUI `Html` where icons are needed; use `Entity` + `Form->create()` for form context.
 - **FileManagerController**: Temp dir under `TMP`, `Configure::write('Admin.FileManager', ...)`, reflection for private methods; AJAX via `X-Requested-With: XMLHttpRequest`.
 - **SortableComponent**: Isolated sqlite table, Sequence behavior, POST via `ServerRequest`.
+- **AttachmentsComponent**: Temp File Manager dir, `Laminas\Diactoros\UploadedFile`, sqlite child table.
 - **Integration**: `IntegrationTestTrait` where full HTTP stack is needed.
 - Avoid tests that call removed private APIs (e.g. `getEntityFromContext` on `FormHelper`).
 
@@ -86,5 +93,6 @@ Use `COMPOSER_ALLOW_SUPERUSER=1` if Composer refuses to run as root.
 - [docs/HELPERS.md](docs/HELPERS.md) — ButtonHelper, FormHelper
 - [docs/FILTER.md](docs/FILTER.md) — FilterComponent for index filters
 - [docs/SORTABLE.md](docs/SORTABLE.md) — drag-and-drop reorder
+- [docs/ATTACHMENTS.md](docs/ATTACHMENTS.md) — multiupload and attachment UI
 - [docs/FILEMANAGER.md](docs/FILEMANAGER.md) — file manager
 - [docs/CONFIGURATION.md](docs/CONFIGURATION.md) — all `Admin.*` options

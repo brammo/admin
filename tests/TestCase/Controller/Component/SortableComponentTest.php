@@ -8,6 +8,7 @@ use Cake\Controller\ComponentRegistry;
 use Cake\Controller\Controller;
 use Cake\Datasource\ConnectionManager;
 use Cake\Http\Exception\BadRequestException;
+use Cake\Http\Response;
 use Cake\Http\ServerRequest;
 use Cake\ORM\Table;
 use Cake\TestSuite\TestCase;
@@ -132,7 +133,7 @@ class SortableComponentTest extends TestCase
      * @param \Cake\Http\Response $response Response
      * @return array<string, mixed>
      */
-    protected function decode(mixed $response): array
+    protected function decode(Response $response): array
     {
         $payload = json_decode((string)$response->getBody(), true);
         $this->assertIsArray($payload);

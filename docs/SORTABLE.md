@@ -123,6 +123,6 @@ The plugin script `Brammo/Admin.sortable` is always queued after that URL. Scrip
 
 ## Out of scope
 
-- Attachment bulk upload (separate feature)
+- Attachment bulk upload (see [ATTACHMENTS.md](ATTACHMENTS.md))
 - Host add/edit/delete actions and `sort_order` migrations
 - Automatic index table markup (columns besides the grip handle)

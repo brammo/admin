@@ -56,6 +56,12 @@ Drag-and-drop reorder for index lists and attachment grids. Host tables use `sor
 
 See [docs/SORTABLE.md](docs/SORTABLE.md) for markup, data attributes, and controller examples.
 
+### Attachments and multiupload
+
+Bulk-upload images/files on an owner view page after the entity exists. `AttachmentsComponent::upload()` writes through File Manager and inserts child rows; optional gallery/list elements and `AttachmentFileBehavior` (unlink unused paths) are included.
+
+See [docs/ATTACHMENTS.md](docs/ATTACHMENTS.md) for controller actions, element options, and disk cleanup.
+
 ### Controllers
 
 #### UserController
@@ -135,8 +141,9 @@ brammo/admin/
 ├── resources/           # Resources (translations, etc.)
 │   └── locales/         # Translation files
 ├── src/                 # Source code
-│   ├── Controller/      # Controllers and components (Filter, Sortable)
+│   ├── Controller/      # Controllers and components (Filter, Sortable, Attachments)
 │   ├── FileManager/     # FileManagerService (filesystem logic)
+│   ├── Model/Behavior/  # AttachmentFileBehavior (optional disk cleanup)
 │   ├── View/            # View classes and helpers
 │   │   └── Helper/      # View helpers
 │   └── AdminPlugin.php  # Plugin bootstrap

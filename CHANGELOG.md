@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - **SortableComponent** — drag-and-drop reorder for Sequence tables: SortableJS + `Brammo/Admin.sortable` / `Sortable/handle` elements, POST `ids[]`, optional owner scope; see [docs/SORTABLE.md](docs/SORTABLE.md)
+- **AttachmentsComponent** — sequential multi-file upload into File Manager folders with ORM rows, gallery/files elements, and `AttachmentFileBehavior` for unused-path unlink; see [docs/ATTACHMENTS.md](docs/ATTACHMENTS.md)
 
 ## [1.9.0] - 2026-09-12
 

@@ -9,11 +9,20 @@ msgstr "Активен"
 msgid "Are you sure you want to delete?"
 msgstr "Сигурни ли сте, че искате да изтриете?"
 
+msgid "Add file"
+msgstr "Добави файл"
+
+msgid "Add image"
+msgstr "Добави снимка"
+
 msgid "Back"
 msgstr "Назад"
 
 msgid "Cancel"
 msgstr "Откажи"
+
+msgid "Cancelled"
+msgstr "Отказано"
 
 msgid "Clear formatting"
 msgstr "Изчисти форматиране"
@@ -29,6 +38,9 @@ msgstr "Размерът на изображението не може да бъ
 
 msgid "Cannot save file"
 msgstr "Файлът не може да бъде записан"
+
+msgid "Cannot save file record"
+msgstr "Записът за файла не може да бъде запазен"
 
 msgid "Close"
 msgstr "Затвори"
@@ -52,6 +64,9 @@ msgstr "Дата"
 msgid "Delete"
 msgstr "Изтрий"
 
+msgid "Done"
+msgstr "Готово"
+
 msgid "Edit"
 msgstr "Редактирай"
 
@@ -67,6 +82,18 @@ msgstr "Имейл"
 
 msgid "Exceeded file size limit"
 msgstr "Надвишен е лимитът за размер на файла"
+
+msgid "Failed"
+msgstr "Грешка"
+
+msgid "Failed: {n}"
+msgstr "Неуспешни: {n}"
+
+msgid "File"
+msgstr "Файл"
+
+msgid "Files"
+msgstr "Файлове"
 
 msgid "File Manager"
 msgstr "Файлов мениджър"
@@ -149,6 +176,9 @@ msgstr "Парола"
 msgid "Preview"
 msgstr "Преглед"
 
+msgid "Processing…"
+msgstr "Обработка…"
+
 msgid "Refresh"
 msgstr "Обнови"
 
@@ -203,6 +233,21 @@ msgstr "Качване"
 
 msgid "Upload failed"
 msgstr "Качването е неуспешно"
+
+msgid "Upload files"
+msgstr "Качи файлове"
+
+msgid "Upload images"
+msgstr "Качи снимки"
+
+msgid "Uploaded {n} of {total}"
+msgstr "Качени {n} от {total}"
+
+msgid "Uploading…"
+msgstr "Качване…"
+
+msgid "Uploading {n} of {total}"
+msgstr "Качване {n} от {total}"
 
 msgid "User"
 msgstr "Потребител"

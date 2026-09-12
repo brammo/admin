@@ -429,7 +429,7 @@ See [SORTABLE.md](SORTABLE.md) for the data-attribute contract and `SortableComp
 
 ## File Manager
 
-File Manager options live under `Admin.FileManager` (base path, allowed folders, file types, image resize settings). See [FILEMANAGER.md](FILEMANAGER.md) for the full option reference, routes, and security notes.
+File Manager options live under `Admin.FileManager` (base path, allowed folders, file types, image resize settings). See [FILEMANAGER.md](FILEMANAGER.md) for the full option reference, routes, and security notes. Host attachment bulk-upload (`AttachmentsComponent`) uses the same File Manager config; see [ATTACHMENTS.md](ATTACHMENTS.md).
 
 ### Asset Loading Order
 
