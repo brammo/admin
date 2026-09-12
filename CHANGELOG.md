@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.9.0] - 2026-09-12
+
 ### Added
 - **HTML editor**: Clear formatting toolbar button; optional `Admin.Editor.cleanOnPaste` (default `true`) strips pasted styles/classes/spans while keeping bold, italic, and other semantic markup
 - **HTML editor**: status bar with clickable element path at the cursor (e.g. `p > span > strong`); optional `Admin.Editor.statusBar` (default `true`)
@@ -247,4 +249,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.6.0]: https://github.com/brammo/admin/releases/tag/v1.6.0
 [1.7.0]: https://github.com/brammo/admin/releases/tag/v1.7.0
 [1.8.0]: https://github.com/brammo/admin/releases/tag/v1.8.0
-[Unreleased]: https://github.com/brammo/admin/compare/v1.8.0...HEAD
+[1.9.0]: https://github.com/brammo/admin/releases/tag/v1.9.0
+[Unreleased]: https://github.com/brammo/admin/compare/v1.9.0...HEAD

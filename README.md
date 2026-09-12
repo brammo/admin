@@ -73,7 +73,7 @@ All configuration options are documented in [docs/CONFIGURATION.md](docs/CONFIGU
 
 - Internationalization (`defaultLocale`)
 - Authentication defaults (`config/auth.php`)
-- HTML editor (`Admin.Editor.height`)
+- HTML editor (`Admin.Editor.height`, `cleanOnPaste`, `statusBar`, `tableClass`)
 - Brand customization
 - Home link and page title
 - Sidebar menu
