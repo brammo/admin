@@ -15,6 +15,12 @@ msgstr "Назад"
 msgid "Cancel"
 msgstr "Откажи"
 
+msgid "Clear formatting"
+msgstr "Изчисти форматиране"
+
+msgid "Clear formatting from the entire document?"
+msgstr "Изчистване на форматирането от целия документ?"
+
 msgid "Cannot create folder"
 msgstr "Папката не може да бъде създадена"
 

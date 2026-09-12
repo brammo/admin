@@ -262,6 +262,11 @@ return [
              * Default height of the HTML editor content area in pixels (scrollable)
              */
             'height' => 500,
+
+            /**
+             * Strip pasted HTML (styles, classes, spans, etc.) while keeping semantic formatting
+             */
+            'cleanOnPaste' => true,
         ],
     ],
 ];

@@ -82,10 +82,14 @@ $labels = [
     'imageEditTitle' => __d('brammo/admin', 'Edit image'),
     'imageSave' => __d('brammo/admin', 'Save'),
     'cancel' => __d('brammo/admin', 'Cancel'),
+    'clearFormat' => __d('brammo/admin', 'Clear formatting'),
+    'clearFormatConfirm' => __d('brammo/admin', 'Clear formatting from the entire document?'),
     'source' => __d('brammo/admin', 'Edit HTML'),
     'undo' => __d('brammo/admin', 'Undo'),
     'redo' => __d('brammo/admin', 'Redo'),
 ];
+
+$cleanOnPaste = $settings['cleanOnPaste'] ?? true;
 
 $this->Html->css('Brammo/Admin.editor', ['block' => true]);
 $this->Html->script('Brammo/Admin.file-browser', ['block' => true]);
@@ -98,6 +102,7 @@ $this->append('script');
         const browseUrl = <?= json_encode($imagesUrl, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
         const filesBrowseUrl = <?= json_encode($filesUrl, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
         const height = <?= (int)$height ?>;
+        const cleanOnPaste = <?= $cleanOnPaste ? 'true' : 'false' ?>;
         const labels = <?= json_encode($labels, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
         const modalTitle = <?= json_encode(__d('brammo/admin', 'Select Image'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
 
@@ -110,6 +115,7 @@ $this->append('script');
                 browseUrl: browseUrl,
                 filesBrowseUrl: filesBrowseUrl,
                 height: height,
+                cleanOnPaste: cleanOnPaste,
                 labels: labels,
                 fileBrowser: fileBrowser,
                 folder: 'images',

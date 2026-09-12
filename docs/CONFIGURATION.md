@@ -81,10 +81,16 @@ Rich text fields (`FormHelper` `html` control) use the built-in HTML editor (con
 ```php
 'Admin' => [
     'Editor' => [
-        'height' => 500,  // content area height in pixels (scrollable)
+        'height' => 500,       // content area height in pixels (scrollable)
+        'cleanOnPaste' => true, // strip pasted styles/classes/spans; keep bold/italic/etc.
     ],
 ],
 ```
+
+| Key | Default | Description |
+|-----|---------|-------------|
+| `Editor.height` | `500` | Content area height in pixels |
+| `Editor.cleanOnPaste` | `true` | Clean HTML on paste (styles, classes, ids, spans); the Clear formatting toolbar button always works |
 
 The editor integrates with the File Manager for image insertion (`browseImages` action). See [HELPERS.md](HELPERS.md#html-editor-control).
 

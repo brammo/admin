@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **HTML editor**: Clear formatting toolbar button; optional `Admin.Editor.cleanOnPaste` (default `true`) strips pasted styles/classes/spans while keeping bold, italic, and other semantic markup
+
 ### Fixed
 - PHPStan: remove invalid generic on `AdminPlugin::bootstrap()` `$app`; type `ButtonHelper::$helpers` to match CakePHP's Helper property
 - File Manager pagination: default `$action` and `$target` so the index view no longer warns (`Undefined variable $action` / `compact(): Undefined variable $target`)

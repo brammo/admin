@@ -19,6 +19,28 @@ const HtmlEditor = (function() {
     const BLOCK_TAGS = ['H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'P', 'DIV', 'BLOCKQUOTE', 'PRE', 'LI'];
     const FORMAT_BLOCK_TAGS = ['H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'P', 'DIV', 'BLOCKQUOTE', 'PRE'];
 
+    const CLEAN_KEEP_TAGS = {
+        P: true, BR: true, H1: true, H2: true, H3: true, H4: true, H5: true, H6: true,
+        STRONG: true, B: true, EM: true, I: true, U: true, S: true, STRIKE: true,
+        DEL: true, INS: true, SUB: true, SUP: true, UL: true, OL: true, LI: true,
+        A: true, IMG: true, BLOCKQUOTE: true, PRE: true, CODE: true, DIV: true,
+        HR: true, TABLE: true, THEAD: true, TBODY: true, TFOOT: true, TR: true,
+        TH: true, TD: true, CAPTION: true,
+    };
+
+    const CLEAN_DROP_TAGS = {
+        SCRIPT: true, STYLE: true, META: true, LINK: true, TITLE: true, BASE: true,
+        IFRAME: true, OBJECT: true, EMBED: true, APPLET: true, FORM: true, INPUT: true,
+        BUTTON: true, SELECT: true, TEXTAREA: true, SVG: true, MATH: true,
+    };
+
+    const CLEAN_ATTRS = {
+        A: { href: true, title: true, target: true, rel: true },
+        IMG: { src: true, alt: true },
+        TD: { colspan: true, rowspan: true },
+        TH: { colspan: true, rowspan: true },
+    };
+
     /**
      * @param {HTMLTextAreaElement} textarea
      * @param {Object} options
@@ -115,6 +137,10 @@ const HtmlEditor = (function() {
             }
         }.bind(this));
 
+        if (this.options.cleanOnPaste !== false) {
+            this.body.addEventListener('paste', this.onPaste.bind(this));
+        }
+
         this.onSelectionChange = this.onSelectionChange.bind(this);
         document.addEventListener('selectionchange', this.onSelectionChange);
 
@@ -162,6 +188,9 @@ const HtmlEditor = (function() {
         toolbar.appendChild(this.buildButtonGroup([
             { action: 'insertLink', icon: 'bi-link-45deg', title: labels.link },
             { action: 'insertImage', icon: 'bi-image', title: labels.imageBrowse },
+        ]));
+        toolbar.appendChild(this.buildButtonGroup([
+            { action: 'clearFormat', icon: 'bi-eraser', title: labels.clearFormat },
         ]));
         toolbar.appendChild(this.buildButtonGroup([
             { action: 'toggleSource', icon: 'bi-code-slash', title: labels.source },
@@ -289,6 +318,9 @@ const HtmlEditor = (function() {
             case 'insertImage':
                 this.openImageDialog();
                 break;
+            case 'clearFormat':
+                this.clearFormatting();
+                break;
             case 'toggleSource':
                 this.toggleSource();
                 break;
@@ -383,6 +415,275 @@ const HtmlEditor = (function() {
         }
 
         selection.removeAllRanges();
+        this.sync();
+        this.refreshToolbarState();
+    };
+
+    /**
+     * @param {ClipboardEvent} e
+     */
+    HtmlEditor.prototype.onPaste = function(e) {
+        if (this.sourceMode) {
+            return;
+        }
+
+        const clipboard = e.clipboardData;
+        if (!clipboard) {
+            return;
+        }
+
+        e.preventDefault();
+
+        const html = clipboard.getData('text/html');
+        const text = clipboard.getData('text/plain');
+        let cleaned;
+
+        if (html) {
+            cleaned = this.cleanHtml(html);
+        } else if (text) {
+            cleaned = this.escapeText(text).replace(/\n/g, '<br>');
+        } else {
+            return;
+        }
+
+        this.focusBody();
+        document.execCommand('insertHTML', false, cleaned);
+        this.sync();
+        this.refreshToolbarState();
+    };
+
+    /**
+     * @param {string} text
+     * @returns {string}
+     */
+    HtmlEditor.prototype.escapeText = function(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    };
+
+    /**
+     * @param {string} html
+     * @returns {string}
+     */
+    HtmlEditor.prototype.cleanHtml = function(html) {
+        const template = document.createElement('template');
+        template.innerHTML = html;
+        this.cleanFragment(template.content);
+        return template.innerHTML;
+    };
+
+    /**
+     * Clean a DocumentFragment or Element in place.
+     *
+     * @param {DocumentFragment|Element} root
+     */
+    HtmlEditor.prototype.cleanFragment = function(root) {
+        const self = this;
+        const children = Array.prototype.slice.call(root.childNodes);
+
+        children.forEach(function(node) {
+            self.cleanNode(node);
+        });
+    };
+
+    /**
+     * @param {Node} node
+     */
+    HtmlEditor.prototype.cleanNode = function(node) {
+        if (node.nodeType === Node.COMMENT_NODE) {
+            node.parentNode.removeChild(node);
+            return;
+        }
+
+        if (node.nodeType === Node.TEXT_NODE) {
+            node.nodeValue = node.nodeValue.replace(/\u00a0/g, ' ');
+            return;
+        }
+
+        if (node.nodeType !== Node.ELEMENT_NODE) {
+            if (node.parentNode) {
+                node.parentNode.removeChild(node);
+            }
+            return;
+        }
+
+        const tag = node.nodeName.toUpperCase();
+
+        if (CLEAN_DROP_TAGS[tag] || tag === 'O:P') {
+            node.parentNode.removeChild(node);
+            return;
+        }
+
+        const childNodes = Array.prototype.slice.call(node.childNodes);
+        const self = this;
+        childNodes.forEach(function(child) {
+            self.cleanNode(child);
+        });
+
+        if (!CLEAN_KEEP_TAGS[tag]) {
+            this.promoteInlineStyles(node);
+            this.unwrapNode(node);
+            return;
+        }
+
+        this.stripAttributes(node);
+
+        if (this.isEmptyCleanable(node)) {
+            node.parentNode.removeChild(node);
+        }
+    };
+
+    /**
+     * Promote font-weight / font-style / text-decoration on span/font to semantic tags
+     * before unwrapping.
+     *
+     * @param {Element} el
+     */
+    HtmlEditor.prototype.promoteInlineStyles = function(el) {
+        const style = el.style;
+        if (!style) {
+            return;
+        }
+
+        const wrappers = [];
+        const weight = (style.fontWeight || '').toString().toLowerCase();
+        if (weight === 'bold' || weight === 'bolder' || parseInt(weight, 10) >= 600) {
+            wrappers.push('strong');
+        }
+
+        const fontStyle = (style.fontStyle || '').toString().toLowerCase();
+        if (fontStyle === 'italic' || fontStyle === 'oblique') {
+            wrappers.push('em');
+        }
+
+        const decoration = (style.textDecoration || style.textDecorationLine || '').toString().toLowerCase();
+        if (decoration.indexOf('underline') !== -1) {
+            wrappers.push('u');
+        }
+        if (decoration.indexOf('line-through') !== -1) {
+            wrappers.push('s');
+        }
+
+        if (!wrappers.length) {
+            return;
+        }
+
+        let parent = el;
+        wrappers.forEach(function(tagName) {
+            const wrapper = document.createElement(tagName);
+            while (parent.firstChild) {
+                wrapper.appendChild(parent.firstChild);
+            }
+            parent.appendChild(wrapper);
+        });
+    };
+
+    /**
+     * @param {Element} el
+     */
+    HtmlEditor.prototype.unwrapNode = function(el) {
+        const parent = el.parentNode;
+        if (!parent) {
+            return;
+        }
+
+        while (el.firstChild) {
+            parent.insertBefore(el.firstChild, el);
+        }
+        parent.removeChild(el);
+    };
+
+    /**
+     * @param {Element} el
+     */
+    HtmlEditor.prototype.stripAttributes = function(el) {
+        const tag = el.nodeName.toUpperCase();
+        const allowed = CLEAN_ATTRS[tag] || {};
+        let keptWidth = '';
+        let keptHeight = '';
+
+        if (tag === 'IMG') {
+            keptWidth = el.style.width || '';
+            keptHeight = el.style.height || '';
+        }
+
+        const attrs = Array.prototype.slice.call(el.attributes);
+        attrs.forEach(function(attr) {
+            const name = attr.name.toLowerCase();
+            if (!allowed[name]) {
+                el.removeAttribute(attr.name);
+            }
+        });
+
+        if (tag === 'IMG') {
+            const parts = [];
+            if (keptWidth) {
+                parts.push('width: ' + keptWidth);
+            }
+            if (keptHeight) {
+                parts.push('height: ' + keptHeight);
+            }
+            if (parts.length) {
+                el.style.cssText = parts.join('; ');
+            }
+        }
+    };
+
+    /**
+     * @param {Element} el
+     * @returns {boolean}
+     */
+    HtmlEditor.prototype.isEmptyCleanable = function(el) {
+        const tag = el.nodeName.toUpperCase();
+        if (tag === 'BR' || tag === 'IMG' || tag === 'HR') {
+            return false;
+        }
+
+        if (tag === 'TD' || tag === 'TH') {
+            return false;
+        }
+
+        return !el.textContent.trim() && !el.querySelector('img, hr, br');
+    };
+
+    HtmlEditor.prototype.clearFormatting = function() {
+        if (this.sourceMode) {
+            return;
+        }
+
+        this.focusBody();
+        const selection = window.getSelection();
+        const labels = this.options.labels || {};
+
+        if (selection && selection.rangeCount > 0) {
+            const range = selection.getRangeAt(0);
+            if (this.body.contains(range.commonAncestorContainer) && !range.collapsed) {
+                const fragment = range.extractContents();
+                this.cleanFragment(fragment);
+                const first = fragment.firstChild;
+                const last = fragment.lastChild;
+                range.insertNode(fragment);
+
+                if (first && last) {
+                    range.setStartBefore(first);
+                    range.setEndAfter(last);
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                }
+
+                this.sync();
+                this.refreshToolbarState();
+                return;
+            }
+        }
+
+        const message = labels.clearFormatConfirm || 'Clear formatting from the entire document?';
+        if (!window.confirm(message)) {
+            return;
+        }
+
+        this.cleanFragment(this.body);
         this.sync();
         this.refreshToolbarState();
     };

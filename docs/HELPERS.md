@@ -188,7 +188,9 @@ echo $this->Form->control('body', ['type' => 'html', 'label' => 'Content']);
 echo $this->Form->end();
 ```
 
-The toolbar supports block formats (headings, paragraph, div, blockquote, pre), inline formatting (bold, italic, underline, strikethrough, subscript, superscript, code), alignment, lists, links, and images. Use **Edit HTML** to toggle raw HTML source mode.
+The toolbar supports block formats (headings, paragraph, div, blockquote, pre), inline formatting (bold, italic, underline, strikethrough, subscript, superscript, code), alignment, lists, links, and images. Use **Clear formatting** to strip styles, classes, ids, and wrapper tags (`span`, `font`, etc.) from the selection (or the whole document if nothing is selected) while keeping semantic formatting such as bold and italic. Use **Edit HTML** to toggle raw HTML source mode.
+
+When `Admin.Editor.cleanOnPaste` is enabled (default), pasted HTML from Word or websites is cleaned with the same rules. See [CONFIGURATION.md](CONFIGURATION.md#editor).
 
 The **Insert link** button opens a properties dialog (URL, text, title, target). Double-click an existing link to edit it. Use **Select** next to the URL field to browse files inline via the File Manager (`browseFiles`).
 
