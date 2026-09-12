@@ -198,6 +198,8 @@ The **Insert image** button opens a properties dialog (URL, alt, width, height, 
 
 Optional `Admin.Editor.height` sets the editor content area height in pixels (default `500`). See [CONFIGURATION.md](CONFIGURATION.md#editor).
 
+A status bar below the content area shows the element path at the cursor (for example `p > span > strong`). Click a tag to select that element. Disable with `Admin.Editor.statusBar` set to `false`.
+
 #### Options
 
 Supports standard BootstrapUI textarea options (`label`, `class`, etc.). The helper adds the `editor` CSS class automatically; additional classes are merged.

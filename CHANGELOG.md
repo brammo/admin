@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - **HTML editor**: Clear formatting toolbar button; optional `Admin.Editor.cleanOnPaste` (default `true`) strips pasted styles/classes/spans while keeping bold, italic, and other semantic markup
+- **HTML editor**: status bar with clickable element path at the cursor (e.g. `p > span > strong`); optional `Admin.Editor.statusBar` (default `true`)
 
 ### Fixed
 - PHPStan: remove invalid generic on `AdminPlugin::bootstrap()` `$app`; type `ButtonHelper::$helpers` to match CakePHP's Helper property

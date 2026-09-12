@@ -64,12 +64,15 @@ const HtmlEditor = (function() {
         this.editingLink = null;
         this.savedSelection = null;
         this.selectedImage = null;
+        this.statusBar = null;
+        this.statusPath = '';
 
         window.BrammoEditor.instances[this.id] = this;
         this.init();
     }
 
     HtmlEditor.prototype.init = function() {
+        const labels = this.options.labels || {};
         const wrapper = document.createElement('div');
         wrapper.className = 'html-editor';
         wrapper.style.setProperty('--html-editor-height', (this.options.height || 500) + 'px');
@@ -88,6 +91,15 @@ const HtmlEditor = (function() {
         this.linkTarget.dataset.editorLinkTarget = '1';
         this.linkTarget.hidden = true;
         wrapper.appendChild(this.linkTarget);
+
+        if (this.options.statusBar !== false) {
+            wrapper.classList.add('has-statusbar');
+            this.statusBar = document.createElement('div');
+            this.statusBar.className = 'html-editor-statusbar';
+            this.statusBar.setAttribute('aria-live', 'polite');
+            this.statusBar.setAttribute('aria-label', labels.elementPath || '');
+            wrapper.appendChild(this.statusBar);
+        }
 
         this.toolbar = this.buildToolbar();
         wrapper.insertBefore(this.toolbar, this.textarea);
@@ -1630,6 +1642,116 @@ const HtmlEditor = (function() {
     };
 
     /**
+     * Ancestor elements from the editor body down to the node at the caret.
+     *
+     * @returns {Array<Element>}
+     */
+    HtmlEditor.prototype.getElementPath = function() {
+        let node = this.getImageAtSelection();
+        if (!node) {
+            const selection = window.getSelection();
+            if (!selection || selection.rangeCount === 0) {
+                return [];
+            }
+            node = selection.anchorNode;
+            if (node && node.nodeType === Node.TEXT_NODE) {
+                node = node.parentNode;
+            }
+        }
+
+        if (!node || !this.body.contains(node)) {
+            return [];
+        }
+
+        const path = [];
+        while (node && node !== this.body) {
+            if (node.nodeType === Node.ELEMENT_NODE) {
+                path.unshift(node);
+            }
+            node = node.parentNode;
+        }
+
+        return path;
+    };
+
+    /**
+     * Select an element from the status bar path.
+     *
+     * @param {Element} el
+     */
+    HtmlEditor.prototype.selectElementNode = function(el) {
+        if (!el || !this.body.contains(el)) {
+            return;
+        }
+
+        this.focusBody();
+        const range = document.createRange();
+        const tag = el.nodeName.toUpperCase();
+        if (tag === 'IMG' || tag === 'HR') {
+            range.selectNode(el);
+        } else {
+            range.selectNodeContents(el);
+        }
+
+        const selection = window.getSelection();
+        if (selection) {
+            selection.removeAllRanges();
+            selection.addRange(range);
+        }
+
+        this.refreshToolbarState();
+    };
+
+    HtmlEditor.prototype.updateStatusBar = function() {
+        if (!this.statusBar) {
+            return;
+        }
+
+        if (this.sourceMode) {
+            if (this.statusPath !== '') {
+                this.statusPath = '';
+                this.statusBar.innerHTML = '';
+            }
+            return;
+        }
+
+        const path = this.getElementPath();
+        const pathKey = path.map(function(el) {
+            return el.nodeName.toLowerCase();
+        }).join('>');
+
+        if (pathKey === this.statusPath) {
+            return;
+        }
+
+        this.statusPath = pathKey;
+        this.statusBar.innerHTML = '';
+
+        const self = this;
+        path.forEach(function(el, index) {
+            if (index > 0) {
+                const sep = document.createElement('span');
+                sep.className = 'html-editor-path-sep';
+                sep.textContent = '>';
+                self.statusBar.appendChild(sep);
+            }
+
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'btn btn-link btn-sm html-editor-path-item';
+            button.textContent = el.nodeName.toLowerCase();
+            button.addEventListener('mousedown', function(e) {
+                e.preventDefault();
+            });
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                self.selectElementNode(el);
+            });
+            self.statusBar.appendChild(button);
+        });
+    };
+
+    /**
      * @returns {string}
      */
     HtmlEditor.prototype.getBlockTag = function() {
@@ -1731,6 +1853,8 @@ const HtmlEditor = (function() {
             codeBtn.classList.toggle('active', inCode);
             codeBtn.setAttribute('aria-pressed', inCode ? 'true' : 'false');
         }
+
+        this.updateStatusBar();
     };
 
     HtmlEditor.prototype.updateToolbarState = function() {
@@ -1744,6 +1868,7 @@ const HtmlEditor = (function() {
                 btn.classList.remove('active');
                 btn.setAttribute('aria-pressed', 'false');
             });
+            this.updateStatusBar();
         } else {
             this.refreshToolbarState();
         }

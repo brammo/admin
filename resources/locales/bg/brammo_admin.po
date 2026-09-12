@@ -369,6 +369,9 @@ msgstr "Отмени"
 msgid "Redo"
 msgstr "Повтори"
 
+msgid "Element path"
+msgstr "Път на елемента"
+
 msgid "Toggle Menu"
 msgstr "Превключи менюто"
 

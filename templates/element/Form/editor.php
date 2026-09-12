@@ -87,9 +87,11 @@ $labels = [
     'source' => __d('brammo/admin', 'Edit HTML'),
     'undo' => __d('brammo/admin', 'Undo'),
     'redo' => __d('brammo/admin', 'Redo'),
+    'elementPath' => __d('brammo/admin', 'Element path'),
 ];
 
 $cleanOnPaste = $settings['cleanOnPaste'] ?? true;
+$statusBar = $settings['statusBar'] ?? true;
 
 $this->Html->css('Brammo/Admin.editor', ['block' => true]);
 $this->Html->script('Brammo/Admin.file-browser', ['block' => true]);
@@ -103,6 +105,7 @@ $this->append('script');
         const filesBrowseUrl = <?= json_encode($filesUrl, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
         const height = <?= (int)$height ?>;
         const cleanOnPaste = <?= $cleanOnPaste ? 'true' : 'false' ?>;
+        const statusBar = <?= $statusBar ? 'true' : 'false' ?>;
         const labels = <?= json_encode($labels, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
         const modalTitle = <?= json_encode(__d('brammo/admin', 'Select Image'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
 
@@ -116,6 +119,7 @@ $this->append('script');
                 filesBrowseUrl: filesBrowseUrl,
                 height: height,
                 cleanOnPaste: cleanOnPaste,
+                statusBar: statusBar,
                 labels: labels,
                 fileBrowser: fileBrowser,
                 folder: 'images',

@@ -115,4 +115,39 @@ class EditorElementTest extends TestCase
 
         $this->assertStringContainsString('const cleanOnPaste = false;', $script);
     }
+
+    /**
+     * Test statusBar defaults to true in the emitted script
+     *
+     * @return void
+     */
+    public function testStatusBarDefaultsToTrue(): void
+    {
+        Configure::write('Admin.Editor', [
+            'height' => 500,
+        ]);
+
+        $script = $this->renderEditorScript();
+
+        $this->assertStringContainsString('const statusBar = true;', $script);
+        $this->assertStringContainsString('statusBar: statusBar', $script);
+        $this->assertStringContainsString('Element path', $script);
+    }
+
+    /**
+     * Test statusBar can be disabled via Admin.Editor config
+     *
+     * @return void
+     */
+    public function testStatusBarCanBeDisabled(): void
+    {
+        Configure::write('Admin.Editor', [
+            'height' => 500,
+            'statusBar' => false,
+        ]);
+
+        $script = $this->renderEditorScript();
+
+        $this->assertStringContainsString('const statusBar = false;', $script);
+    }
 }

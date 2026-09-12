@@ -112,6 +112,50 @@
     padding-left: 1.5rem;
 }
 
+.html-editor.has-statusbar .html-editor-body,
+.html-editor.has-statusbar .html-editor-source {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+/* Status bar */
+
+.html-editor-statusbar {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    background-color: var(--bs-tertiary-bg);
+    border: 1px solid var(--bs-border-color);
+    border-top: none;
+    border-radius: 0 0 var(--bs-border-radius) var(--bs-border-radius);
+    overflow-x: auto;
+    white-space: nowrap;
+    min-height: 1.75rem;
+}
+
+.html-editor-path-item {
+    padding: 0;
+    font-family: var(--bs-font-monospace, monospace);
+    font-size: inherit;
+    line-height: 1.2;
+    text-decoration: none;
+    color: var(--bs-body-color);
+}
+
+.html-editor-path-item:hover,
+.html-editor-path-item:focus {
+    color: var(--bs-primary);
+    text-decoration: underline;
+}
+
+.html-editor-path-sep {
+    color: var(--bs-secondary-color);
+    user-select: none;
+}
+
 .html-editor-image-browse-body,
 .html-editor-link-browse-body {
     max-height: 60vh;

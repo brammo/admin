@@ -267,6 +267,11 @@ return [
              * Strip pasted HTML (styles, classes, spans, etc.) while keeping semantic formatting
              */
             'cleanOnPaste' => true,
+
+            /**
+             * Show the status bar with the element path at the cursor position
+             */
+            'statusBar' => true,
         ],
     ],
 ];
