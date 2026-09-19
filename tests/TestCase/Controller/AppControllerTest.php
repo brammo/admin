@@ -26,6 +26,13 @@ class AppControllerTest extends TestCase
     protected AppController $AppController;
 
     /**
+     * Locale active before the test
+     *
+     * @var string
+     */
+    protected string $originalLocale;
+
+    /**
      * setUp method
      *
      * @return void
@@ -33,6 +40,7 @@ class AppControllerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        $this->originalLocale = I18n::getLocale();
         $request = new ServerRequest();
         $this->AppController = new AppController($request);
     }
@@ -44,6 +52,7 @@ class AppControllerTest extends TestCase
      */
     protected function tearDown(): void
     {
+        I18n::setLocale($this->originalLocale);
         unset($this->AppController);
         parent::tearDown();
     }

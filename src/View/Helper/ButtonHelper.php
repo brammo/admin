@@ -38,7 +38,7 @@ class ButtonHelper extends Helper
      * - `confirm`: confirmation message for post links
      *
      * @param string $title Title
-     * @param array<string, mixed>|string $url URL
+     * @param array<array-key, mixed>|string $url URL
      * @param array<string, mixed> $options Options
      * @return string HTML code
      */
@@ -105,7 +105,7 @@ class ButtonHelper extends Helper
      * Renders a button link
      *
      * @param string $title Title
-     * @param array<string, mixed>|string $url URL
+     * @param array<array-key, mixed>|string $url URL
      * @param array<string, mixed> $options Options
      * @return string HTML code
      */
@@ -118,7 +118,7 @@ class ButtonHelper extends Helper
      * Renders a button post link
      *
      * @param string $title Title
-     * @param array<string, mixed>|string $url URL
+     * @param array<array-key, mixed>|string $url URL
      * @param array<string, mixed> $options Options
      * @return string HTML code
      */
@@ -130,7 +130,7 @@ class ButtonHelper extends Helper
     /**
      * Renders a create button
      *
-     * @param array<string, mixed>|string $url URL
+     * @param array<array-key, mixed>|string $url URL
      * @param array<string, mixed> $options Options
      * @return string HTML code
      */
@@ -145,7 +145,7 @@ class ButtonHelper extends Helper
     /**
      * Renders a view button
      *
-     * @param array<string, mixed>|string $url URL
+     * @param array<array-key, mixed>|string $url URL
      * @param array<string, mixed> $options Options
      * @return string HTML code
      */
@@ -160,7 +160,7 @@ class ButtonHelper extends Helper
     /**
      * Renders an edit button
      *
-     * @param array<string, mixed>|string $url URL
+     * @param array<array-key, mixed>|string $url URL
      * @param array<string, mixed> $options Options
      * @return string HTML code
      */
@@ -175,7 +175,7 @@ class ButtonHelper extends Helper
     /**
      * Renders a compact edit button
      *
-     * @param array<string, mixed>|string $url URL
+     * @param array<array-key, mixed>|string $url URL
      * @param array<string, mixed> $options Options
      * @return string HTML code
      */
@@ -190,7 +190,7 @@ class ButtonHelper extends Helper
     /**
      * Renders a delete button
      *
-     * @param array<string, mixed>|string $url URL
+     * @param array<array-key, mixed>|string $url URL
      * @param array<string, mixed> $options Options
      * @return string HTML code
      */
@@ -207,7 +207,7 @@ class ButtonHelper extends Helper
     /**
      * Renders a compact delete button
      *
-     * @param array<string, mixed>|string $url URL
+     * @param array<array-key, mixed>|string $url URL
      * @param array<string, mixed> $options Options
      * @return string HTML code
      */
@@ -222,7 +222,7 @@ class ButtonHelper extends Helper
     /**
      * Renders a preview button
      *
-     * @param array<string, mixed>|string $url URL
+     * @param array<array-key, mixed>|string $url URL
      * @param array<string, mixed> $options Options
      * @return string HTML code
      */

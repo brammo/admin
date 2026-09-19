@@ -53,6 +53,17 @@ class FormHelper extends BootstrapFormHelper
     }
 
     /**
+     * @param string $fieldName Name attribute of the SELECT
+     * @param iterable<array-key, mixed> $options OPTION elements as value => label pairs
+     * @param array<string, mixed> $attributes HTML attributes of the select element
+     * @return string Formatted SELECT element
+     */
+    public function select(string $fieldName, iterable $options = [], array $attributes = []): string
+    {
+        return parent::select($fieldName, $options, $attributes);
+    }
+
+    /**
      * Generate an image control element.
      *
      * Options:

@@ -7,9 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.10.0] - 2026-09-19
+
 ### Added
 - **SortableComponent** — drag-and-drop reorder for Sequence tables: SortableJS + `Brammo/Admin.sortable` / `Sortable/handle` elements, POST `ids[]`, optional owner scope; see [docs/SORTABLE.md](docs/SORTABLE.md)
 - **AttachmentsComponent** — sequential multi-file upload into File Manager folders with ORM rows, gallery/files elements, and `AttachmentFileBehavior` for unused-path unlink; see [docs/ATTACHMENTS.md](docs/ATTACHMENTS.md)
+
+### Fixed
+- **ButtonHelper** / **FormHelper**: widen `$url` and `select()` `$options` docblocks to `array<array-key, mixed>` / `iterable<array-key, mixed>` so host apps passing URL arrays with numeric keys (e.g. `['action' => 'edit', $id]`) stay static-analysis clean
+- Tests: restore the locale in `AppControllerTest` so the `bg` locale no longer leaks into later element tests
 
 ## [1.9.0] - 2026-09-12
 
@@ -254,4 +260,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.7.0]: https://github.com/brammo/admin/releases/tag/v1.7.0
 [1.8.0]: https://github.com/brammo/admin/releases/tag/v1.8.0
 [1.9.0]: https://github.com/brammo/admin/releases/tag/v1.9.0
-[Unreleased]: https://github.com/brammo/admin/compare/v1.9.0...HEAD
+[1.10.0]: https://github.com/brammo/admin/releases/tag/v1.10.0
+[Unreleased]: https://github.com/brammo/admin/compare/v1.10.0...HEAD
