@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **File Manager**: uploaded filenames with non-Latin letters (e.g. Cyrillic) are transliterated to readable ASCII before sanitization (`Привет мир.txt` → `Privet_mir.txt`)
+
 ## [1.10.0] - 2026-09-19
 
 ### Added

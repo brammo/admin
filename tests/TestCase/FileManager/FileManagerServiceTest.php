@@ -217,6 +217,36 @@ class FileManagerServiceTest extends TestCase
         $this->assertEquals('my_file_name.txt', $result);
     }
 
+    public function testGetUniqueFilenameTransliteratesCyrillic(): void
+    {
+        $result = $this->service->getUniqueFilename($this->testDir . DS . 'uploads', 'Привет мир.txt');
+        $this->assertEquals('Privet_mir.txt', $result);
+    }
+
+    public function testGetUniqueFilenameTransliteratesCyrillicDigraphs(): void
+    {
+        $result = $this->service->getUniqueFilename($this->testDir . DS . 'uploads', 'яблоко.png');
+        $this->assertEquals('yabloko.png', $result);
+
+        $result = $this->service->getUniqueFilename($this->testDir . DS . 'uploads', 'файл.jpg');
+        $this->assertEquals('fayl.jpg', $result);
+
+        $result = $this->service->getUniqueFilename($this->testDir . DS . 'uploads', 'Щука.gif');
+        $this->assertEquals('Shtuka.gif', $result);
+    }
+
+    public function testGetUniqueFilenameTransliteratesMixedLatinAndCyrillic(): void
+    {
+        $result = $this->service->getUniqueFilename($this->testDir . DS . 'uploads', 'report-отчет.pdf');
+        $this->assertEquals('report-otchet.pdf', $result);
+    }
+
+    public function testGetUniqueFilenameTransliteratesAccentedLatin(): void
+    {
+        $result = $this->service->getUniqueFilename($this->testDir . DS . 'uploads', 'café menu.txt');
+        $this->assertEquals('cafe_menu.txt', $result);
+    }
+
     public function testFolderCount(): void
     {
         $this->assertEquals(3, $this->service->folderCount($this->testDir . DS . 'uploads'));

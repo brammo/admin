@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Brammo\Admin\FileManager;
 
 use Cake\Core\Configure;
+use Cake\Utility\Text;
 use Exception;
 use Imagick;
 use ImagickException;
@@ -138,10 +139,15 @@ class FileManagerService
 
     /**
      * Return a unique, sanitized filename within the target directory.
+     *
+     * Non-Latin letters are transliterated (Cyrillic via a readable map, then
+     * CakePHP Text::transliterate for other scripts/accents) before unsafe
+     * characters are replaced with underscores.
      */
     public function getUniqueFilename(string $fullPath, string $filename): string
     {
         $filename = basename($filename);
+        $filename = $this->transliterateFilename($filename);
         $filename = preg_replace('/[^\w.\-()]/', '_', $filename) ?: $filename;
 
         if (file_exists($fullPath . DS . $filename)) {
@@ -161,6 +167,45 @@ class FileManagerService
         }
 
         return $filename;
+    }
+
+    /**
+     * Transliterate non-Latin characters in a filename for filesystem safety.
+     *
+     * Applies a Bulgarian Streamlined Cyrillic map (plus Russian-only letters)
+     * before CakePHP Text::transliterate, so digraphs stay readable
+     * (я → ya, щ → sht) instead of ICU's single-letter flattening.
+     */
+    protected function transliterateFilename(string $filename): string
+    {
+        $filename = strtr($filename, $this->getCyrillicTransliterationMap());
+
+        return Text::transliterate($filename);
+    }
+
+    /**
+     * Cyrillic → Latin map (Bulgarian Streamlined System + Russian extras).
+     *
+     * @return array<string, string>
+     */
+    protected function getCyrillicTransliterationMap(): array
+    {
+        return [
+            'а' => 'a', 'б' => 'b', 'в' => 'v', 'г' => 'g', 'д' => 'd',
+            'е' => 'e', 'ж' => 'zh', 'з' => 'z', 'и' => 'i', 'й' => 'y',
+            'к' => 'k', 'л' => 'l', 'м' => 'm', 'н' => 'n', 'о' => 'o',
+            'п' => 'p', 'р' => 'r', 'с' => 's', 'т' => 't', 'у' => 'u',
+            'ф' => 'f', 'х' => 'h', 'ц' => 'ts', 'ч' => 'ch', 'ш' => 'sh',
+            'щ' => 'sht', 'ъ' => 'a', 'ь' => 'y', 'ю' => 'yu', 'я' => 'ya',
+            'ё' => 'yo', 'ы' => 'y', 'э' => 'e',
+            'А' => 'A', 'Б' => 'B', 'В' => 'V', 'Г' => 'G', 'Д' => 'D',
+            'Е' => 'E', 'Ж' => 'Zh', 'З' => 'Z', 'И' => 'I', 'Й' => 'Y',
+            'К' => 'K', 'Л' => 'L', 'М' => 'M', 'Н' => 'N', 'О' => 'O',
+            'П' => 'P', 'Р' => 'R', 'С' => 'S', 'Т' => 'T', 'У' => 'U',
+            'Ф' => 'F', 'Х' => 'H', 'Ц' => 'Ts', 'Ч' => 'Ch', 'Ш' => 'Sh',
+            'Щ' => 'Sht', 'Ъ' => 'A', 'Ь' => 'Y', 'Ю' => 'Yu', 'Я' => 'Ya',
+            'Ё' => 'Yo', 'Ы' => 'Y', 'Э' => 'E',
+        ];
     }
 
     /**

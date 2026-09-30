@@ -314,7 +314,7 @@ The File Manager includes several security measures:
 
 - **Path Validation**: All paths are validated against configured `topFolders` to prevent directory traversal; null bytes and `..` sequences are blocked
 - **Path Resolution Validation**: Resolved paths are verified via `realpath()` to ensure they stay within the configured base directory
-- **Filename Sanitization**: Uploaded and user-supplied filenames are sanitized — path separators, null bytes, and traversal sequences are stripped, and unsafe characters are replaced with underscores
+- **Filename Sanitization**: Uploaded and user-supplied filenames are sanitized — path separators, null bytes, and traversal sequences are stripped; non-Latin letters (e.g. Cyrillic) are transliterated to ASCII for readable filesystem names, then remaining unsafe characters are replaced with underscores
 - **File Type Validation**: Only configured file types in `fileTypes` are allowed for upload
 - **Authentication**: Access requires authentication through the admin panel's authentication system
 - **Unique Filenames**: Uploaded files with duplicate names are automatically renamed (e.g., `image(1).jpg`)
