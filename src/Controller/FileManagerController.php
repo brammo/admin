@@ -163,10 +163,10 @@ class FileManagerController extends AppController
             return $this->returnJson($res);
         }
 
-        if (!empty($res['error'])) {
+        if (is_string($res['error'])) {
             $this->Flash->error($res['error']);
         }
-        if (!empty($res['message'])) {
+        if (isset($res['message'])) {
             $this->Flash->success($res['message']);
         }
 
