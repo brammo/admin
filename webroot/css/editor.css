@@ -21,8 +21,9 @@
 }
 
 .html-editor-toolbar .btn {
-    color: var(--bs-body-color);
-    border-color: var(--bs-border-color);
+    --bs-btn-color: var(--bs-body-color);
+    --bs-btn-border-width: 0;
+    --bs-btn-font-size: 1rem;
 }
 
 .html-editor-toolbar .btn:hover {
@@ -54,7 +55,7 @@
     border: 1px solid var(--bs-border-color);
     border-top: none;
     border-radius: 0 0 var(--bs-border-radius) var(--bs-border-radius);
-    background: var(--bs-body-bg);
+    background: var(--bs-card-bg);
     color: var(--bs-body-color);
     outline: none;
     height: var(--html-editor-height, 500px);
@@ -356,7 +357,7 @@
     gap: 0.25rem;
     padding: 0.25rem 0.75rem;
     font-size: 0.75rem;
-    background-color: var(--bs-tertiary-bg);
+    background-color: var(--bs-body-bg);
     border: 1px solid var(--bs-border-color);
     border-top: none;
     border-radius: 0 0 var(--bs-border-radius) var(--bs-border-radius);

@@ -93,9 +93,11 @@ Rich text fields (`FormHelper` `html` control) use the built-in HTML editor (con
 | Key | Default | Description |
 |-----|---------|-------------|
 | `Editor.height` | `500` | Content area height in pixels |
-| `Editor.cleanOnPaste` | `true` | Clean HTML on paste (styles, classes, ids, spans); the Clear formatting toolbar button always works. Table elements keep `class`/`style` with a whitelist of layout styles (`width`, `height`, alignment, borders, background, padding, margins) |
+| `Editor.cleanOnPaste` | `true` | Clean HTML on paste (styles, classes, ids, spans) and wrap pasted plain text in paragraphs (one `<p>` per line). The Clear formatting toolbar button always works. Table elements keep `class`/`style` with a whitelist of layout styles (`width`, `height`, alignment, borders, background, padding, margins) |
 | `Editor.statusBar` | `true` | Show a status bar with the clickable element path at the cursor position |
 | `Editor.tableClass` | `''` | CSS class prefilled when inserting a table (also applied by the grid size picker) |
+
+Paragraph (`<p>`) is the default block for new lines. Typing on an empty line and Enter both produce `<p>`, not `<div>`. An explicit Div chosen from the block menu is left unchanged. A single line of plain text pasted into an existing block stays inline.
 
 The editor integrates with the File Manager for image insertion (`browseImages` action). See [HELPERS.md](HELPERS.md#html-editor-control).
 

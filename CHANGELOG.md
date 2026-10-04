@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - **File Manager**: uploaded filenames with non-Latin letters (e.g. Cyrillic) are transliterated to readable ASCII before sanitization (`Привет мир.txt` → `Privet_mir.txt`)
+- **HTML editor**: paragraph is the default block — typing on an empty line and Enter wrap content in `<p>` instead of `<div>`; choosing Div in the block menu still keeps that block
+- **HTML editor**: pasted plain text is wrapped in paragraphs (one `<p>` per line, blank lines included); a single line pasted into an existing block stays inline
+- **HTML editor**: toolbar buttons are borderless with a larger icon size; the content area uses the card background and the status bar uses the body background
 
 ## [1.10.0] - 2026-09-19
 

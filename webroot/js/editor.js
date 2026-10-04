@@ -493,6 +493,7 @@ const HtmlEditor = (function() {
         this.historyTimer = null;
         this.historyApplying = false;
         this.destroyed = false;
+        this.explicitDivs = new WeakSet();
         this.form = null;
         this.onSubmit = null;
         this.onKeyDown = this.onKeyDown.bind(this);
@@ -585,6 +586,12 @@ const HtmlEditor = (function() {
             this.sourceObserver.observe(this.textarea);
         }
 
+        this.body.addEventListener('focus', function() {
+            this.setDefaultBlock();
+        }.bind(this));
+        this.body.addEventListener('compositionstart', function() {
+            this.ensureParagraph();
+        }.bind(this));
         this.body.addEventListener('input', function() {
             this.sync();
             if (!this.historyApplying) {
@@ -639,6 +646,7 @@ const HtmlEditor = (function() {
             this.form.addEventListener('submit', this.onSubmit);
         }
 
+        this.setDefaultBlock();
         this.historyReset();
         this.refreshToolbarState();
     };
@@ -731,7 +739,14 @@ const HtmlEditor = (function() {
         const self = this;
         select.addEventListener('change', function() {
             self.focusBody();
+            self.setDefaultBlock();
             document.execCommand('formatBlock', false, '<' + select.value + '>');
+            if (select.value === 'div') {
+                const block = self.getBlockElement();
+                if (block && block.nodeName === 'DIV') {
+                    self.explicitDivs.add(block);
+                }
+            }
             self.sync();
             self.commitHistory();
             self.refreshToolbarState();
@@ -1147,6 +1162,11 @@ const HtmlEditor = (function() {
             return;
         }
 
+        this.setDefaultBlock();
+        if (!e.ctrlKey && !e.metaKey && !e.altKey && (e.key === 'Enter' || e.key.length === 1)) {
+            this.ensureParagraph();
+        }
+
         if (e.key === 'Tab' && !(e.ctrlKey || e.metaKey || e.altKey)) {
             const cell = this.getCellAtSelection();
             if (cell) {
@@ -1185,10 +1205,102 @@ const HtmlEditor = (function() {
         if (e.inputType === 'historyUndo') {
             e.preventDefault();
             this.historyUndo();
-        } else if (e.inputType === 'historyRedo') {
+            return;
+        }
+        if (e.inputType === 'historyRedo') {
             e.preventDefault();
             this.historyRedo();
+            return;
         }
+
+        if (
+            e.inputType === 'insertText' ||
+            e.inputType === 'insertCompositionText' ||
+            e.inputType === 'insertReplacementText' ||
+            e.inputType === 'insertParagraph' ||
+            e.inputType === 'insertLineBreak'
+        ) {
+            this.ensureParagraph();
+        }
+    };
+
+    /**
+     * Use paragraphs for new lines created by the browser.
+     */
+    HtmlEditor.prototype.setDefaultBlock = function() {
+        document.execCommand('defaultParagraphSeparator', false, 'p');
+    };
+
+    /**
+     * Put the caret in a paragraph before text is inserted on an empty line.
+     * An explicit Div block from the toolbar is left as-is.
+     */
+    HtmlEditor.prototype.ensureParagraph = function() {
+        if (this.sourceMode || this.destroyed) {
+            return;
+        }
+
+        this.setDefaultBlock();
+
+        const block = this.getBlockElement();
+        if (block) {
+            if (
+                block.nodeName === 'DIV' &&
+                block.parentNode === this.body &&
+                !this.explicitDivs.has(block) &&
+                this.isEmptyBlock(block)
+            ) {
+                document.execCommand('formatBlock', false, '<p>');
+            }
+            return;
+        }
+
+        if (this.caretIsInEditorRoot()) {
+            document.execCommand('formatBlock', false, '<p>');
+        }
+    };
+
+    /**
+     * @param {HTMLElement} el
+     * @returns {boolean}
+     */
+    HtmlEditor.prototype.isEmptyBlock = function(el) {
+        const text = (el.textContent || '').replace(/\u00a0/g, '').trim();
+        return text === '' && !el.querySelector('img, hr, table, ul, ol');
+    };
+
+    /**
+     * True when the caret is in the editor body and not inside a block, cell, or list item.
+     *
+     * @returns {boolean}
+     */
+    HtmlEditor.prototype.caretIsInEditorRoot = function() {
+        const selection = window.getSelection();
+        if (!selection || selection.rangeCount === 0) {
+            return false;
+        }
+
+        let node = selection.anchorNode;
+        if (!node || (node !== this.body && !this.body.contains(node))) {
+            return false;
+        }
+
+        if (node === this.body) {
+            return true;
+        }
+
+        if (node.nodeType === Node.TEXT_NODE) {
+            node = node.parentNode;
+        }
+
+        while (node && node !== this.body) {
+            if (BLOCK_TAGS.includes(node.nodeName) || node.nodeName === 'TD' || node.nodeName === 'TH') {
+                return false;
+            }
+            node = node.parentNode;
+        }
+
+        return node === this.body;
     };
 
     /**
@@ -1455,7 +1567,7 @@ const HtmlEditor = (function() {
         if (html) {
             cleaned = this.cleanHtml(html);
         } else if (text) {
-            cleaned = this.escapeText(text).replace(/\n/g, '<br>');
+            cleaned = this.plainTextToHtml(text);
         } else {
             return;
         }
@@ -1465,6 +1577,59 @@ const HtmlEditor = (function() {
         this.sync();
         this.commitHistory();
         this.refreshToolbarState();
+    };
+
+    /**
+     * Wrap pasted plain text in paragraphs. Each line becomes a <p>.
+     * A single line pasted into an existing block stays inline.
+     *
+     * @param {string} text
+     * @returns {string}
+     */
+    HtmlEditor.prototype.plainTextToHtml = function(text) {
+        const normalized = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').replace(/\n$/, '');
+        const lines = normalized.split('\n');
+        const block = this.getBlockElement();
+
+        if (lines.length === 1 && block) {
+            return this.escapeText(lines[0]);
+        }
+
+        const self = this;
+        return lines.map(function(line) {
+            const content = line === '' ? '<br>' : self.escapeText(line);
+            return '<p>' + content + '</p>';
+        }).join('');
+    };
+
+    /**
+     * Block element that contains the caret, when one exists inside the editor.
+     *
+     * @returns {HTMLElement|null}
+     */
+    HtmlEditor.prototype.getBlockElement = function() {
+        const selection = window.getSelection();
+        if (!selection || selection.rangeCount === 0) {
+            return null;
+        }
+
+        let node = selection.anchorNode;
+        if (!node || !this.body.contains(node)) {
+            return null;
+        }
+
+        if (node.nodeType === Node.TEXT_NODE) {
+            node = node.parentNode;
+        }
+
+        while (node && node !== this.body) {
+            if (BLOCK_TAGS.includes(node.nodeName)) {
+                return node;
+            }
+            node = node.parentNode;
+        }
+
+        return null;
     };
 
     /**

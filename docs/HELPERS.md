@@ -188,9 +188,11 @@ echo $this->Form->control('body', ['type' => 'html', 'label' => 'Content']);
 echo $this->Form->end();
 ```
 
+Paragraph (`<p>`) is the default block. Typing on an empty line, or pressing Enter, wraps the text in `<p>`. Choosing **Div** in the block menu keeps that block as a `<div>`.
+
 The toolbar supports block formats (headings, paragraph, div, blockquote, pre), inline formatting (bold, italic, underline, strikethrough, subscript, superscript, code), alignment, lists, links, images, and tables. Use **Clear formatting** to strip styles, classes, ids, and wrapper tags (`span`, `font`, etc.) from the selection (or the whole document if nothing is selected) while keeping semantic formatting such as bold and italic. Table `class` and whitelisted layout styles are preserved. Use **Edit HTML** to toggle raw HTML source mode with syntax highlighting, line numbers (aligned to wrapped lines, so there is no horizontal scrolling), Tab/Shift+Tab indent, and Enter auto-indent. Use **Format HTML** (visible in source mode) to pretty-print indentation on demand without changing document structure. **Undo** / **Redo** (toolbar or Ctrl/Cmd+Z and Ctrl+Shift+Z / Ctrl+Y) cover all editor changes, including code wrap, alignment, clear formatting, link/image/table dialogs, and source-mode edits.
 
-When `Admin.Editor.cleanOnPaste` is enabled (default), pasted HTML from Word or websites is cleaned with the same rules. See [CONFIGURATION.md](CONFIGURATION.md#editor).
+When `Admin.Editor.cleanOnPaste` is enabled (default), pasted HTML from Word or websites is cleaned with the same rules. Pasted plain text is wrapped in paragraphs, one `<p>` per line (a blank line becomes an empty paragraph). A single line pasted into an existing block stays in that block. See [CONFIGURATION.md](CONFIGURATION.md#editor).
 
 The **Insert link** button opens a properties dialog (URL, text, title, target). Double-click an existing link to edit it. Use **Select** next to the URL field to browse files inline via the File Manager (`browseFiles`).
 
