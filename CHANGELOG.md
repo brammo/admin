@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **HTML editor**: implementation moved to `brammo/content` (`Brammo/Content.editor`). Admin `Form/editor` still loads it for the `html` control and adds File Manager browsing (`browseImages`, `browseFiles`). `Admin.Editor` settings are unchanged
+
 ## [1.11.0] - 2026-10-04
 
 ### Changed

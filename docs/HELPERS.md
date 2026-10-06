@@ -176,7 +176,7 @@ The control automatically:
 
 ### HTML Editor Control
 
-The `html` type renders a textarea upgraded to a WYSIWYG HTML editor (loaded once per page via the `Form/editor` element).
+The `html` type renders a textarea upgraded to a WYSIWYG HTML editor. The editor itself is `Brammo/Content.editor` from `brammo/content` (assets `Brammo/Content.editor`). `Form/editor` loads it once per page and turns on File Manager browsing.
 
 #### Basic Usage
 

@@ -6,6 +6,7 @@ declare(strict_types=1);
  */
 
 use Brammo\Admin\AdminPlugin;
+use Brammo\Content\ContentPlugin;
 use Cake\Cache\Cache;
 use Cake\Core\Configure;
 use Cake\Core\Plugin;
@@ -93,6 +94,14 @@ ConnectionManager::setConfig('test', [
 ]);
 
 // Load more plugins here if needed
+if (!Plugin::isLoaded('Brammo/Content')) {
+    $contentPath = dirname(ROOT) . DS . 'content' . DS;
+    if (!is_dir($contentPath . 'templates')) {
+        $contentPath = ROOT . 'vendor' . DS . 'brammo' . DS . 'content' . DS;
+    }
+    Plugin::getCollection()->add(new ContentPlugin(['path' => $contentPath]));
+}
+
 if (!Plugin::isLoaded('Brammo/Admin')) {
     Plugin::getCollection()->add(new AdminPlugin());
 }

@@ -189,4 +189,33 @@ class EditorElementTest extends TestCase
 
         $this->assertStringContainsString('const tableClass = "table table-bordered";', $script);
     }
+
+    /**
+     * Test the admin editor loads content assets and File Manager browse URLs
+     *
+     * @return void
+     */
+    public function testLoadsContentEditorWithFileBrowser(): void
+    {
+        Configure::write('Admin.Editor', [
+            'height' => 500,
+        ]);
+
+        $this->View->element('Brammo/Admin.Form/editor');
+        $script = $this->View->fetch('script');
+        $css = $this->View->fetch('css');
+
+        $this->assertStringContainsString('/brammo/content/editor.js', $script);
+        $this->assertStringContainsString('/brammo/content/editor.css', $css);
+        $this->assertStringContainsString('/brammo/admin/file-browser.js', $script);
+        $this->assertStringNotContainsString('/brammo/admin/editor.js', $script);
+        $this->assertStringNotContainsString('/brammo/admin/editor.css', $css);
+        $this->assertStringContainsString('new FileBrowser(', $script);
+        $this->assertStringContainsString('browseImages', $script);
+        $this->assertStringContainsString('browseFiles', $script);
+        $this->assertLessThan(
+            strpos($script, '/brammo/content/editor.js'),
+            strpos($script, '/brammo/admin/file-browser.js'),
+        );
+    }
 }

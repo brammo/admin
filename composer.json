@@ -23,7 +23,7 @@
         "cakephp/cakephp": "^5.3",
         "friendsofcake/bootstrap-ui": "^5.1",
         "brammo/bootstrap-ui": "^1.0",
-        "brammo/content": "^1.0",
+        "brammo/content": "^1.4",
         "brammo/auth": "^1.1",
         "admad/cakephp-sequence": "^4.0"
     },

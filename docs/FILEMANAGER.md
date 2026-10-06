@@ -227,7 +227,7 @@ See [FormHelper Image Control](HELPERS.md#image-control) for detailed documentat
 
 ### HTML editor
 
-The `html` form control opens `browseImages` in a Bootstrap modal via `file-browser.js`. The editor passes `?folder=images&target=` for image selection. Requires the same authenticated `/admin` access as the rest of the File Manager. See [HELPERS.md — HTML Editor Control](HELPERS.md#html-editor-control).
+The `html` form control uses the editor from `brammo/content` and opens `browseImages` and `browseFiles` inside its dialogs via `file-browser.js`. The editor passes `?folder=images&target=` for image selection and `?folder=files&target=` for link files. Requires the same authenticated `/admin` access as the rest of the File Manager. See [HELPERS.md — HTML Editor Control](HELPERS.md#html-editor-control).
 
 ### Sidebar Menu Entry
 

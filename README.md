@@ -86,7 +86,7 @@ All configuration options are documented in [docs/CONFIGURATION.md](docs/CONFIGU
 
 - Internationalization (`defaultLocale`)
 - Authentication defaults (`config/auth.php`)
-- HTML editor (`Admin.Editor.height`, `cleanOnPaste`, `statusBar`, `tableClass`)
+- HTML editor from `brammo/content`, with File Manager browsing in admin (`Admin.Editor.height`, `cleanOnPaste`, `statusBar`, `tableClass`)
 - Brand customization
 - Home link and page title
 - Sidebar menu

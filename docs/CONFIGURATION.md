@@ -77,7 +77,7 @@ Authentication middleware is registered in `AdminPlugin::middleware()`. Controll
 
 ## Editor
 
-Rich text fields (`FormHelper` `html` control) use the built-in HTML editor (contenteditable WYSIWYG). Optional configuration:
+Rich text fields (`FormHelper` `html` control) use the HTML editor from `brammo/content` (`Brammo/Content.editor`). `Admin.Editor` is passed into that element and overrides `Content.Editor`. Projects that load only `brammo/content` get the same editor with URL fields and no file browser. Optional configuration:
 
 ```php
 'Admin' => [
@@ -99,7 +99,7 @@ Rich text fields (`FormHelper` `html` control) use the built-in HTML editor (con
 
 Paragraph (`<p>`) is the default block for new lines. Typing on an empty line and Enter both produce `<p>`, not `<div>`. An explicit Div chosen from the block menu is left unchanged. A single line of plain text pasted into an existing block stays inline.
 
-The editor integrates with the File Manager for image insertion (`browseImages` action). See [HELPERS.md](HELPERS.md#html-editor-control).
+Admin passes File Manager `browseImages` and `browseFiles` URLs into the content editor, which shows Select buttons in the image and link dialogs. See [HELPERS.md](HELPERS.md#html-editor-control).
 
 ## Brand
 
