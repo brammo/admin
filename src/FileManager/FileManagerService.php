@@ -148,7 +148,7 @@ class FileManagerService
     {
         $filename = basename($filename);
         $filename = $this->transliterateFilename($filename);
-        $filename = preg_replace('/[^\w.\-()]/', '_', $filename) ?: $filename;
+        $filename = preg_replace('/[^\w.\-()]/', '_', $filename) ?? $filename;
 
         if (file_exists($fullPath . DS . $filename)) {
             $match = [];
