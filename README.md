@@ -4,9 +4,9 @@ Admin dashboard plugin for CakePHP 5 with Bootstrap UI integration.
 
 ## Requirements
 
-- PHP 8.2 or higher
+- PHP 8.3 or higher
 - CakePHP 5.3 or higher
-- [brammo/auth](https://github.com/brammo/auth) ^1.1 (loaded automatically)
+- [cakephp/authentication](https://github.com/cakephp/authentication) ^3.0
 - [admad/cakephp-sequence](https://github.com/ADmad/cakephp-sequence) ^4.0 (drag-and-drop reorder)
 - Optional: `ext-imagick` for image resize in the File Manager
 
@@ -78,7 +78,7 @@ See [docs/FILEMANAGER.md](docs/FILEMANAGER.md) for detailed documentation.
 
 ### Authentication
 
-The plugin integrates with CakePHP Authentication and Brammo Auth plugin for user management and authentication.
+The plugin provides login, logout, and profile actions on `UsersController` (`UserController` is a compatible subclass). Configuration lives under `Admin.Auth` (`config/auth.php`). Host applications that already have a users table set `Admin.Auth.Users.table` to that table.
 
 ## Configuration
 
@@ -189,4 +189,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Related Projects
 
-- [brammo/auth](https://github.com/brammo/auth) - Authentication plugin for CakePHP
+- [brammo/content](https://github.com/brammo/content) - Content helpers and HTML editor
+- [brammo/bootstrap-ui](https://github.com/brammo/bootstrap-ui) - Bootstrap UI helpers

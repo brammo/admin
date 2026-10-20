@@ -21,19 +21,19 @@ $name = $this->Identity->get('name');
         <ul class="dropdown-menu dropdown-menu-end position-absolute">
             <li>
                 <?= $this->Html->link(
-                        __d('brammo/admin', 'Profile'), 
-                        ['plugin' => 'brammo/admin', 'controller' => 'User', 'action' => 'profile'],
+                        __d('brammo/admin', 'Profile'),
+                        ['plugin' => 'Brammo/Admin', 'controller' => 'Users', 'action' => 'profile'],
                         ['class' => 'dropdown-item']
-                    ) 
+                    )
                 ?>
             </li>
             <li><hr class="dropdown-divider"></li>
             <li>
                 <?= $this->Html->link(
-                        __d('brammo/admin', 'Log out'), 
-                        ['plugin' => 'Brammo/Auth', 'controller' => 'User', 'action' => 'logout'],
+                        __d('brammo/admin', 'Log out'),
+                        ['plugin' => 'Brammo/Admin', 'controller' => 'Users', 'action' => 'logout'],
                         ['class' => 'dropdown-item']
-                    ) 
+                    )
                 ?>
             </li>
         </ul>

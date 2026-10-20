@@ -13,9 +13,13 @@ $routes->plugin(
     function (RouteBuilder $routeBuilder) {
         
         /**
-         * User profile route
+         * Authentication and profile.
+         * UserController remains available for hosts that route to controller User.
          */
-        $routeBuilder->connect('/profile', ['controller' => 'User', 'action' => 'profile']);
+        $routeBuilder->connect('/login', ['controller' => 'Users', 'action' => 'login']);
+        $routeBuilder->connect('/logout', ['controller' => 'Users', 'action' => 'logout']);
+        $routeBuilder->connect('/profile', ['controller' => 'Users', 'action' => 'profile']);
+        $routeBuilder->connect('/user/profile', ['controller' => 'User', 'action' => 'profile']);
 
         /**
          * File Manager route

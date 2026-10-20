@@ -45,35 +45,67 @@ The element reads `App.locales`, then `I18n.locales`, then falls back to a singl
 
 ## Authentication
 
-The plugin ships `config/auth.php` with defaults for [brammo/auth](https://github.com/brammo/auth). Merge or copy into your application configuration:
+Authentication is built into the plugin (`cakephp/authentication`). Defaults are loaded from `config/auth.php` into `Admin.Auth`. Host applications override that array; values already in `Admin.Auth` or the legacy `Auth` key are merged on top of the defaults.
 
 ```php
-'Auth' => [
-    'Authentication' => [
-        'sessionKey' => 'AdminAuth',
-        'cookieName' => 'AdminCookieAuth',
-    ],
-    'Routes' => [
-        'login' => '/admin/login',
-        'logout' => '/admin/logout',
-        'loginRedirect' => '/admin',
-    ],
-    'Templates' => [
-        'login' => 'Brammo/Admin.User/login',
+'Admin' => [
+    'Auth' => [
+        'Users' => [
+            'table' => 'Brammo/Admin.Users',
+        ],
+        'Authentication' => [
+            'sessionKey' => 'AdminAuth',
+            'cookieName' => 'AdminCookieAuth',
+            'finder' => 'active',
+            'fields' => [
+                'username' => 'email',
+                'password' => 'password',
+            ],
+            'passwordHasher' => [
+                'className' => 'Authentication.Default',
+            ],
+            'rehashPasswords' => false,
+        ],
+        'Routes' => [
+            'login' => '/admin/login',
+            'logout' => '/admin/logout',
+            'loginRedirect' => '/admin',
+        ],
+        'Templates' => [
+            'login' => 'Brammo/Admin.User/login',
+        ],
+        'Messages' => [
+            'invalidCredentials' => 'Invalid email or password',
+            'blocked' => 'Your account has been blocked',
+            'notActivated' => 'Your account is not yet activated',
+            'enumerateAccounts' => true,
+        ],
     ],
 ],
 ```
 
 | Key | Default | Description |
 |-----|---------|-------------|
+| `Users.table` | `Brammo/Admin.Users` | Users table. Point this at the application table when the host app has its own `Users` model |
 | `Authentication.sessionKey` | `AdminAuth` | Session key for the authenticated admin user |
 | `Authentication.cookieName` | `AdminCookieAuth` | Remember-me cookie name |
+| `Authentication.finder` | `active` | Finder used to load a user. `active` allows only `status = active` |
+| `Authentication.fields` | email / password | Username and password columns |
+| `Authentication.passwordHasher` | `Authentication.Default` | Password hasher passed to the identifier and the `User` entity |
+| `Authentication.rehashPasswords` | `false` | Rehash the password on login when the hasher changed |
 | `Routes.login` | `/admin/login` | Login URL |
 | `Routes.logout` | `/admin/logout` | Logout URL |
 | `Routes.loginRedirect` | `/admin` | Redirect after successful login |
 | `Templates.login` | `Brammo/Admin.User/login` | Login view template |
+| `Messages.enumerateAccounts` | `true` | When `false`, failed logins always use the invalid-credentials message |
+
+`UsersController` provides `login`, `logout`, and `profile`. `UserController` extends it so existing links to controller `User` keep working. Routes: `/admin/login`, `/admin/logout`, `/admin/profile`.
+
+The `users` migration is in `config/Migrations/20250101000000_CreateUsers.php` (`name`, `email`, `password`, `status`, timestamps). Run it with `bin/cake migrations migrate -p Brammo/Admin` when the application does not already have a users table.
 
 Authentication middleware is registered in `AdminPlugin::middleware()`. Controllers load the `Authentication` component; views can use `$this->Identity` (see `AppView`).
+
+A host that authenticates several areas (admin and a public site) can disable this plugin's middleware and build the service itself. Read `Admin.Auth` for the admin area so session and cookie names stay separate.
 
 ## Editor
 

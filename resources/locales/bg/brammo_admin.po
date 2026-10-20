@@ -132,7 +132,7 @@ msgid "Inactive"
 msgstr "Неактивен"
 
 msgid "Invalid email or password"
-msgstr "Невалиден имайл или парола"
+msgstr "Невалиден имейл или парола"
 
 msgid "Invalid file"
 msgstr "Невалиден файл"
@@ -154,6 +154,12 @@ msgstr "Оставете празно, за да запазите текущат
 
 msgid "Log out"
 msgstr "Изход"
+
+msgid "Log in"
+msgstr "Вход"
+
+msgid "Login"
+msgstr "Вход"
 
 msgid "Missing folder name"
 msgstr "Липсва име на папката"
@@ -257,6 +263,15 @@ msgstr "Потребителски профил"
 
 msgid "Users"
 msgstr "Потребители"
+
+msgid "You have been logged out"
+msgstr "Успешно излязохте от профила си"
+
+msgid "Your account has been blocked"
+msgstr "Вашият профил е блокиран"
+
+msgid "Your account is not yet activated"
+msgstr "Вашият профил все още не е активиран"
 
 msgid "Your profile has been updated."
 msgstr "Профилът е актуализиран."

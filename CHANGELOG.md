@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Authentication is part of this plugin. `brammo/auth` is no longer a dependency
+- Login, logout, and profile are handled by `UsersController`. `UserController` extends it
+- Auth settings load from `config/auth.php` under `Admin.Auth` (legacy `Auth` is still merged when `Admin.Auth` is not set)
+
+### Added
+- `Users` table, entity, migration, and `AuthenticationServiceProvider` for `/admin` routes
+- Bulgarian strings for login errors and logout
+
 ## [1.12.0] - 2026-10-06
 
 ### Changed

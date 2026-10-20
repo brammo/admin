@@ -6,20 +6,23 @@ CakePHP 5 **plugin** (`brammo/admin`) providing an admin dashboard UI, file mana
 
 | Item | Version / tool |
 |------|----------------|
-| PHP | >= 8.2 (`composer.json`; README still says 8.1) |
+| PHP | >= 8.3 |
 | CakePHP | ^5.3 |
 | UI | Bootstrap 5 via `friendsofcake/bootstrap-ui`, `brammo/bootstrap-ui` |
-| Auth | `brammo/auth` (loaded in `AdminPlugin::bootstrap`) |
+| Auth | `cakephp/authentication` (`Admin.Auth`, `AuthenticationServiceProvider`) |
 | Content helpers | `brammo/content` |
 | Quality | PHPUnit 10, PHPStan 8 (`src/` only), Psalm 5, PHPCS (CakePHP ruleset) |
 
 ## Layout
 
 ```
-src/AdminPlugin.php          Plugin bootstrap, middleware, Auth dependency
-src/Controller/              AppController, UserController, FileManagerController
+src/AdminPlugin.php          Plugin bootstrap, middleware, authentication
+src/AuthenticationServiceProvider.php  Admin.Auth authentication service
+src/Controller/              AppController, UsersController, UserController, FileManagerController
 src/Controller/Component/    FilterComponent, SortableComponent, AttachmentsComponent
 src/FileManager/             FileManagerService (path validation, uploads, image resize)
+src/Model/Table/             UsersTable
+src/Model/Entity/            User
 src/Model/Behavior/          AttachmentFileBehavior (optional unused-file unlink)
 src/View/AppView.php         Registers helpers (BootstrapUI, Brammo, Admin)
 src/View/Helper/             FormHelper, ButtonHelper
