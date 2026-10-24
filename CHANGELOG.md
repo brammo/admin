@@ -25,6 +25,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Profile**: only `name`, `email` and `password` can be changed; `status` and timestamps are ignored
 - **Login**: blocked / not-activated messages are shown only when the password is correct, so they no longer reveal which emails exist
 
+### Fixed
+- **File Manager**: array query values (`folder[]=…`, `filter[]=…`, `deleteFile[]=…`) are rejected instead of causing a 500
+- **File Manager**: an empty folder shows page 1 of 1 instead of page 0
+- **File Manager**: image resize is skipped when ext-imagick is not installed instead of a fatal error
+- **File Manager**: `.jpeg` files use the configured `jpegQuality`
+
 ## [1.12.0] - 2026-10-06
 
 ### Changed

@@ -292,6 +292,11 @@ class FileManagerService
             return true;
         }
 
+        // ext-imagick is optional (composer "suggest")
+        if (!class_exists(Imagick::class)) {
+            return false;
+        }
+
         try {
             $image = new Imagick($path);
         } catch (ImagickException $e) {
@@ -335,6 +340,7 @@ class FileManagerService
                     $image->setImageCompressionQuality($config['webpQuality'] ?? 90);
                     break;
                 case 'jpg':
+                case 'jpeg':
                     $image->setImageCompressionQuality($config['jpegQuality'] ?? 90);
                     break;
             }

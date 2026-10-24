@@ -623,6 +623,66 @@ class FileManagerControllerTest extends TestCase
     }
 
     /**
+     * Test array query values fall back to the root listing instead of a TypeError
+     *
+     * @return void
+     */
+    public function testIndexIgnoresArrayQueryValues(): void
+    {
+        $request = new ServerRequest([
+            'url' => '/admin/filemanager',
+            'query' => ['folder' => ['uploads'], 'filter' => ['x']],
+        ]);
+
+        $controller = $this->fileManagerControllerWithoutRender($request);
+        $controller->index();
+
+        $this->assertSame('', $controller->viewBuilder()->getVar('folder'));
+        $this->assertSame('', $controller->viewBuilder()->getVar('filter'));
+    }
+
+    /**
+     * Test an empty folder reports page 1 of 1
+     *
+     * @return void
+     */
+    public function testIndexEmptyFolderIsPageOne(): void
+    {
+        $request = new ServerRequest([
+            'url' => '/admin/filemanager',
+            'query' => ['folder' => 'images'],
+        ]);
+
+        $controller = $this->fileManagerControllerWithoutRender($request);
+        $controller->index();
+
+        $this->assertSame(1, $controller->viewBuilder()->getVar('page'));
+        $this->assertSame(1, $controller->viewBuilder()->getVar('pages'));
+        $this->assertSame(0, $controller->viewBuilder()->getVar('first'));
+    }
+
+    /**
+     * Test delete with an array folder is rejected as invalid
+     *
+     * @return void
+     */
+    public function testDeleteRejectsArrayFolder(): void
+    {
+        $request = new ServerRequest([
+            'url' => '/admin/filemanager/delete',
+            'environment' => ['REQUEST_METHOD' => 'POST', 'HTTP_X_REQUESTED_WITH' => 'XMLHttpRequest'],
+            'query' => ['folder' => ['uploads'], 'deleteFile' => 'test.txt'],
+        ]);
+
+        $controller = $this->fileManagerControllerWithoutRender($request);
+        $response = $controller->delete();
+
+        $this->assertNotNull($response);
+        $this->assertSame(['error' => 'Invalid folder'], json_decode((string)$response->getBody(), true));
+        $this->assertFileExists($this->testDir . DS . 'uploads' . DS . 'test.txt');
+    }
+
+    /**
      * Test browseImages uses simple layout for full-page requests (e.g. legacy iframe embed)
      *
      * @return void

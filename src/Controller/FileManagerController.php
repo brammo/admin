@@ -193,11 +193,11 @@ class FileManagerController extends AppController
 
         if ($this->request->is('post')) {
             $newFolder = $this->request->getData('folder');
-            if (empty($newFolder)) {
+            if (!is_string($newFolder) || $newFolder === '') {
                 return $this->errorResponse(__d('brammo/admin', 'Missing folder name'), $returnUrl);
             }
 
-            $newFolder = $this->fileManager()->sanitizeFilename((string)$newFolder);
+            $newFolder = $this->fileManager()->sanitizeFilename($newFolder);
             if ($newFolder === '') {
                 return $this->errorResponse(__d('brammo/admin', 'Invalid folder name'), $returnUrl);
             }
@@ -235,11 +235,11 @@ class FileManagerController extends AppController
         }
 
         $folder = $this->request->getQuery('folder');
-        $returnUrl = ['action' => 'index', '?' => compact('folder')];
-
-        if (empty($folder) || !$this->fileManager()->isValidFolder($folder)) {
-            return $this->errorResponse(__d('brammo/admin', 'Invalid folder'), $returnUrl);
+        if (!is_string($folder) || $folder === '' || !$this->fileManager()->isValidFolder($folder)) {
+            return $this->errorResponse(__d('brammo/admin', 'Invalid folder'));
         }
+
+        $returnUrl = ['action' => 'index', '?' => compact('folder')];
 
         $deleteFile = $this->request->getQuery('deleteFile');
         $deleteFolder = $this->request->getQuery('deleteFolder');
@@ -249,8 +249,8 @@ class FileManagerController extends AppController
             return $this->errorResponse(__d('brammo/admin', 'Invalid folder'), $returnUrl);
         }
 
-        if (!empty($deleteFile)) {
-            $deleteFile = $this->fileManager()->sanitizeFilename((string)$deleteFile);
+        if (is_string($deleteFile) && $deleteFile !== '') {
+            $deleteFile = $this->fileManager()->sanitizeFilename($deleteFile);
             $fullPath .= '/' . $deleteFile;
             if (!file_exists($fullPath) || !is_file($fullPath) || !is_writable($fullPath)) {
                 return $this->errorResponse(__d('brammo/admin', 'Invalid file'), $returnUrl);
@@ -258,8 +258,8 @@ class FileManagerController extends AppController
             if (!unlink($fullPath)) {
                 return $this->errorResponse(__d('brammo/admin', 'The file could not be deleted'), $returnUrl);
             }
-        } elseif (!empty($deleteFolder)) {
-            $deleteFolder = $this->fileManager()->sanitizeFilename((string)$deleteFolder);
+        } elseif (is_string($deleteFolder) && $deleteFolder !== '') {
+            $deleteFolder = $this->fileManager()->sanitizeFilename($deleteFolder);
             $fullPath .= '/' . $deleteFolder;
             if (!file_exists($fullPath) || !is_dir($fullPath) || !is_writable($fullPath)) {
                 return $this->errorResponse(__d('brammo/admin', 'Invalid folder'), $returnUrl);
@@ -381,12 +381,15 @@ class FileManagerController extends AppController
      */
     private function browse(string $type, int $itemsPerPage): void
     {
-        $folder = $this->request->getQuery('folder') ?: '';
-        if ($folder !== '' && !$this->fileManager()->isValidFolder($folder)) {
+        $folder = $this->request->getQuery('folder');
+        if (!is_string($folder) || ($folder !== '' && !$this->fileManager()->isValidFolder($folder))) {
             $folder = '';
         }
 
-        $filter = $this->request->getQuery('filter') ?: '';
+        $filter = $this->request->getQuery('filter');
+        if (!is_string($filter)) {
+            $filter = '';
+        }
 
         $fullPath = $this->fileManager()->getFullPath($folder);
 
@@ -399,7 +402,7 @@ class FileManagerController extends AppController
             fn(array $a, array $b): int => $this->fileManager()->sortFiles($a, $b, $sortField, $sortDirection),
         );
 
-        $pages = (int)ceil(count($items) / $itemsPerPage);
+        $pages = max(1, (int)ceil(count($items) / $itemsPerPage));
         $page = min(max((int)$this->request->getQuery('page'), 1), $pages);
         $first = ($page - 1) * $itemsPerPage;
         $this->set(compact('page', 'pages', 'first'));
