@@ -18,6 +18,8 @@ Install via Composer:
 composer require brammo/admin
 ```
 
+Upgrading from 1.x? See [docs/MIGRATION.md](docs/MIGRATION.md).
+
 ## Loading the Plugin
 
 Load the plugin in your application's `src/Application.php`:

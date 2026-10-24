@@ -97,3 +97,4 @@ Use `COMPOSER_ALLOW_SUPERUSER=1` if Composer refuses to run as root.
 - [docs/ATTACHMENTS.md](docs/ATTACHMENTS.md) — multiupload and attachment UI
 - [docs/FILEMANAGER.md](docs/FILEMANAGER.md) — file manager
 - [docs/CONFIGURATION.md](docs/CONFIGURATION.md) — all `Admin.*` options
+- [docs/MIGRATION.md](docs/MIGRATION.md) — upgrading from 1.x to 2.0
