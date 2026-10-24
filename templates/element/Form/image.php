@@ -89,10 +89,10 @@ $this->Html->script('Brammo/Admin.form-image', ['block' => true]);
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const formImage<?= $id ?> = new FormImage(
-                'form-image-<?= $id ?>', 
-                '<?= $browseUrl ?>', 
-                '<?= $uploadUrl ?>',
-                '<?= __d('brammo/admin', 'Select Image') ?>'
+                'form-image-<?= $id ?>',
+                <?= json_encode($browseUrl, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>,
+                <?= json_encode($uploadUrl, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>,
+                <?= json_encode(__d('brammo/admin', 'Select Image'), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>
             );
         });
     </script>
