@@ -305,5 +305,6 @@ class AttachmentsComponentTest extends TestCase
         $this->assertTrue($payload['error']);
         $this->assertSame(0, $payload['saved']);
         $this->assertSame('Cannot save file record', $payload['files'][0]['error']);
+        $this->assertFileDoesNotExist($this->testDir . DS . 'uploads' . DS . 'note.txt');
     }
 }

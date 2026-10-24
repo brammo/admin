@@ -31,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **File Manager**: image resize is skipped when ext-imagick is not installed instead of a fatal error
 - **File Manager**: `.jpeg` files use the configured `jpegQuality`
 - **FilterComponent**: `in` / `not_in` filters with no usable items are skipped (no empty `IN ()`); array values on scalar filters are ignored
+- **AttachmentsComponent**: the uploaded file is removed when its row cannot be saved
 
 ## [1.12.0] - 2026-10-06
 

@@ -107,6 +107,7 @@ class AttachmentsComponent extends Component
             ]));
 
             if (!$table->save($entity)) {
+                $this->removeUploadedFile($fullPath . DS . $res['filename']);
                 $hasError = true;
                 $results[] = [
                     'name' => $res['filename'],
@@ -128,6 +129,19 @@ class AttachmentsComponent extends Component
             'files' => $results,
             'saved' => $savedCount,
         ]);
+    }
+
+    /**
+     * Remove a file just uploaded by this request when its row could not be saved.
+     *
+     * @param string $path Absolute file path
+     * @return void
+     */
+    private function removeUploadedFile(string $path): void
+    {
+        if (is_file($path) && $this->fileManager()->isPathWithinBase($path)) {
+            unlink($path);
+        }
     }
 
     /**
