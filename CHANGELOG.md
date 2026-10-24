@@ -7,12 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-10-24
+
 ### Changed
+- Require **PHP 8.3+**
 - Authentication is part of this plugin. `brammo/auth` is no longer a dependency
 - Login, logout, and profile are handled by `UsersController`. `UserController` extends it
 - Auth settings load from `config/auth.php` under `Admin.Auth` (legacy `Auth` is still merged when `Admin.Auth` is not set)
 - **Breaking**: `/admin/logout` accepts POST only; the header menu uses a post link. Host links to logout must use `Form->postLink()`
-- Default `Admin.Auth.Templates.login` is `Brammo/Admin.Users/login`; `templates/User/*` remain as aliases of `templates/Users/*`
+- **Breaking**: default `Admin.Auth.Templates.login` is `Brammo/Admin.Users/login`. `templates/User/*` were removed; hosts that set `Brammo/Admin.User/login` must use `Brammo/Admin.Users/login`
 - **SortableComponent**: non-integer primary keys (e.g. UUID) are supported instead of being dropped
 
 ### Added
@@ -306,4 +309,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.10.0]: https://github.com/brammo/admin/releases/tag/v1.10.0
 [1.11.0]: https://github.com/brammo/admin/releases/tag/v1.11.0
 [1.12.0]: https://github.com/brammo/admin/releases/tag/v1.12.0
-[Unreleased]: https://github.com/brammo/admin/compare/v1.12.0...HEAD
+[2.0.0]: https://github.com/brammo/admin/releases/tag/v2.0.0
+[Unreleased]: https://github.com/brammo/admin/compare/v2.0.0...HEAD

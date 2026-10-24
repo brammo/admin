@@ -62,7 +62,7 @@ class UsersControllerTest extends TestCase
         Configure::write('Admin.Auth.Routes.login', '/admin/login');
         Configure::write('Admin.Auth.Routes.logout', '/admin/logout');
         Configure::write('Admin.Auth.Routes.loginRedirect', '/admin');
-        Configure::write('Admin.Auth.Templates.login', 'Brammo/Admin.User/login');
+        Configure::write('Admin.Auth.Templates.login', 'Brammo/Admin.Users/login');
         Configure::write('Admin.Auth.Authentication.fields', [
             'username' => 'email',
             'password' => 'password',
