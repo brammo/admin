@@ -29,7 +29,7 @@ $name = $this->Identity->get('name');
             </li>
             <li><hr class="dropdown-divider"></li>
             <li>
-                <?= $this->Html->link(
+                <?= $this->Form->postLink(
                         __d('brammo/admin', 'Log out'),
                         ['plugin' => 'Brammo/Admin', 'controller' => 'Users', 'action' => 'logout'],
                         ['class' => 'dropdown-item']

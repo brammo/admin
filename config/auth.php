@@ -59,7 +59,7 @@ $config = [
     ],
 
     'Templates' => [
-        'login' => 'Brammo/Admin.User/login',
+        'login' => 'Brammo/Admin.Users/login',
     ],
 
     'Messages' => [

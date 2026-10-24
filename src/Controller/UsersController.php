@@ -74,6 +74,9 @@ class UsersController extends AppController
      */
     public function logout(): ?Response
     {
+        // POST only, so other sites cannot log the user out with a link or image
+        $this->getRequest()->allowMethod(['post']);
+
         $this->Authentication->logout();
 
         $this->Flash->success(__d('brammo/admin', 'You have been logged out'));

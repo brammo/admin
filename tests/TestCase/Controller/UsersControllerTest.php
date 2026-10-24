@@ -7,6 +7,7 @@ use Brammo\Admin\Test\TestApp\Application;
 use Cake\Core\Configure;
 use Cake\Core\Plugin;
 use Cake\Core\PluginCollection;
+use Cake\Http\Exception\MethodNotAllowedException;
 use Cake\I18n\I18n;
 use Cake\TestSuite\IntegrationTestTrait;
 use Cake\TestSuite\TestCase;
@@ -185,10 +186,31 @@ class UsersControllerTest extends TestCase
             ],
         ]);
 
-        $this->get('/admin/logout');
+        $this->post('/admin/logout');
 
         $this->assertRedirect('/admin/login');
         $this->assertFlashMessage('You have been logged out');
+    }
+
+    /**
+     * Test logout rejects GET so it cannot be triggered cross-site by a link
+     *
+     * @return void
+     */
+    public function testLogoutRejectsGet(): void
+    {
+        $this->session([
+            'AdminAuth' => [
+                'id' => 1,
+                'email' => 'test@example.com',
+                'status' => 'active',
+            ],
+        ]);
+
+        $this->disableErrorHandlerMiddleware();
+        $this->expectException(MethodNotAllowedException::class);
+
+        $this->get('/admin/logout');
     }
 
     /**
