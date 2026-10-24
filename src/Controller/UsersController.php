@@ -5,7 +5,9 @@ namespace Brammo\Admin\Controller;
 
 use Authentication\Identifier\IdentifierCollection;
 use Authentication\Identifier\PasswordIdentifier;
+use Authentication\PasswordHasher\PasswordHasherFactory;
 use Cake\Core\Configure;
+use Cake\Datasource\EntityInterface;
 use Cake\Event\EventInterface;
 use Cake\Http\Response;
 use Cake\ORM\Table;
@@ -46,9 +48,9 @@ class UsersController extends AppController
         if ($result && $result->isValid()) {
             $this->rehashUserPassword();
 
-            $fallback = $this->Authentication->getLoginRedirect()
+            // getLoginRedirect() validates the `redirect` query param (local URLs only)
+            $redirectUrl = $this->Authentication->getLoginRedirect()
                 ?? $this->authConfig('Routes.loginRedirect', '/admin');
-            $redirectUrl = $this->getRequest()->getQuery('redirect', $fallback);
 
             return $this->redirect(is_array($redirectUrl) || is_string($redirectUrl) ? $redirectUrl : '/admin');
         }
@@ -112,6 +114,7 @@ class UsersController extends AppController
 
             $user = $usersTable->patchEntity($user, $data, [
                 'validate' => 'default',
+                'fields' => ['name', 'email', 'password'],
             ]);
 
             if ($usersTable->save($user)) {
@@ -179,11 +182,19 @@ class UsersController extends AppController
     /**
      * Show a login error based on account status when enumeration is enabled.
      *
+     * The account status is only revealed when the submitted password is
+     * correct, so the message cannot be used to probe which emails exist.
+     *
      * @return void
      */
     private function showLoginError(): void
     {
-        $email = $this->getRequest()->getData('email');
+        $fields = $this->authConfig('Authentication.fields', []);
+        $usernameField = is_array($fields) && is_string($fields['username'] ?? null) ? $fields['username'] : 'email';
+        $passwordField = is_array($fields) && is_string($fields['password'] ?? null) ? $fields['password'] : 'password';
+
+        $username = $this->getRequest()->getData($usernameField);
+        $password = $this->getRequest()->getData($passwordField);
         $messages = $this->authConfig('Messages', []);
         if (!is_array($messages)) {
             $messages = [];
@@ -191,10 +202,18 @@ class UsersController extends AppController
 
         $enumerateAccounts = $messages['enumerateAccounts'] ?? true;
 
-        if ($enumerateAccounts && is_string($email) && $email !== '') {
+        if (
+            $enumerateAccounts
+            && is_string($username) && $username !== ''
+            && is_string($password) && $password !== ''
+        ) {
             $user = $this->usersTable()->find()
-                ->where(['email' => $email])
+                ->where([$usernameField => $username])
                 ->first();
+
+            if (!$user instanceof EntityInterface || !$this->passwordMatches($user, $passwordField, $password)) {
+                $user = null;
+            }
 
             if (is_object($user) && $this->hasAccountStatus($user, 'isBlocked')) {
                 $blocked = $messages['blocked'] ?? 'Your account has been blocked';
@@ -220,6 +239,31 @@ class UsersController extends AppController
             'brammo/admin',
             is_string($invalid) ? $invalid : 'Invalid email or password',
         ));
+    }
+
+    /**
+     * Check a plain password against the user's stored hash.
+     *
+     * @param \Cake\Datasource\EntityInterface $user User entity.
+     * @param string $passwordField Password column.
+     * @param string $password Submitted plain password.
+     * @return bool
+     */
+    private function passwordMatches(EntityInterface $user, string $passwordField, string $password): bool
+    {
+        $hash = $user->get($passwordField);
+        if (!is_string($hash) || $hash === '') {
+            return false;
+        }
+
+        $hasher = $this->authConfig('Authentication.passwordHasher', [
+            'className' => 'Authentication.Default',
+        ]);
+        if (!is_array($hasher)) {
+            $hasher = ['className' => 'Authentication.Default'];
+        }
+
+        return PasswordHasherFactory::build($hasher)->check($password, $hash);
     }
 
     /**

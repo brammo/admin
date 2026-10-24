@@ -97,7 +97,7 @@ Authentication is built into the plugin (`cakephp/authentication`). Defaults are
 | `Routes.logout` | `/admin/logout` | Logout URL |
 | `Routes.loginRedirect` | `/admin` | Redirect after successful login |
 | `Templates.login` | `Brammo/Admin.User/login` | Login view template |
-| `Messages.enumerateAccounts` | `true` | When `false`, failed logins always use the invalid-credentials message |
+| `Messages.enumerateAccounts` | `true` | When `true`, a blocked or not-activated account gets its status message, but only if the submitted password is correct. When `false`, failed logins always use the invalid-credentials message |
 
 `UsersController` provides `login`, `logout`, and `profile`. `UserController` extends it so existing links to controller `User` keep working. Routes: `/admin/login`, `/admin/logout`, `/admin/profile`.
 

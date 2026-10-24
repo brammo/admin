@@ -155,6 +155,21 @@ class UsersControllerTest extends TestCase
     }
 
     /**
+     * Test login ignores an external redirect target
+     *
+     * @return void
+     */
+    public function testLoginIgnoresExternalRedirect(): void
+    {
+        $this->post('/admin/login?redirect=https://evil.example/path', [
+            'email' => 'test@example.com',
+            'password' => 'password',
+        ]);
+
+        $this->assertRedirect('/admin');
+    }
+
+    /**
      * Test logout
      *
      * @return void
@@ -208,6 +223,38 @@ class UsersControllerTest extends TestCase
         $this->assertResponseOk();
         $this->assertNoRedirect();
         $this->assertFlashMessage('Your account is not yet activated');
+    }
+
+    /**
+     * Test a blocked user with a wrong password gets the generic message
+     *
+     * @return void
+     */
+    public function testLoginWithBlockedUserWrongPassword(): void
+    {
+        $this->post('/admin/login', [
+            'email' => 'blocked@example.com',
+            'password' => 'wrongpassword',
+        ]);
+
+        $this->assertResponseOk();
+        $this->assertFlashMessage('Invalid email or password');
+    }
+
+    /**
+     * Test a new user with a wrong password gets the generic message
+     *
+     * @return void
+     */
+    public function testLoginWithNewUserWrongPassword(): void
+    {
+        $this->post('/admin/login', [
+            'email' => 'new@example.com',
+            'password' => 'wrongpassword',
+        ]);
+
+        $this->assertResponseOk();
+        $this->assertFlashMessage('Invalid email or password');
     }
 
     /**
@@ -314,5 +361,34 @@ class UsersControllerTest extends TestCase
 
         $user = $this->getTableLocator()->get('Brammo/Admin.Users')->get(1);
         $this->assertSame('Updated Name', $user->name);
+    }
+
+    /**
+     * Test profile update cannot change protected fields such as status
+     *
+     * @return void
+     */
+    public function testProfilePostIgnoresStatus(): void
+    {
+        $this->session([
+            'AdminAuth' => [
+                'id' => 3,
+                'email' => 'blocked@example.com',
+                'name' => 'Blocked User',
+                'status' => 'blocked',
+            ],
+        ]);
+
+        $this->post('/admin/profile', [
+            'name' => 'Still Blocked',
+            'email' => 'blocked@example.com',
+            'status' => 'active',
+        ]);
+
+        $this->assertRedirect('/admin/profile');
+
+        $user = $this->getTableLocator()->get('Brammo/Admin.Users')->get(3);
+        $this->assertSame('Still Blocked', $user->name);
+        $this->assertSame('blocked', $user->status);
     }
 }

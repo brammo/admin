@@ -16,6 +16,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Users` table, entity, migration, and `AuthenticationServiceProvider` for `/admin` routes
 - Bulgarian strings for login errors and logout
 
+### Security
+- **File Manager**: escape the `folder` query value in the page `<title>` and the browse header (reflected XSS)
+- **Login**: the `redirect` query param only accepts local URLs (open redirect)
+- **Profile**: only `name`, `email` and `password` can be changed; `status` and timestamps are ignored
+- **Login**: blocked / not-activated messages are shown only when the password is correct, so they no longer reveal which emails exist
+
 ## [1.12.0] - 2026-10-06
 
 ### Changed
