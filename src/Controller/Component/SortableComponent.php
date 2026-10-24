@@ -40,10 +40,7 @@ class SortableComponent extends Component
         }
 
         if ($ids) {
-            $ids = array_values(array_filter(
-                array_map(static fn($id) => (int)$id, $ids),
-                static fn(int $id) => $id > 0,
-            ));
+            $ids = $this->normalizeIds($table, $ids);
 
             if ($ownerScope !== [] && $ids !== []) {
                 $ids = $this->filterIdsToScope($table, $ids, $ownerScope);
@@ -65,12 +62,53 @@ class SortableComponent extends Component
     }
 
     /**
+     * Coerce posted IDs to the primary key type.
+     *
+     * Integer keys keep only positive integers; other keys (e.g. UUID) keep
+     * non-empty scalar values as strings.
+     *
+     * @param \Cake\ORM\Table $table Table
+     * @param array<mixed> $ids Posted ids
+     * @return list<int|string>
+     */
+    private function normalizeIds(Table $table, array $ids): array
+    {
+        if ($this->hasIntegerPrimaryKey($table)) {
+            return array_values(array_filter(
+                array_map(static fn($id) => is_scalar($id) ? (int)$id : 0, $ids),
+                static fn(int $id) => $id > 0,
+            ));
+        }
+
+        return array_values(array_filter(
+            array_map(static fn($id) => is_scalar($id) ? trim((string)$id) : '', $ids),
+            static fn(string $id) => $id !== '',
+        ));
+    }
+
+    /**
+     * @param \Cake\ORM\Table $table Table
+     * @return bool
+     */
+    private function hasIntegerPrimaryKey(Table $table): bool
+    {
+        $primaryKey = $table->getPrimaryKey();
+        if (!is_string($primaryKey)) {
+            return true;
+        }
+
+        $type = $table->getSchema()->getColumnType($primaryKey);
+
+        return $type === null || in_array($type, ['integer', 'biginteger', 'smallinteger', 'tinyinteger'], true);
+    }
+
+    /**
      * Keep posted IDs that belong to the owner scope, preserving order.
      *
      * @param \Cake\ORM\Table $table Table
-     * @param list<int> $ids Ordered ids
+     * @param list<int|string> $ids Ordered ids
      * @param array<string, mixed> $ownerScope Conditions
-     * @return list<int>
+     * @return list<int|string>
      */
     private function filterIdsToScope(Table $table, array $ids, array $ownerScope): array
     {
@@ -94,13 +132,13 @@ class SortableComponent extends Component
             ->where([$primaryKey . ' IN' => $ids])
             ->all()
             ->extract($primaryKey)
-            ->map(static fn($id) => (int)$id)
+            ->map(static fn($id) => (string)$id)
             ->toList();
         $allowedSet = array_flip($allowed);
 
         return array_values(array_filter(
             $ids,
-            static fn(int $id) => isset($allowedSet[$id]),
+            static fn(int|string $id) => isset($allowedSet[(string)$id]),
         ));
     }
 

@@ -57,8 +57,9 @@ public function sortImages(int $articleId): \Cake\Http\Response
 
 - Accepts a `Table` or association
 - Requires POST; otherwise throws `BadRequestException`
-- Coerces `ids` to positive integers
+- Coerces `ids` to positive integers for integer primary keys; other key types (e.g. UUID) keep non-empty values as strings
 - When `$ownerScope` is given, keeps only IDs that match those conditions (`null` values become `IS NULL`)
+- **Always pass `$ownerScope`** when rows belong to a parent record. Without it, any posted ID in the table can be reordered
 - Calls `SequenceBehavior::setOrder($ids)`
 - Returns JSON `{ "ok": true }` (also when the list is empty)
 

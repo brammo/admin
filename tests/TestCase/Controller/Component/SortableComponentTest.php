@@ -249,4 +249,49 @@ class SortableComponentTest extends TestCase
         $this->expectExceptionMessage('Sequence behavior is required for sorting');
         $this->Sortable->reorder($this->table, [1]);
     }
+
+    /**
+     * UUID primary keys are kept as strings instead of being cast to int.
+     *
+     * @return void
+     */
+    public function testReorderSupportsUuidPrimaryKeys(): void
+    {
+        $connection = ConnectionManager::get('test');
+        $connection->execute('DROP TABLE IF EXISTS sortable_uuid_items');
+        $connection->execute(
+            'CREATE TABLE sortable_uuid_items (
+                id CHAR(36) PRIMARY KEY,
+                title VARCHAR(255) NOT NULL,
+                owner_id INTEGER,
+                sort_order INTEGER NOT NULL DEFAULT 0
+            )',
+        );
+
+        $table = $this->getTableLocator()->get('SortableUuidItems', [
+            'table' => 'sortable_uuid_items',
+            'connection' => $connection,
+        ]);
+        $table->addBehavior('ADmad/Sequence.Sequence', [
+            'sequenceField' => 'sort_order',
+            'scope' => ['owner_id'],
+        ]);
+
+        $ids = [];
+        foreach (['A', 'B', 'C'] as $title) {
+            $ids[] = (string)$table->saveOrFail($table->newEntity(['title' => $title, 'owner_id' => 1]))->id;
+        }
+
+        try {
+            $this->createSortable();
+            $this->Sortable->reorder($table, [$ids[2], $ids[0], $ids[1]], ['owner_id' => 1]);
+
+            $this->assertSame(1, $table->get($ids[2])->sort_order);
+            $this->assertSame(2, $table->get($ids[0])->sort_order);
+            $this->assertSame(3, $table->get($ids[1])->sort_order);
+        } finally {
+            $this->getTableLocator()->remove('SortableUuidItems');
+            $connection->execute('DROP TABLE IF EXISTS sortable_uuid_items');
+        }
+    }
 }

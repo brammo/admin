@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Auth settings load from `config/auth.php` under `Admin.Auth` (legacy `Auth` is still merged when `Admin.Auth` is not set)
 - **Breaking**: `/admin/logout` accepts POST only; the header menu uses a post link. Host links to logout must use `Form->postLink()`
 - Default `Admin.Auth.Templates.login` is `Brammo/Admin.Users/login`; `templates/User/*` remain as aliases of `templates/Users/*`
+- **SortableComponent**: non-integer primary keys (e.g. UUID) are supported instead of being dropped
 
 ### Added
 - `Users` table, entity, migration, and `AuthenticationServiceProvider` for `/admin` routes

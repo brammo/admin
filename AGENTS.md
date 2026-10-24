@@ -47,8 +47,6 @@ docs/                        HELPERS, FILEMANAGER, CONFIGURATION, PHPSTAN, PSALM
 - **File manager**: Requires `Admin.FileManager` (basePath, topFolders, fileTypes); path validation via `isValidFolder` / `isPathWithinBase` / `sanitizeFilename`
 - **FormHelper**: Extends BootstrapUI; custom `control` types: `image`, `html` (WYSIWYG HTML editor), `dateRange`
 - **FilterComponent**: Opt-in list filters + sort/page session; see [docs/FILTER.md](docs/FILTER.md)
-- **SortableComponent**: Drag-and-drop reorder; see [docs/SORTABLE.md](docs/SORTABLE.md)
-- **AttachmentsComponent**: Bulk upload + optional AttachmentFileBehavior; see [docs/ATTACHMENTS.md](docs/ATTACHMENTS.md)
 - **SortableComponent**: Drag-and-drop reorder via SortableJS + ADmad Sequence; see [docs/SORTABLE.md](docs/SORTABLE.md)
 - **AttachmentsComponent**: Bulk upload into File Manager + ORM rows; see [docs/ATTACHMENTS.md](docs/ATTACHMENTS.md)
 - **AttachmentFileBehavior**: Unlink unused attachment paths after delete (File Manager path checks)
