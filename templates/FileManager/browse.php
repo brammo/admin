@@ -50,7 +50,7 @@ $action = $this->request->getParam('action');
                 </div>
             <?php endif ?>
             <div class="me-2 py-1 px-3 rounded fw-bolder">
-                <?= $this->Html->icon('folder') ?> /<?= $folder ?>
+                <?= $this->Html->icon('folder') ?> /<?= h($folder) ?>
             </div>
             <?php if ($folder): ?>
                 <div>

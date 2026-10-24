@@ -16,4 +16,4 @@ if ($adminTitle) {
     $title .= $adminTitle;
 }
 ?>
-<title><?= $title ?></title>
+<title><?= h($title) ?></title>
