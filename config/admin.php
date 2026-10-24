@@ -9,6 +9,12 @@ return [
 
     'Admin' => [
 
+        /**
+         * Authentication defaults are loaded from config/auth.php under Admin.Auth.
+         *
+         * @see docs/CONFIGURATION.md#authentication
+         */
+
         /* 
          * Default locale for the admin panel
          */

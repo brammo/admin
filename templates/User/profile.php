@@ -3,7 +3,7 @@
  * User profile template
  * 
  * @var \Brammo\Admin\View\AppView $this
- * @var \Brammo\Auth\Model\Entity\User $user
+ * @var \Brammo\Admin\Model\Entity\User $user
  */
 
 $this->assign('title', __d('brammo/admin', 'User Profile'));

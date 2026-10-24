@@ -19,12 +19,13 @@
     "version": "1.12.0",
     "prefer-stable": true,
     "require": {
-        "php": ">=8.2",
+        "php": ">=8.3",
         "cakephp/cakephp": "^5.3",
         "friendsofcake/bootstrap-ui": "^5.1",
         "brammo/bootstrap-ui": "^1.0",
         "brammo/content": "^1.4",
-        "brammo/auth": "^1.1",
+        "cakephp/authentication": "^3.0",
+        "cakephp/migrations": "^5.0",
         "admad/cakephp-sequence": "^4.0"
     },
     "suggest": {

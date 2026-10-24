@@ -9,8 +9,8 @@ alwaysApply: true
 - `declare(strict_types=1);` on every PHP file; type-hint parameters and returns.
 - User strings: `__d('brammo/admin', '...')` — update `resources/locales/` when adding UI text.
 - Templates/elements: `Brammo/Admin.*` (e.g. `Brammo/Admin.Form/image`). Assets: `Brammo/Admin.{css,js}` in `webroot/`.
-- Config: `Configure::read('Admin.*')` from `config/admin.php`; document new keys in `docs/CONFIGURATION.md`.
-- Depends on `brammo/auth` (auto-loaded). Controllers extend `AppController` → `AppView` + Authentication.
+- Config: `Configure::read('Admin.*')` from `config/admin.php` and `config/auth.php`; document new keys in `docs/CONFIGURATION.md`.
+- Authentication is built in (`Admin.Auth`, `UsersController`). Controllers extend `AppController` → `AppView` + Authentication.
 
 Before finishing: `composer check` (tests, PHPCS, PHPStan on `src/`). Use `composer check-full` for Psalm.
 

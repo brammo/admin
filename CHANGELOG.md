@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Authentication is part of this plugin. `brammo/auth` is no longer a dependency
+- Login, logout, and profile are handled by `UsersController`. `UserController` extends it
+- Auth settings load from `config/auth.php` under `Admin.Auth` (legacy `Auth` is still merged when `Admin.Auth` is not set)
+
+### Added
+- `Users` table, entity, migration, and `AuthenticationServiceProvider` for `/admin` routes
+- Bulgarian strings for login errors and logout
+
+### Security
+- **File Manager**: escape the `folder` query value in the page `<title>` and the browse header (reflected XSS)
+- **Login**: the `redirect` query param only accepts local URLs (open redirect)
+- **Profile**: only `name`, `email` and `password` can be changed; `status` and timestamps are ignored
+- **Login**: blocked / not-activated messages are shown only when the password is correct, so they no longer reveal which emails exist
+
 ## [1.12.0] - 2026-10-06
 
 ### Changed

@@ -48,26 +48,16 @@ class AdminPluginTest extends TestCase
     /**
      * Test bootstrap method
      *
+     * Authentication is part of this plugin, so bootstrap must not load Brammo/Auth.
+     *
      * @return void
      */
     public function testBootstrap(): void
     {
         $app = $this->createMock(PluginApplicationInterface::class);
+        $app->expects($this->never())->method('addPlugin');
 
-        $app->expects($this->once())
-            ->method('addPlugin')
-            ->with('Brammo/Auth');
-
-        // Create a minimal plugin instance that doesn't load full bootstrap
-        $plugin = new class extends AdminPlugin {
-            public function bootstrap(PluginApplicationInterface $app): void
-            {
-                // Only test the plugin loading, skip full bootstrap
-                $app->addPlugin('Brammo/Auth');
-            }
-        };
-
-        $plugin->bootstrap($app);
+        $this->plugin->bootstrap($app);
     }
 
     /**

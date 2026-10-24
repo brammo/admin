@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Brammo\Admin\Test\TestCase\Controller;
 
 use Brammo\Admin\Controller\UserController;
+use Brammo\Admin\Controller\UsersController;
 use Cake\Http\ServerRequest;
 use Cake\TestSuite\TestCase;
 
@@ -58,5 +59,15 @@ class UserControllerTest extends TestCase
             'Brammo\Admin\Controller\AppController',
             $this->UserController,
         );
+    }
+
+    /**
+     * Test that UserController is the backwards-compatible UsersController alias
+     *
+     * @return void
+     */
+    public function testExtendsUsersController(): void
+    {
+        $this->assertInstanceOf(UsersController::class, $this->UserController);
     }
 }

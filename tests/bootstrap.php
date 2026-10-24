@@ -18,6 +18,7 @@ require dirname(__DIR__) . '/vendor/autoload.php';
 // Load CakePHP core functions if not already loaded
 if (!function_exists('h')) {
     require dirname(__DIR__) . '/vendor/cakephp/cakephp/src/Core/functions.php';
+    require dirname(__DIR__) . '/vendor/cakephp/cakephp/src/Core/functions_global.php';
 }
 
 // Load CakePHP global I18n functions if not already loaded
