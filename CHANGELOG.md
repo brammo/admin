@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **File Manager**: an empty folder shows page 1 of 1 instead of page 0
 - **File Manager**: image resize is skipped when ext-imagick is not installed instead of a fatal error
 - **File Manager**: `.jpeg` files use the configured `jpegQuality`
+- **FilterComponent**: `in` / `not_in` filters with no usable items are skipped (no empty `IN ()`); array values on scalar filters are ignored
 
 ## [1.12.0] - 2026-10-06
 

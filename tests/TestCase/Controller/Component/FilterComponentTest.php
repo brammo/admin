@@ -479,6 +479,44 @@ class FilterComponentTest extends TestCase
     }
 
     /**
+     * Test list filters with no usable items are skipped instead of building `IN ()`.
+     *
+     * @return void
+     */
+    public function testEmptyListFilterIsSkipped(): void
+    {
+        $this->createFilter(['ids' => ' , ', 'skip' => [['nested']]]);
+        $this->Filter->configure([
+            'ids' => ['field' => 'Events.id', 'type' => 'in'],
+            'skip' => ['field' => 'Events.id', 'type' => 'not_in'],
+        ]);
+        $this->Filter->apply($this->table->find());
+
+        $this->assertSame([], $this->Filter->getConditions());
+    }
+
+    /**
+     * Test array values on scalar filters are ignored.
+     *
+     * @return void
+     */
+    public function testArrayValueOnScalarFilterIsSkipped(): void
+    {
+        $this->createFilter([
+            'title' => ['x'],
+            'country_id' => ['1', '2'],
+            'active' => ['1'],
+            'town' => 'Sofia',
+        ]);
+        $this->Filter->configure($this->eventsFilters());
+        $this->Filter->apply($this->table->find());
+
+        $this->assertSame([
+            'Events.town LIKE' => '%Sofia%',
+        ], $this->Filter->getConditions());
+    }
+
+    /**
      * Test sort/page from query are written to paging session.
      *
      * @return void

@@ -623,6 +623,15 @@ class FilterComponent extends Component
         $validate = $config['validate'] ?? null;
         $type = (string)($config['type'] ?? 'equal');
 
+        // Only list filters accept arrays; `?q[]=x` on a scalar filter is ignored
+        if (in_array($type, ['in', 'not_in'], true)) {
+            return $this->toList($value) !== [];
+        }
+
+        if (!is_scalar($value)) {
+            return false;
+        }
+
         if ($type === 'date' || $validate === 'date') {
             return is_string($value) && $this->isValidDate($value);
         }
@@ -656,7 +665,10 @@ class FilterComponent extends Component
     protected function toList(mixed $value): array
     {
         if (is_array($value)) {
-            return array_values($value);
+            return array_values(array_filter(
+                $value,
+                static fn(mixed $item): bool => is_scalar($item) && $item !== '',
+            ));
         }
 
         if (is_string($value)) {
@@ -679,7 +691,7 @@ class FilterComponent extends Component
     protected function normalizeUrlValue(mixed $value, string $type): mixed
     {
         if (in_array($type, ['in', 'not_in'], true)) {
-            return is_array($value) ? implode(',', $value) : $value;
+            return is_array($value) ? implode(',', $this->toList($value)) : $value;
         }
 
         if ($type === 'boolean') {
