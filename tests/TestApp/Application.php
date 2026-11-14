@@ -38,6 +38,15 @@ class Application extends BaseApplication
 
         // Keep assertion messages in English. Plugin config defaults the locale to bg.
         Configure::write('Admin.defaultLocale', '');
+
+        // Plugin bootstrap loads config/admin.php over values written earlier, so tests
+        // that need their own Admin.* values pass them here via TestApp.Admin.
+        $overrides = Configure::read('TestApp.Admin');
+        if (is_array($overrides)) {
+            foreach ($overrides as $key => $value) {
+                Configure::write('Admin.' . $key, $value);
+            }
+        }
     }
 
     /**
