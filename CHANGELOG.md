@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Attachments** elements keep non-integer ids (UUID) in `data-id`, so drag-and-drop sorting works for them
+
 ### Added
 - Upgrade guide from 1.x to 2.0: [docs/MIGRATION.md](docs/MIGRATION.md)
 

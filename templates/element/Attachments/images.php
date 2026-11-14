@@ -68,7 +68,7 @@ $galleryClass = 'gallery-' . $id;
         <?php endif ?>
     >
         <?php foreach ($imagesList as $image): ?>
-            <div class="col-sm-6 col-md-4 col-lg-3" data-id="<?= (int)$image->id ?>">
+            <div class="col-sm-6 col-md-4 col-lg-3" data-id="<?= h((string)$image->id) ?>">
                 <div class="card mb-3">
                     <div class="card-body text-center p-2">
                         <?php

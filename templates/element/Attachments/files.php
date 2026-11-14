@@ -77,7 +77,7 @@ $csrfToken = $this->getRequest()->getAttribute('csrfToken');
                     <?php endif ?>
                 >
                     <?php foreach ($filesList as $file): ?>
-                        <tr data-id="<?= (int)$file->id ?>">
+                        <tr data-id="<?= h((string)$file->id) ?>">
                             <?php if ($sortUrl): ?>
                                 <td class="text-secondary align-middle">
                                     <?= $this->element('Brammo/Admin.Sortable/handle') ?>
