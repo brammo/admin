@@ -9,6 +9,8 @@
  * @var array<string, mixed> $items
  */
 
+use Cake\Core\Configure;
+
 $this->assign('title', __d('brammo/admin', 'File Manager'));
 
 $target = $this->request->getQuery('target') ?: '';
@@ -19,6 +21,8 @@ if ($folder) {
 }
 
 $action = $this->request->getParam('action');
+
+$fileIcons = Configure::read('Admin.FileManager.fileIcons') ?: [];
 ?>
 <div class="file-browser-header">
     <div class="d-lg-flex">
@@ -41,7 +45,7 @@ $action = $this->request->getParam('action');
                                 ],
                             ],
                             [
-                                'escape' => false, 
+                                'escapeTitle' => false, 
                                 'class' => 'folder btn btn-light btn-sm', 
                                 'title' => __d('brammo/admin', 'Back')
                             ]
@@ -49,41 +53,40 @@ $action = $this->request->getParam('action');
                     ?>
                 </div>
             <?php endif ?>
-            <div class="me-2 py-1 px-3 rounded fw-bolder">
-                <?= $this->Html->icon('folder') ?> /<?= h($folder) ?>
+            <div class="d-flex align-items-center gap-2 me-2 py-1 px-2 rounded fw-bolder">
+                <?= $this->Html->icon('folder', ['class' => 'text-secondary']) ?>
+                <span>/<?= h($folder) ?></span>
             </div>
             <?php if ($folder): ?>
-                <div>
-                    <?= $this->Form->create(null, [
-                            'url' => ['action' => 'createFolder', '?' => compact('folder')],
-                            'class' => 'create-folder-form d-inline-block', 
-                            'style' => 'max-width:10rem;'
-                        ]) 
+                <?= $this->Form->create(null, [
+                        'url' => ['action' => 'createFolder', '?' => compact('folder')],
+                        'class' => 'create-folder-form d-inline-block ms-2', 
+                        'style' => 'max-width:10rem;'
+                    ]) 
+                ?>
+                    <?= $this->Form->button($this->Html->icon('folder-plus'),
+                            [
+                                'class' => 'create-folder btn btn-success btn-sm', 
+                                'title' => __d('brammo/admin', 'Create Folder'),
+                                'escapeTitle' => false, 
+                            ]
+                        );
                     ?>
-                        <?= $this->Form->button($this->Html->icon('folder-plus'),
-                                [
-                                    'class' => 'create-folder btn btn-success btn-sm', 
-                                    'title' => __d('brammo/admin', 'Create Folder'),
-                                    'escapeTitle' => false, 
-                                ]
-                            );
+                    <div class="input-group" style="display:none;">
+                        <?= $this->Form->text('folder', [
+                                'class' => 'form-control form-control-sm', 
+                                'placeholder' => __d('brammo/admin', 'Folder Name')
+                            ]) 
                         ?>
-                        <div class="input-group" style="display:none;">
-                            <?= $this->Form->text('folder', [
-                                    'class' => 'form-control form-control-sm', 
-                                    'placeholder' => __d('brammo/admin', 'Folder Name')
-                                ]) 
-                            ?>
-                            <?= $this->Form->button($this->Html->icon('folder-plus'), [
-                                    'type' => 'submit', 
-                                    'class' => 'btn btn-success btn-sm', 
-                                    'title' => __d('brammo/admin', 'Create'),
-                                    'escapeTitle' => false
-                                ]) 
-                            ?>
-                        </div>
-                    <?= $this->Form->end() ?>
-                </div>
+                        <?= $this->Form->button($this->Html->icon('folder-plus'), [
+                                'type' => 'submit', 
+                                'class' => 'btn btn-success btn-sm', 
+                                'title' => __d('brammo/admin', 'Create'),
+                                'escapeTitle' => false
+                            ]) 
+                        ?>
+                    </div>
+                <?= $this->Form->end() ?>
             <?php endif ?>
         </div>
         <div class="ms-lg-auto">
@@ -94,7 +97,7 @@ $action = $this->request->getParam('action');
                         '?' => compact('folder', 'target', 'filter')
                     ],
                     [
-                        'escape' => false, 
+                        'escapeTitle' => false, 
                         'class' => 'refresh btn btn-info btn-sm', 
                         'title' => __d('brammo/admin', 'Refresh')
                     ]
@@ -145,7 +148,7 @@ $action = $this->request->getParam('action');
                     ?>
                     <?= $this->Form->button($this->Html->icon('filter'), [
                             'type' => 'submit', 
-                            'class' => 'filterbtn btn-secondary btn-sm', 
+                            'class' => 'filter btn btn-secondary btn-sm', 
                             'title' => __d('brammo/admin', 'Filter'),
                             'escapeTitle' => false
                         ]) 
@@ -159,13 +162,16 @@ $action = $this->request->getParam('action');
     <?php foreach ($items as $item) : ?>
         <div class="col-sm-4 col-md-3">
             <?php if ($item['type'] == '[folder]') : ?>
-                <div class="card card-folder">
+                <div class="card h-100">
                     <div class="card-img-top ratio ratio-4x3">
                         <div class="d-flex justify-content-center align-items-center h-100">
-                            <?= $this->Html->icon('folder', ['style' => 'font-size:4rem']) ?>
+                            <?= $this->Html->icon('folder', [
+                                'class' => 'text-secondary',
+                                'style' => 'font-size:5rem',
+                            ]) ?>
                         </div>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body position-static p-2 text-center small">
                         <?= $this->Html->link(
                                 $item['filename'],
                                 [
@@ -178,23 +184,39 @@ $action = $this->request->getParam('action');
                                     ]
                                 ],
                                 [
-                                    'class' => 'folder stretched-link'
+                                    'class' => 'folder stretched-link text-reset text-decoration-none',
                                 ]
                             ) 
                         ?>
                     </div>
                 </div>
             <?php else : ?>
-                <div class="card card-image">
-                    <div class="card-img-top ratio ratio-4x3" style="background-image:url('<?= h($path . $item['filename']) ?>')"></div>
-                    <div class="card-body">
+                <?php $isImage = !empty($item['image']); ?>
+                <div class="card h-100">
+                    <?php if ($isImage) : ?>
+                        <div class="card-img-top ratio ratio-4x3 bg-dark">
+                            <?= $this->Html->image($path . $item['filename'], [
+                                'class' => 'object-fit-contain',
+                            ]) ?>
+                        </div>
+                    <?php else : ?>
+                        <div class="card-img-top ratio ratio-4x3">
+                            <div class="d-flex justify-content-center align-items-center h-100">
+                                <?= $this->Html->icon($fileIcons[$item['type']] ?? $fileIcons['default'] ?? 'file', [
+                                    'class' => 'text-secondary',
+                                    'style' => 'font-size:5rem',
+                                ]) ?>
+                            </div>
+                        </div>
+                    <?php endif ?>
+                    <div class="card-body position-static p-2 text-center small">
                         <?= $this->Html->link(
                             $item['filename'], 
                             $path . $item['filename'], 
                             [
-                                'class' => 'select stretched-link',
-                                'data-type' => 'image', 
-                                'data-target' => $target
+                                'class' => 'select stretched-link text-reset text-decoration-none',
+                                'data-type' => $isImage ? 'image' : 'file',
+                                'data-target' => $target,
                             ]
                         ) ?>
                     </div>

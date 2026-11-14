@@ -162,6 +162,60 @@ class FileManagerServiceTest extends TestCase
         $this->assertFalse($this->service->isPathWithinBase('/etc'));
         $this->assertFalse($this->service->isPathWithinBase('/tmp'));
         $this->assertFalse($this->service->isPathWithinBase('/nonexistent/path'));
+        $this->assertFalse($this->service->isPathWithinBase($this->testDir . DS . 'uploads' . DS . '..' . DS . 'images'));
+    }
+
+    /**
+     * A configured top folder may be a symlink to storage outside the base path.
+     * A symlink nested under that folder that points elsewhere stays rejected.
+     */
+    public function testIsPathWithinBaseAllowsSymlinkedTopFolder(): void
+    {
+        $outside = TMP . 'filemanager_outside_' . uniqid();
+        $escapeTarget = TMP . 'filemanager_escape_' . uniqid();
+        mkdir($outside, 0755, true);
+        mkdir($escapeTarget, 0755, true);
+        file_put_contents($outside . DS . 'photo.jpg', 'x');
+
+        $images = $this->testDir . DS . 'images';
+        $this->removeDirectory($images);
+        $escapeLink = $outside . DS . 'escape';
+        if (!function_exists('symlink') || !symlink($outside, $images) || !symlink($escapeTarget, $escapeLink)) {
+            if (is_link($images)) {
+                unlink($images);
+            }
+            $this->removeDirectory($outside);
+            $this->removeDirectory($escapeTarget);
+            mkdir($images, 0755, true);
+            $this->markTestSkipped('Symlinks are not available');
+        }
+
+        try {
+            $this->assertTrue($this->service->isPathWithinBase($images));
+            $this->assertTrue($this->service->isPathWithinBase($images . DS . 'photo.jpg'));
+            $this->assertTrue($this->service->isPathWithinBase($images . DS . 'gallery' . DS . '2024'));
+            $this->assertFalse($this->service->isPathWithinBase($images . DS . 'escape'));
+            $this->assertFalse($this->service->isPathWithinBase($images . DS . 'escape' . DS . 'new'));
+        } finally {
+            if (is_link($escapeLink)) {
+                unlink($escapeLink);
+            }
+            if (is_link($images)) {
+                unlink($images);
+            }
+            $this->removeDirectory($outside);
+            $this->removeDirectory($escapeTarget);
+            if (!is_dir($images)) {
+                mkdir($images, 0755, true);
+            }
+        }
+    }
+
+    public function testIsPathWithinBaseAllowsMissingDirectoryInsideJail(): void
+    {
+        $missing = $this->testDir . DS . 'uploads' . DS . 'gallery' . DS . '2024';
+        $this->assertDirectoryDoesNotExist($missing);
+        $this->assertTrue($this->service->isPathWithinBase($missing));
     }
 
     public function testSanitizeFilename(): void

@@ -30,6 +30,7 @@ const FormImage = (function() {
             }
         }
         
+        // Shared by all image controls on the page (FileBrowser keeps one instance per modal)
         this.fileBrowser = new FileBrowser('#file-browser-modal', this.modalTitle);
 
         this.init();
@@ -65,7 +66,8 @@ const FormImage = (function() {
         const url = this.browseUrl + '?folder=' + encodeURIComponent(folder) + 
             '&target=' + encodeURIComponent(target);
 
-        this.fileBrowser.loadContent(url);
+        // Name the modal as target: a shared instance may have last loaded into an embedded container
+        this.fileBrowser.loadContent(url, this.fileBrowser.modalId);
         this.fileBrowser.showModal();
     };
 
@@ -93,6 +95,9 @@ const FormImage = (function() {
 
         const file = e.target.files[0];
         if (!file) return;
+
+        // Reset so that choosing the same file again fires change
+        e.target.value = '';
 
         const folder = this.element.dataset.folder || '';
 

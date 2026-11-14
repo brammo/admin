@@ -1495,4 +1495,220 @@ class FileManagerControllerTest extends TestCase
         $this->assertFileExists($this->testDir . DS . 'images' . DS . 'valid_image.jpg');
         $this->assertFileDoesNotExist($this->testDir . DS . 'images' . DS . 'invalid.exe');
     }
+
+    /**
+     * Build an ajax POST request for the given action and query.
+     *
+     * @param string $action Action name
+     * @param array<string, mixed> $query Query values
+     * @return \Cake\Http\ServerRequest
+     */
+    private function ajaxPost(string $action, array $query): ServerRequest
+    {
+        return new ServerRequest([
+            'url' => '/admin/filemanager/' . $action,
+            'environment' => ['REQUEST_METHOD' => 'POST', 'HTTP_X_REQUESTED_WITH' => 'XMLHttpRequest'],
+            'query' => $query,
+        ]);
+    }
+
+    /**
+     * Test a folder name that sanitises to nothing cannot remove the current folder
+     *
+     * @return void
+     */
+    public function testDeleteFolderRejectsNameResolvingToCurrentFolder(): void
+    {
+        foreach (['..', '/', '.'] as $name) {
+            $controller = $this->fileManagerControllerWithoutRender(
+                $this->ajaxPost('delete', ['folder' => 'images', 'deleteFolder' => $name]),
+            );
+            $response = $controller->delete();
+
+            $this->assertNotNull($response);
+            $this->assertSame(
+                ['error' => 'Invalid folder'],
+                json_decode((string)$response->getBody(), true),
+                'deleteFolder=' . $name,
+            );
+            $this->assertDirectoryExists($this->testDir . DS . 'images');
+        }
+    }
+
+    /**
+     * Test delete without a file or folder to delete is an error, not a success
+     *
+     * @return void
+     */
+    public function testDeleteWithoutTargetIsRejected(): void
+    {
+        $controller = $this->fileManagerControllerWithoutRender(
+            $this->ajaxPost('delete', ['folder' => 'uploads']),
+        );
+        $response = $controller->delete();
+
+        $this->assertNotNull($response);
+        $this->assertSame(['error' => 'Invalid request'], json_decode((string)$response->getBody(), true));
+    }
+
+    /**
+     * Test fixImage rejects GET requests
+     *
+     * @return void
+     */
+    public function testFixImageRequiresPost(): void
+    {
+        $request = new ServerRequest([
+            'url' => '/admin/filemanager/fixImage',
+            'environment' => ['REQUEST_METHOD' => 'GET', 'HTTP_X_REQUESTED_WITH' => 'XMLHttpRequest'],
+            'query' => ['folder' => 'uploads', 'file' => 'test.pdf'],
+        ]);
+
+        $controller = $this->fileManagerControllerWithoutRender($request);
+        $response = $controller->fixImage();
+
+        $this->assertNotNull($response);
+        $this->assertSame(['error' => 'Invalid request'], json_decode((string)$response->getBody(), true));
+    }
+
+    /**
+     * Test upload ignores nested upload arrays instead of failing with a TypeError
+     *
+     * @return void
+     */
+    public function testUploadIgnoresNestedUploadArrays(): void
+    {
+        $tmp = tempnam(sys_get_temp_dir(), 'upl');
+        file_put_contents($tmp, 'x');
+        $file = new UploadedFile($tmp, 1, UPLOAD_ERR_OK, 'nested.txt', 'text/plain');
+
+        $request = $this->ajaxPost('upload', ['folder' => 'uploads'])
+            ->withUploadedFiles(['files' => ['group' => [$file]]]);
+
+        $controller = $this->fileManagerControllerWithoutRender($request);
+        $response = $controller->upload();
+        unlink($tmp);
+
+        $this->assertNotNull($response);
+        $this->assertSame(['error' => 'No files uploaded'], json_decode((string)$response->getBody(), true));
+        $this->assertFileDoesNotExist($this->testDir . DS . 'uploads' . DS . 'nested.txt');
+    }
+
+    /**
+     * Test upload accepts a top folder that is itself a symlink outside the base path
+     *
+     * @return void
+     */
+    public function testUploadAllowsSymlinkedTopFolder(): void
+    {
+        $outside = TMP . 'filemanager_outside_' . uniqid();
+        mkdir($outside, 0755, true);
+        $images = $this->testDir . DS . 'images';
+        $this->removeDirectory($images);
+        if (!function_exists('symlink') || !symlink($outside, $images)) {
+            $this->removeDirectory($outside);
+            mkdir($images, 0755, true);
+            $this->markTestSkipped('Symlinks are not available');
+        }
+
+        $tmp = tempnam(sys_get_temp_dir(), 'upl');
+        file_put_contents((string)$tmp, 'x');
+        $file = new UploadedFile((string)$tmp, 1, UPLOAD_ERR_OK, 'photo.jpg', 'image/jpeg');
+
+        try {
+            $request = $this->ajaxPost('upload', ['folder' => 'images/gallery'])
+                ->withUploadedFiles(['files' => [$file]]);
+            $response = $this->fileManagerControllerWithoutRender($request)->upload();
+
+            $this->assertNotNull($response);
+            $data = json_decode((string)$response->getBody(), true);
+            $this->assertFalse($data['error']);
+            $this->assertFileExists($outside . DS . 'gallery' . DS . 'photo.jpg');
+        } finally {
+            if (is_string($tmp) && is_file($tmp)) {
+                unlink($tmp);
+            }
+            if (is_link($images)) {
+                unlink($images);
+            }
+            $this->removeDirectory($outside);
+            if (!is_dir($images)) {
+                mkdir($images, 0755, true);
+            }
+        }
+    }
+
+    /**
+     * Test upload and createFolder refuse a folder whose parent is a symlink out of the base path
+     *
+     * @return void
+     */
+    public function testUploadAndCreateFolderRejectSymlinkOutsideBase(): void
+    {
+        $outside = TMP . 'filemanager_outside_' . uniqid();
+        mkdir($outside, 0755, true);
+        $link = $this->testDir . DS . 'uploads' . DS . 'escape';
+        if (!function_exists('symlink') || !symlink($outside, $link)) {
+            rmdir($outside);
+            $this->markTestSkipped('Symlinks are not available');
+        }
+
+        try {
+            $tmp = tempnam(sys_get_temp_dir(), 'upl');
+            file_put_contents($tmp, 'x');
+            $file = new UploadedFile($tmp, 1, UPLOAD_ERR_OK, 'out.txt', 'text/plain');
+
+            $request = $this->ajaxPost('upload', ['folder' => 'uploads/escape/new'])
+                ->withUploadedFiles(['files' => [$file]]);
+            $response = $this->fileManagerControllerWithoutRender($request)->upload();
+            unlink($tmp);
+
+            $this->assertNotNull($response);
+            $this->assertSame(['error' => 'Invalid folder'], json_decode((string)$response->getBody(), true));
+            $this->assertDirectoryDoesNotExist($outside . DS . 'new');
+
+            $request = $this->ajaxPost('createFolder', ['folder' => 'uploads/escape'])
+                ->withParsedBody(['folder' => 'made']);
+            $response = $this->fileManagerControllerWithoutRender($request)->createFolder();
+
+            $this->assertNotNull($response);
+            $this->assertSame(['error' => 'Invalid folder'], json_decode((string)$response->getBody(), true));
+            $this->assertDirectoryDoesNotExist($outside . DS . 'made');
+        } finally {
+            unlink($link);
+            rmdir($outside);
+        }
+    }
+
+    /**
+     * Test browseImages lists folders and images only, while browseFiles lists everything
+     *
+     * @return void
+     */
+    public function testBrowseImagesListsOnlyImagesAndFolders(): void
+    {
+        file_put_contents($this->testDir . DS . 'uploads' . DS . 'photo.jpg', 'not really a jpeg');
+
+        $names = static fn(array $items): array => array_values(array_column($items, 'filename'));
+
+        $request = new ServerRequest([
+            'url' => '/admin/filemanager/browseImages',
+            'query' => ['folder' => 'uploads'],
+        ]);
+        $controller = $this->fileManagerControllerWithoutRender($request);
+        $controller->browseImages();
+        $items = $names($controller->viewBuilder()->getVar('items'));
+        sort($items);
+        $this->assertSame(['photo.jpg', 'subfolder'], $items);
+
+        $request = new ServerRequest([
+            'url' => '/admin/filemanager/browseFiles',
+            'query' => ['folder' => 'uploads'],
+        ]);
+        $controller = $this->fileManagerControllerWithoutRender($request);
+        $controller->browseFiles();
+        $items = $names($controller->viewBuilder()->getVar('items'));
+        sort($items);
+        $this->assertSame(['photo.jpg', 'subfolder', 'test.pdf', 'test.txt'], $items);
+    }
 }

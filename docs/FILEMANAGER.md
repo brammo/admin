@@ -101,12 +101,12 @@ The File Manager is available at the following routes:
 | Route | Action | Description |
 |-------|--------|-------------|
 | `/admin/filemanager` | `index` | Main file browser interface |
-| `/admin/filemanager/browseImages` | `browseImages` | Browse images only (used by image picker modals) |
-| `/admin/filemanager/browseFiles` | `browseFiles` | Browse files only |
+| `/admin/filemanager/browseImages` | `browseImages` | Browse folders and images only (used by image picker modals) |
+| `/admin/filemanager/browseFiles` | `browseFiles` | Browse all files; non-images are shown with a file icon |
 | `/admin/filemanager/upload` | `upload` | Handle file uploads |
 | `/admin/filemanager/createFolder` | `createFolder` | Create new folders |
 | `/admin/filemanager/delete` | `delete` | Delete files or empty folders |
-| `/admin/filemanager/fixImage` | `fixImage` | Resize an existing image to fit max dimensions |
+| `/admin/filemanager/fixImage` | `fixImage` | Resize an existing image to fit max dimensions (POST only; animated images are left unchanged) |
 
 ---
 
@@ -313,7 +313,7 @@ pecl install imagick
 The File Manager includes several security measures:
 
 - **Path Validation**: All paths are validated against configured `topFolders` to prevent directory traversal; null bytes and `..` sequences are blocked
-- **Path Resolution Validation**: Resolved paths are verified via `realpath()` to ensure they stay within the configured base directory
+- **Path Resolution Validation**: `realpath()` must keep every path inside its jail. The jail is the resolved target of the configured top folder when that folder exists, so a top folder may be a symlink to storage outside `basePath`. A symlink nested under that folder that points elsewhere is rejected. Directories that do not exist yet are allowed when their nearest existing ancestor stays in the jail
 - **Filename Sanitization**: Uploaded and user-supplied filenames are sanitized — path separators, null bytes, and traversal sequences are stripped; non-Latin letters (e.g. Cyrillic) are transliterated to ASCII for readable filesystem names, then remaining unsafe characters are replaced with underscores
 - **File Type Validation**: Only configured file types in `fileTypes` are allowed for upload
 - **Authentication**: Access requires authentication through the admin panel's authentication system

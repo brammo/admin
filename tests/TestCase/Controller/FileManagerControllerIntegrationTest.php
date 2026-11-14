@@ -134,4 +134,42 @@ class FileManagerControllerIntegrationTest extends TestCase
         $this->assertResponseNotContains('<img src=x onerror=alert(1)>');
         $this->assertResponseContains('/images/&lt;img src=x onerror=alert(1)&gt;');
     }
+
+    /**
+     * Test the oversized-image fix is a POST form, not a plain link
+     *
+     * @return void
+     */
+    public function testFixImageRejectsGet(): void
+    {
+        $this->get('/admin/filemanager/fixImage?folder=images&file=a.jpg');
+
+        $this->assertRedirect();
+        $this->assertFlashMessage('Invalid request');
+    }
+
+    /**
+     * Test the browser shows a file icon for non-image files instead of an image tag
+     *
+     * @return void
+     */
+    public function testBrowseFilesRendersNonImagesAsFiles(): void
+    {
+        $file = $this->testDir . DS . 'images' . DS . 'doc.pdf';
+        file_put_contents($file, 'pdf');
+        // Applied after plugin bootstrap, which would otherwise reset basePath
+        Configure::write('TestApp.Admin', ['FileManager' => Configure::read('Admin.FileManager')]);
+
+        try {
+            $this->get('/admin/filemanager/browseFiles?folder=images');
+
+            $this->assertResponseOk();
+            $this->assertResponseContains('doc.pdf');
+            $this->assertResponseContains('data-type="file"');
+            $this->assertResponseNotContains('<img src="/images/doc.pdf"');
+        } finally {
+            Configure::delete('TestApp.Admin');
+            unlink($file);
+        }
+    }
 }

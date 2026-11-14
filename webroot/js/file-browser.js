@@ -38,9 +38,11 @@ const FileBrowser = (function() {
 
         this.boundHandleClick = this.handleClick.bind(this);
         this.boundHandleSubmit = this.handleSubmit.bind(this);
+        this.boundHandleChange = this.handleUploadChange.bind(this);
 
         document.addEventListener('click', this.boundHandleClick);
         document.addEventListener('submit', this.boundHandleSubmit);
+        document.addEventListener('change', this.boundHandleChange);
     }
 
     /**
@@ -170,6 +172,11 @@ const FileBrowser = (function() {
         
         document.removeEventListener('click', this.boundHandleClick);
         document.removeEventListener('submit', this.boundHandleSubmit);
+        document.removeEventListener('change', this.boundHandleChange);
+
+        if (instances[this.modalId] === this) {
+            delete instances[this.modalId];
+        }
     }
 
     /**
@@ -281,7 +288,12 @@ const FileBrowser = (function() {
     }
 
     /**
-     * Handle file upload
+     * Handle upload button clicks: open the file dialog.
+     *
+     * The upload itself runs in handleUploadChange(), bound once on document.
+     * Adding a change listener per click would stack up when the dialog is
+     * cancelled and then upload the same files several times.
+     *
      * @param {Event} e - Click event
      */
     FileBrowser.prototype.handleUpload = function(e) {
@@ -290,55 +302,77 @@ const FileBrowser = (function() {
             return false;
         }
 
-        const btnUpload = match.element;
         e.preventDefault();
 
         const form = match.root ? document.querySelector(match.root + ' .upload-form') : null;
-        if (!form) {
+        const fileInput = form ? form.querySelector('input[type="file"]') : null;
+        if (fileInput) {
+            fileInput.click();
+        }
+
+        return true;
+    }
+
+    /**
+     * Upload the files chosen in an upload form
+     * @param {Event} e - Change event
+     */
+    FileBrowser.prototype.handleUploadChange = function(e) {
+        const match = this.closestInRoots(e.target, '.upload-form input[type="file"]');
+        if (!match) {
+            return false;
+        }
+
+        const fileInput = match.element;
+        if (!fileInput.files || fileInput.files.length === 0) {
             return true;
         }
 
-        const fileInput = form.querySelector('input[type="file"]');
-        if (!fileInput) {
-            return true;
-        }
-
+        const form = fileInput.closest('.upload-form');
+        const btnUpload = form.querySelector('.upload');
+        const formData = new FormData(form);
+        const csrfToken = form.querySelector('input[name="_csrfToken"]');
         const self = this;
         const loadRoot = match.root;
-        fileInput.addEventListener('change', function handleFileChange() {
-            const formData = new FormData(form);
 
-            const csrfToken = form.querySelector('input[name="_csrfToken"]');
+        // Reset so that choosing the same file again fires change
+        fileInput.value = '';
 
+        if (btnUpload) {
             btnUpload.disabled = true;
+        }
 
-            fetch(form.getAttribute('action'), {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-Token': csrfToken ? csrfToken.value : ''
-                }
-            })
-            .then(response => response.json())
-            .then(json => {
+        fetch(form.getAttribute('action'), {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-Token': csrfToken ? csrfToken.value : ''
+            }
+        })
+        .then(response => response.json())
+        .then(json => {
+            if (btnUpload) {
                 btnUpload.disabled = false;
-                if (json.error) {
-                    alert(json.error);
-                } else {
-                    const refreshBtn = document.querySelector(loadRoot + ' .refresh');
-                    if (refreshBtn) {
-                        self.loadContent(refreshBtn.getAttribute('href'), loadRoot);
-                    }
+            }
+            if (json.error) {
+                alert(json.error);
+            }
+            // Reload also after a partial failure: some files may have been saved
+            if (!json.error || (json.files && json.files.length > 0)) {
+                const refreshBtn = document.querySelector(loadRoot + ' .refresh');
+                if (refreshBtn) {
+                    self.loadContent(refreshBtn.getAttribute('href'), loadRoot);
                 }
-            })
-            .catch(error => {
+            }
+        })
+        .catch(error => {
+            if (btnUpload) {
                 btnUpload.disabled = false;
-                alert('Error: ' + error.message);
-            });
-        }, { once: true });
+            }
+            alert('Error: ' + error.message);
+        });
 
-        fileInput.click();
         return true;
     }
 

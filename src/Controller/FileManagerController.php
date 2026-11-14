@@ -5,6 +5,7 @@ namespace Brammo\Admin\Controller;
 
 use Brammo\Admin\FileManager\FileManagerService;
 use Cake\Http\Response;
+use Psr\Http\Message\UploadedFileInterface;
 use function Cake\I18n\__d;
 
 /**
@@ -119,17 +120,29 @@ class FileManagerController extends AppController
 
         $fullPath = $this->fileManager()->getFullPath($folder);
 
+        if (!$this->fileManager()->isPathWithinBase($fullPath)) {
+            return $this->errorResponse(__d('brammo/admin', 'Invalid folder'));
+        }
+
         if (!is_dir($fullPath) && !mkdir($fullPath, 0755, true)) {
             return $this->errorResponse(__d('brammo/admin', 'Invalid folder') . ' /' . $folder);
         }
 
         $uploadedFiles = $this->request->getUploadedFiles();
 
-        $filesToProcess = [];
-        if (isset($uploadedFiles['files']) && is_array($uploadedFiles['files'])) {
-            $filesToProcess = $uploadedFiles['files'];
+        // Nested arrays (files[a][b]) are ignored; only real uploads are processed
+        $candidates = [];
+        if (isset($uploadedFiles['files'])) {
+            $candidates = is_array($uploadedFiles['files']) ? $uploadedFiles['files'] : [$uploadedFiles['files']];
         } elseif (isset($uploadedFiles['file'])) {
-            $filesToProcess = [$uploadedFiles['file']];
+            $candidates = [$uploadedFiles['file']];
+        }
+
+        $filesToProcess = [];
+        foreach ($candidates as $candidate) {
+            if ($candidate instanceof UploadedFileInterface) {
+                $filesToProcess[] = $candidate;
+            }
         }
 
         if ($filesToProcess === []) {
@@ -203,7 +216,11 @@ class FileManagerController extends AppController
             }
 
             $fullPath = $this->fileManager()->getFullPath($folder);
-            if (!mkdir($fullPath . DS . $newFolder, 0755, true)) {
+            if (!$this->fileManager()->isPathWithinBase($fullPath)) {
+                return $this->errorResponse(__d('brammo/admin', 'Invalid folder'), $returnUrl);
+            }
+
+            if (file_exists($fullPath . DS . $newFolder) || !mkdir($fullPath . DS . $newFolder, 0755, true)) {
                 return $this->errorResponse(
                     __d('brammo/admin', 'Cannot create folder') . ' ' . $folder . DS . $newFolder,
                     $returnUrl,
@@ -251,6 +268,9 @@ class FileManagerController extends AppController
 
         if (is_string($deleteFile) && $deleteFile !== '') {
             $deleteFile = $this->fileManager()->sanitizeFilename($deleteFile);
+            if ($deleteFile === '') {
+                return $this->errorResponse(__d('brammo/admin', 'Invalid file'), $returnUrl);
+            }
             $fullPath .= '/' . $deleteFile;
             if (!file_exists($fullPath) || !is_file($fullPath) || !is_writable($fullPath)) {
                 return $this->errorResponse(__d('brammo/admin', 'Invalid file'), $returnUrl);
@@ -259,7 +279,11 @@ class FileManagerController extends AppController
                 return $this->errorResponse(__d('brammo/admin', 'The file could not be deleted'), $returnUrl);
             }
         } elseif (is_string($deleteFolder) && $deleteFolder !== '') {
+            // An empty name would resolve to the current folder itself
             $deleteFolder = $this->fileManager()->sanitizeFilename($deleteFolder);
+            if ($deleteFolder === '' || $deleteFolder === '.') {
+                return $this->errorResponse(__d('brammo/admin', 'Invalid folder'), $returnUrl);
+            }
             $fullPath .= '/' . $deleteFolder;
             if (!file_exists($fullPath) || !is_dir($fullPath) || !is_writable($fullPath)) {
                 return $this->errorResponse(__d('brammo/admin', 'Invalid folder'), $returnUrl);
@@ -276,6 +300,8 @@ class FileManagerController extends AppController
             if (!rmdir($fullPath)) {
                 return $this->errorResponse(__d('brammo/admin', 'The folder could not be deleted'), $returnUrl);
             }
+        } else {
+            return $this->errorResponse(__d('brammo/admin', 'Invalid request'), $returnUrl);
         }
 
         return $this->successResponse(__d('brammo/admin', 'Successfully deleted'), $returnUrl);
@@ -290,10 +316,16 @@ class FileManagerController extends AppController
     {
         $this->autoRender = false;
 
+        // POST only: the action rewrites a file on disk
+        if (!$this->request->is('post')) {
+            return $this->errorResponse(__d('brammo/admin', 'Invalid request'));
+        }
+
+        // Query values arrive already URL-decoded
         $folderQuery = $this->request->getQuery('folder');
         $fileQuery = $this->request->getQuery('file');
-        $folder = is_string($folderQuery) ? urldecode($folderQuery) : '';
-        $filename = is_string($fileQuery) ? $this->fileManager()->sanitizeFilename(urldecode($fileQuery)) : '';
+        $folder = is_string($folderQuery) ? $folderQuery : '';
+        $filename = is_string($fileQuery) ? $this->fileManager()->sanitizeFilename($fileQuery) : '';
 
         if ($folder === '' || !$this->fileManager()->isValidFolder($folder)) {
             $this->Flash->error(__d('brammo/admin', 'Invalid folder'));
@@ -304,7 +336,7 @@ class FileManagerController extends AppController
         $returnUrl = ['action' => 'index', '?' => compact('folder')];
         $fullPath = $this->fileManager()->getFullPath($folder) . DS . $filename;
 
-        if ($filename === '' || !file_exists($fullPath)) {
+        if ($filename === '' || !is_file($fullPath) || !$this->fileManager()->isPathWithinBase($fullPath)) {
             $this->Flash->error(__d('brammo/admin', 'Invalid file'));
 
             return $this->redirect($returnUrl);
@@ -377,7 +409,7 @@ class FileManagerController extends AppController
     /**
      * Browse folder contents and set view variables.
      *
-     * @param string $type Unused browse filter hint (kept for action compatibility)
+     * @param string $type `images` lists folders and images only; other values list everything
      */
     private function browse(string $type, int $itemsPerPage): void
     {
@@ -394,6 +426,15 @@ class FileManagerController extends AppController
         $fullPath = $this->fileManager()->getFullPath($folder);
 
         $items = $this->fileManager()->readFolder($fullPath, $folder, $filter);
+
+        if ($type === 'images') {
+            $imageTypes = $this->fileManager()->getImageTypes();
+            $items = array_filter(
+                $items,
+                fn(array $item): bool => $item['type'] === FileManagerService::TYPE_FOLDER
+                    || in_array($this->fileManager()->getFileType((string)$item['filename']), $imageTypes, true),
+            );
+        }
 
         $sortField = $this->sortField;
         $sortDirection = $this->sortDirection;

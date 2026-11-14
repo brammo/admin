@@ -7,7 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security
+- **File Manager**: `fixImage` accepts POST only (it rewrites a file); the index page uses a post link. Query values are no longer URL-decoded a second time
+- **File Manager**: `delete` rejects a folder name that resolves to the current folder (`..`, `/`, `.`), which could remove an empty folder including a top folder
+- **File Manager**: `upload` and `createFolder` refuse a target whose existing parent resolves outside `basePath` (symlinked folder)
+
 ### Fixed
+- **File browser**: a file is uploaded once. Cancelling the file dialog and clicking Upload again, or having several image controls on one page, sent the upload (and create-folder) request several times. `FileBrowser` keeps one instance per modal id
+- **File Manager**: `browseImages` lists folders and images only. The browser shows a file icon for non-image files instead of a broken image
+- **File Manager**: `delete` without `deleteFile` or `deleteFolder` returns an error instead of "Successfully deleted"
+- **File Manager**: `upload` ignores nested upload arrays instead of failing with a server error
+- **File Manager**: animated images are no longer flattened to one frame by resize-on-upload / `fixImage`; they are left unchanged
 - **FilterComponent**: the end of a `date_range` given as `Y-m-d` includes the whole day on datetime columns (`< next day`)
 - **FilterComponent**: saved filter keys that are no longer configured are dropped instead of causing a redirect loop
 - **FilterComponent**: a page above 1 is saved to the session only after the action renders, so a page that no longer exists (404 from the paginator) is not restored on the next visit

@@ -5,6 +5,8 @@
  * @var \Brammo\Admin\View\AppView $this
  * @var string $folder
  * @var string $filter
+ * @var array $items
+ * @var int $first
  */
 
 use Cake\Core\Configure;
@@ -103,7 +105,7 @@ $this->append('buttons');
         'url' => ['action' => 'index'], 
         'type' => 'get', 
         'id' => 'form-filter', 
-        'class' => 'd-inline-block',
+        'class' => 'd-inline-block ms-2',
         'style' => 'max-width:12rem'
     ]);
     echo $this->Form->hidden('folder', ['value' => $folder]);
@@ -196,7 +198,7 @@ if ($folder) {
                                             ['style' => 'max-width:50px']
                                         ),
                                         $url,
-                                        ['escape' => false, 'class' => 'gallery-image']
+                                        ['escapeTitle' => false, 'class' => 'gallery-image']
                                     );
                                 }
                             ?></td>
@@ -221,7 +223,7 @@ if ($folder) {
                                             ]
                                         ],
                                         [
-                                            'escape' => false, 
+                                            'escapeTitle' => false, 
                                             'class' => 'btn btn-warning btn-sm', 
                                             'title' => __d('brammo/admin', 'Fix Image Size')
                                         ]   
@@ -244,7 +246,7 @@ if ($folder) {
                                     $this->Html->icon('trash'),
                                     $url,
                                     [
-                                        'escape' => false, 
+                                        'escapeTitle' => false, 
                                         'class' => 'btn btn-danger btn-sm', 
                                         'title' => __d('brammo/admin', 'Delete'),
                                         'confirm' => __d('brammo/admin', 'Are you sure you want to delete?')

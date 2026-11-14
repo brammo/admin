@@ -113,18 +113,92 @@ class FileManagerService
     }
 
     /**
-     * Validate that a resolved path is within the base path.
+     * Whether a path stays inside its file-manager jail after resolving symlinks.
+     *
+     * A configured top folder may be a symlink to storage outside basePath.
+     * That link is the jail for every path under the folder. A symlink nested
+     * inside the folder that points somewhere else is rejected.
+     *
+     * The path may not exist yet. The nearest existing ancestor is resolved,
+     * and the remaining segments must not climb out of the jail.
      */
     public function isPathWithinBase(string $fullPath): bool
     {
-        $realBase = realpath($this->basePath);
-        $realPath = realpath($fullPath);
-
-        if ($realBase === false || $realPath === false) {
+        if ($fullPath === '' || str_contains($fullPath, "\0") || $this->hasTraversalSegment($fullPath)) {
             return false;
         }
 
-        return str_starts_with($realPath, $realBase . DS) || $realPath === $realBase;
+        $jail = $this->jailFor($fullPath);
+        if ($jail === null) {
+            return false;
+        }
+
+        $existing = $fullPath;
+        $suffix = '';
+        while (!file_exists($existing)) {
+            $parent = dirname($existing);
+            if ($parent === $existing) {
+                return false;
+            }
+            $suffix = substr($existing, strlen($parent)) . $suffix;
+            $existing = $parent;
+        }
+
+        $realExisting = realpath($existing);
+        if ($realExisting === false) {
+            return false;
+        }
+
+        $candidate = $realExisting . $suffix;
+
+        return $candidate === $jail || str_starts_with($candidate, $jail . DS);
+    }
+
+    /**
+     * Directory a path is allowed to stay inside, after resolving symlinks.
+     *
+     * The resolved top folder is the jail when that folder exists. Until it
+     * does, new directories must be created inside the base path.
+     */
+    private function jailFor(string $fullPath): ?string
+    {
+        $base = rtrim($this->basePath, DS);
+        $realBase = realpath($base);
+        if ($realBase === false) {
+            return null;
+        }
+
+        if ($fullPath === $base || $fullPath === $realBase) {
+            return $realBase;
+        }
+
+        if (!str_starts_with($fullPath, $base . DS)) {
+            return null;
+        }
+
+        $relative = substr($fullPath, strlen($base) + 1);
+        $top = explode(DS, $relative, 2)[0];
+        if ($top === '' || !in_array($top, $this->topFolders, true)) {
+            return $realBase;
+        }
+
+        $realTop = realpath($base . DS . $top);
+
+        return $realTop !== false ? $realTop : $realBase;
+    }
+
+    /**
+     * Whether any path segment is `..`.
+     */
+    private function hasTraversalSegment(string $path): bool
+    {
+        foreach (preg_split('#[\\\\/]#', $path) ?: [] as $part) {
+            if ($part === '..') {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -300,6 +374,19 @@ class FileManagerService
         try {
             $image = new Imagick($path);
         } catch (ImagickException $e) {
+            return false;
+        }
+
+        // Animated images: resizing and writing one frame would drop the animation
+        try {
+            if ($image->getNumberImages() > 1) {
+                $image->clear();
+
+                return false;
+            }
+        } catch (ImagickException $e) {
+            $image->clear();
+
             return false;
         }
 
