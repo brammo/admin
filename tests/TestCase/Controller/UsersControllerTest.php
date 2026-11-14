@@ -413,4 +413,54 @@ class UsersControllerTest extends TestCase
         $this->assertSame('Still Blocked', $user->name);
         $this->assertSame('blocked', $user->status);
     }
+
+    /**
+     * Test profile update replaces the identity kept in the session
+     *
+     * @return void
+     */
+    public function testProfilePostRefreshesSessionIdentity(): void
+    {
+        $this->session([
+            'AdminAuth' => [
+                'id' => 1,
+                'email' => 'test@example.com',
+                'name' => 'Test User',
+                'status' => 'active',
+            ],
+        ]);
+
+        $this->post('/admin/profile', [
+            'name' => 'Updated Name',
+            'email' => 'test@example.com',
+            'password' => '',
+        ]);
+
+        $this->assertRedirect('/admin/profile');
+        $identity = $this->_requestSession->read('AdminAuth');
+        $this->assertSame('Updated Name', $identity['name']);
+    }
+
+    /**
+     * Test the login form uses the field names from the auth config
+     *
+     * @return void
+     */
+    public function testLoginFormUsesConfiguredFieldNames(): void
+    {
+        $original = Configure::read('Admin.Auth.Authentication');
+        Configure::write('Admin.Auth.Authentication.fields', ['username' => 'name', 'password' => 'password']);
+        Configure::write('Admin.Auth.Authentication.rememberMeField', 'keep_me');
+
+        try {
+            $this->get('/admin/login');
+
+            $this->assertResponseOk();
+            $this->assertResponseContains('name="name"');
+            $this->assertResponseContains('name="keep_me"');
+            $this->assertResponseNotContains('name="email"');
+        } finally {
+            Configure::write('Admin.Auth.Authentication', $original);
+        }
+    }
 }

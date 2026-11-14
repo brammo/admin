@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- **Profile**: the session identity is replaced after saving, so the header shows the new name without a new login
+- **Login**: the login form and password rehash use the field names from `Admin.Auth.Authentication.fields` and `rememberMeField`
 - **Attachments** elements keep non-integer ids (UUID) in `data-id`, so drag-and-drop sorting works for them
 
 ### Added

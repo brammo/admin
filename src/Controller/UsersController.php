@@ -64,6 +64,14 @@ class UsersController extends AppController
             $this->viewBuilder()->setTemplate($template);
         }
 
+        // Field names for the login form, so the template follows the auth config
+        [$usernameField, $passwordField] = $this->loginFields();
+        $rememberMeField = $this->authConfig('Authentication.rememberMeField', 'remember_me');
+        if (!is_string($rememberMeField) || $rememberMeField === '') {
+            $rememberMeField = 'remember_me';
+        }
+        $this->set(compact('usernameField', 'passwordField', 'rememberMeField'));
+
         return null;
     }
 
@@ -121,6 +129,7 @@ class UsersController extends AppController
             ]);
 
             if ($usersTable->save($user)) {
+                $this->refreshSessionIdentity($user);
                 $this->Flash->success(__d('brammo/admin', 'Your profile has been updated.'));
 
                 return $this->redirect(['action' => 'profile']);
@@ -132,6 +141,42 @@ class UsersController extends AppController
         $this->set(compact('user'));
 
         return null;
+    }
+
+    /**
+     * Replace the identity stored in the session with the saved user.
+     *
+     * The session authenticator only writes the identity at login, so without
+     * this the header keeps showing the old name until the next login.
+     *
+     * @param \Cake\Datasource\EntityInterface $user Saved user.
+     * @return void
+     */
+    private function refreshSessionIdentity(EntityInterface $user): void
+    {
+        $sessionKey = $this->authConfig('Authentication.sessionKey', 'AdminAuth');
+        if (!is_string($sessionKey) || $sessionKey === '') {
+            $sessionKey = 'AdminAuth';
+        }
+
+        $session = $this->getRequest()->getSession();
+        if ($session->check($sessionKey)) {
+            $session->write($sessionKey, $user);
+        }
+    }
+
+    /**
+     * Username and password field names from the auth config.
+     *
+     * @return array{0: string, 1: string}
+     */
+    private function loginFields(): array
+    {
+        $fields = $this->authConfig('Authentication.fields', []);
+        $usernameField = is_array($fields) && is_string($fields['username'] ?? null) ? $fields['username'] : 'email';
+        $passwordField = is_array($fields) && is_string($fields['password'] ?? null) ? $fields['password'] : 'password';
+
+        return [$usernameField, $passwordField];
     }
 
     /**
@@ -171,14 +216,15 @@ class UsersController extends AppController
             return;
         }
 
-        $password = $this->getRequest()->getData('password');
+        [, $passwordField] = $this->loginFields();
+        $password = $this->getRequest()->getData($passwordField);
         if (!is_string($password) || $password === '') {
             return;
         }
 
         $usersTable = $this->usersTable();
         $user = $usersTable->get($userId);
-        $user->set('password', $password);
+        $user->set($passwordField, $password);
         $usersTable->save($user);
     }
 
@@ -192,9 +238,7 @@ class UsersController extends AppController
      */
     private function showLoginError(): void
     {
-        $fields = $this->authConfig('Authentication.fields', []);
-        $usernameField = is_array($fields) && is_string($fields['username'] ?? null) ? $fields['username'] : 'email';
-        $passwordField = is_array($fields) && is_string($fields['password'] ?? null) ? $fields['password'] : 'password';
+        [$usernameField, $passwordField] = $this->loginFields();
 
         $username = $this->getRequest()->getData($usernameField);
         $password = $this->getRequest()->getData($passwordField);
