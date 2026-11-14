@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.1] - 2026-11-14
+
 ### Security
 - **File Manager**: `fixImage` accepts POST only (it rewrites a file); the index page uses a post link. Query values are no longer URL-decoded a second time
 - **File Manager**: `delete` rejects a folder name that resolves to the current folder (`..`, `/`, `.`), which could remove an empty folder including a top folder
@@ -331,4 +333,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.11.0]: https://github.com/brammo/admin/releases/tag/v1.11.0
 [1.12.0]: https://github.com/brammo/admin/releases/tag/v1.12.0
 [2.0.0]: https://github.com/brammo/admin/releases/tag/v2.0.0
-[Unreleased]: https://github.com/brammo/admin/compare/v2.0.0...HEAD
+[2.0.1]: https://github.com/brammo/admin/releases/tag/v2.0.1
+[Unreleased]: https://github.com/brammo/admin/compare/v2.0.1...HEAD
