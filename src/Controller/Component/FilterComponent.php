@@ -7,6 +7,7 @@ use Cake\Controller\Component;
 use Cake\Http\Exception\RedirectException;
 use Cake\ORM\Query\SelectQuery;
 use Cake\Routing\Router;
+use DateTimeImmutable;
 
 /**
  * Applies config-driven GET filters to ORM queries and persists filters plus
@@ -50,6 +51,13 @@ class FilterComponent extends Component
      * @var array<int|string, mixed>
      */
     protected array $conditions = [];
+
+    /**
+     * Paging session key and data held back until the action has rendered.
+     *
+     * @var array{0: string, 1: array<string, mixed>}|null
+     */
+    protected ?array $pendingPaging = null;
 
     /**
      * Default config.
@@ -125,8 +133,15 @@ class FilterComponent extends Component
             $this->url = [];
             $saved = $session->read($sessionKey);
             if (is_array($saved) && $saved !== []) {
-                $filterUrl = $saved;
-                $needsRedirect = true;
+                // Keys that are no longer configured would redirect forever: drop them
+                $restorable = array_intersect_key($saved, array_flip($this->filterQueryKeys()));
+                if ($restorable !== $saved) {
+                    $session->write($sessionKey, $restorable);
+                }
+                if ($restorable !== []) {
+                    $filterUrl = $restorable;
+                    $needsRedirect = true;
+                }
             }
         }
 
@@ -144,6 +159,14 @@ class FilterComponent extends Component
             $this->redirectWithQuery($targetUrl);
         }
 
+        // A page above 1 is saved only after the action renders (see beforeRender()).
+        // If the paginator rejects the page, the session keeps page 1 and the list
+        // opens normally on the next visit.
+        $this->pendingPaging = null;
+        if ($pagingSession['page'] > 1) {
+            $this->pendingPaging = [$pagingSessionKey, $pagingSession];
+            $pagingSession['page'] = 1;
+        }
         $session->write($pagingSessionKey, $pagingSession);
         $this->url = $targetUrl;
 
@@ -152,6 +175,43 @@ class FilterComponent extends Component
         }
 
         return $query;
+    }
+
+    /**
+     * Save the current page once the action has produced a result.
+     *
+     * @return void
+     */
+    public function beforeRender(): void
+    {
+        if ($this->pendingPaging === null) {
+            return;
+        }
+
+        [$key, $paging] = $this->pendingPaging;
+        $this->pendingPaging = null;
+        $this->getController()->getRequest()->getSession()->write($key, $paging);
+    }
+
+    /**
+     * Query parameter names that the configured filters read and store.
+     *
+     * @return list<string>
+     */
+    protected function filterQueryKeys(): array
+    {
+        $keys = [];
+        foreach ($this->filters as $key => $config) {
+            if ((string)($config['type'] ?? 'equal') === 'date_range') {
+                [$fromKey, $toKey] = $this->dateRangeKeys($key, $config);
+                $keys[] = $fromKey;
+                $keys[] = $toKey;
+                continue;
+            }
+            $keys[] = $key;
+        }
+
+        return $keys;
     }
 
     /**
@@ -477,8 +537,34 @@ class FilterComponent extends Component
         if ($this->hasValue($to, 'date') && $this->isValidDate($to)) {
             $this->values[$toKey] = $to;
             $this->url[$toKey] = $to;
-            $this->conditions[$endField . ' <='] = $to;
+            // A plain date means the whole day, also on datetime columns
+            $nextDay = $this->nextDay($to);
+            if ($nextDay !== null) {
+                $this->conditions[$endField . ' <'] = $nextDay;
+            } else {
+                $this->conditions[$endField . ' <='] = $to;
+            }
         }
+    }
+
+    /**
+     * Day after a `Y-m-d` date, or null when the value has another format.
+     *
+     * @param mixed $date Candidate date string
+     * @return string|null
+     */
+    protected function nextDay(mixed $date): ?string
+    {
+        if (!is_string($date) || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+            return null;
+        }
+
+        $parsed = DateTimeImmutable::createFromFormat('!Y-m-d', $date);
+        if ($parsed === false || $parsed->format('Y-m-d') !== $date) {
+            return null;
+        }
+
+        return $parsed->modify('+1 day')->format('Y-m-d');
     }
 
     /**

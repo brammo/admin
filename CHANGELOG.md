@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- **FilterComponent**: the end of a `date_range` given as `Y-m-d` includes the whole day on datetime columns (`< next day`)
+- **FilterComponent**: saved filter keys that are no longer configured are dropped instead of causing a redirect loop
+- **FilterComponent**: a page above 1 is saved to the session only after the action renders, so a page that no longer exists (404 from the paginator) is not restored on the next visit
 - **Profile**: the session identity is replaced after saving, so the header shows the new name without a new login
 - **Login**: the login form and password rehash use the field names from `Admin.Auth.Authentication.fields` and `rememberMeField`
 - **Attachments** elements keep non-integer ids (UUID) in `data-id`, so drag-and-drop sorting works for them

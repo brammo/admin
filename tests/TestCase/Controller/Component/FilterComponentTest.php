@@ -195,6 +195,16 @@ class FilterComponentTest extends TestCase
             ],
             $this->session->read('Filter.Events.index'),
         );
+        // A page above 1 is saved only once the action renders
+        $this->assertSame(
+            [
+                'page' => 1,
+                'sort' => 'Events.title',
+                'direction' => 'asc',
+            ],
+            $this->session->read('Paging.Events.index'),
+        );
+        $this->Filter->beforeRender();
         $this->assertSame(
             [
                 'page' => 2,
@@ -323,7 +333,7 @@ class FilterComponentTest extends TestCase
 
         $this->assertSame([
             'Events.start_date >=' => '2024-01-01',
-            'Events.start_date <=' => '2024-06-30',
+            'Events.start_date <' => '2024-07-01',
         ], $this->Filter->getConditions());
         $this->assertSame([
             'period_from' => '2024-01-01',
@@ -354,7 +364,7 @@ class FilterComponentTest extends TestCase
 
         $this->assertSame([
             'Events.start_date >=' => '2024-01-01',
-            'Events.end_date <=' => '2024-12-31',
+            'Events.end_date <' => '2025-01-01',
         ], $this->Filter->getConditions());
     }
 
@@ -530,6 +540,7 @@ class FilterComponentTest extends TestCase
         ]);
         $this->Filter->configure([]);
         $this->Filter->apply($this->table->find());
+        $this->Filter->beforeRender();
 
         $this->assertSame([
             'page' => 3,
@@ -677,5 +688,82 @@ class FilterComponentTest extends TestCase
             $this->assertStringContainsString('sort=Events.start_date', $e->getMessage());
             $this->assertStringContainsString('direction=desc', $e->getMessage());
         }
+    }
+
+    /**
+     * Test a page the paginator rejects is not saved, so the list opens on the next visit.
+     *
+     * @return void
+     */
+    public function testPageIsNotPersistedWhenActionDoesNotRender(): void
+    {
+        $this->createFilter(['page' => '9']);
+        $this->Filter->configure([]);
+        $this->Filter->apply($this->table->find());
+
+        // No beforeRender(): the action failed (e.g. NotFoundException from the paginator)
+        $this->assertSame(['page' => 1], $this->session->read('Paging.Events.index'));
+
+        $this->createFilter([]);
+        $this->Filter->configure([]);
+        $this->Filter->apply($this->table->find());
+        $this->assertSame([], $this->Filter->getUrl());
+    }
+
+    /**
+     * Test saved filter keys that are no longer configured are dropped instead of redirecting forever.
+     *
+     * @return void
+     */
+    public function testUnconfiguredSavedFilterKeysAreDropped(): void
+    {
+        $this->session->write('Filter.Events.index', ['removed' => 'x']);
+
+        $this->createFilter([]);
+        $this->Filter->configure($this->eventsFilters());
+        $this->Filter->apply($this->table->find());
+
+        $this->assertSame([], $this->session->read('Filter.Events.index'));
+        $this->assertSame([], $this->Filter->getUrl());
+    }
+
+    /**
+     * Test configured saved keys are still restored when stale keys sit next to them.
+     *
+     * @return void
+     */
+    public function testConfiguredSavedFilterKeysAreRestoredWithoutStaleOnes(): void
+    {
+        $this->session->write('Filter.Events.index', ['removed' => 'x', 'title' => 'Folk']);
+
+        $this->createFilter([]);
+        $this->Filter->configure($this->eventsFilters());
+
+        try {
+            $this->Filter->apply($this->table->find());
+            $this->fail('Expected a redirect that restores the saved filter');
+        } catch (RedirectException $e) {
+            $this->assertStringContainsString('title=Folk', $e->getMessage());
+            $this->assertStringNotContainsString('removed', $e->getMessage());
+        }
+    }
+
+    /**
+     * Test the end of a date range keeps `<=` when the value is not a plain date.
+     *
+     * @return void
+     */
+    public function testDateRangeEndWithTimeKeepsLessOrEqual(): void
+    {
+        $this->createFilter(['period_to' => '2024-06-30 12:00:00']);
+        $this->Filter->configure([
+            'period' => ['field' => 'Events.start_date', 'type' => 'date_range'],
+        ]);
+        $this->Filter->apply($this->table->find());
+
+        $this->assertSame(
+            ['Events.start_date <=' => '2024-06-30 12:00:00'],
+            $this->Filter->getConditions(),
+        );
     }
 }

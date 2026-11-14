@@ -85,6 +85,8 @@ Only configured query keys are read as filters. Pagination keys (`sort`, `direct
 
 A single `Y-m-d - Y-m-d` value on the config key is also accepted.
 
+An end date given as `Y-m-d` covers the whole day: the condition is `field < next day`, so rows on that day match on datetime columns too. Other formats (a date with a time) use `field <= value`. The `lte` type compares with the value as given.
+
 Separate `gte` / `lte` keys (as in the Events example) are usually clearer than `date_range`.
 
 ## Session and redirects
@@ -98,6 +100,10 @@ Separate `gte` / `lte` keys (as in the Events example) are usually clearer than 
 3. Missing `sort` (and optional `page` > 1) but paging session / `defaultSort` set → include them in the same redirect.
 4. Request includes configured filter keys (even empty) → build conditions and **write** filter session; **reset page to 1** when `page` is absent (filter submit should not keep an old page).
 5. `?clear_filters=1` → delete filter session, set paging `page` to 1, redirect with saved/current `sort`/`direction` only (no filters, no old page).
+
+Saved filter keys that are no longer in the configured filters are removed from the session and not restored.
+
+A `page` above 1 is written to the paging session in the component's `beforeRender()`, that is only when the action completes. If the paginator rejects the page (for example rows were deleted and the page no longer exists), the session keeps page 1 and the list opens normally on the next visit.
 
 `sort` / `direction` in the query are validated when `sortableFields` is non-empty; invalid values fall back to `defaultSort` / `defaultDirection` via redirect when defaults are configured.
 
